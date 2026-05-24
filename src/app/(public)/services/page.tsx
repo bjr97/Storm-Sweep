@@ -106,18 +106,18 @@ const DOOR_HARDWARE_UPGRADES = [
 export default function ServicesPage(): React.ReactElement {
   return (
     <>
-      <section className="relative overflow-hidden border-b border-white/10">
+      <section className="relative overflow-hidden border-b border-[color-mix(in_srgb,var(--color-border)_40%,transparent)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,134,193,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <p className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold uppercase tracking-[0.2em] text-sky-light">
+          <p className="font-body text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary-light)]">
             What We Do
           </p>
-          <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-bebas)] text-5xl leading-none tracking-wide text-white sm:text-6xl">
+          <h1 className="mt-4 max-w-3xl font-display text-5xl leading-none tracking-wide text-[var(--color-text)] sm:text-6xl">
             SHELTER SERVICES
             <br />
-            <span className="text-sky-DEFAULT">&amp; UPGRADES</span>
+            <span className="text-[var(--color-primary)]">&amp; UPGRADES</span>
           </h1>
-          <p className="mt-6 max-w-2xl font-[family-name:var(--font-barlow-condensed)] text-lg leading-relaxed text-white/70">
+          <p className="mt-6 max-w-2xl font-body text-lg leading-relaxed text-[var(--color-text-muted)]">
             Professional cleaning, lighting, stocking, and hardware upgrades for
             underground storm shelters across Norman and the OKC metro.
           </p>
@@ -127,10 +127,10 @@ export default function ServicesPage(): React.ReactElement {
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <h2 className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+            <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
               SERVICE TYPES
             </h2>
-            <p className="mt-4 font-[family-name:var(--font-barlow-condensed)] text-base text-white/60">
+            <p className="mt-4 font-body text-base text-[var(--color-text-muted)]">
               Four ways to get your shelter clean, lit, stocked, and
               inspection-ready.
             </p>
@@ -140,23 +140,23 @@ export default function ServicesPage(): React.ReactElement {
             {SERVICE_TYPES.map((service) => (
               <Card
                 key={service.title}
-                className="border-white/10 bg-white/5 text-white ring-white/10"
+                className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
               >
                 <CardHeader className="gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-sky-DEFAULT/30 bg-sky-DEFAULT/10">
-                      <service.icon className="size-6 text-sky-DEFAULT" />
+                    <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10">
+                      <service.icon className="size-6 text-[var(--color-primary)]" />
                     </div>
                     <div>
-                      <CardTitle className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide">
+                      <CardTitle className="font-display text-3xl tracking-wide">
                         {service.title}
                       </CardTitle>
-                      <CardDescription className="mt-2 max-w-2xl text-base text-white/60">
+                      <CardDescription className="mt-2 max-w-2xl text-base text-[var(--color-text-muted)]">
                         {service.description}
                       </CardDescription>
                     </div>
                   </div>
-                  <p className="shrink-0 font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-wheat-DEFAULT sm:text-right">
+                  <p className="shrink-0 font-display text-3xl tracking-wide text-[var(--color-accent)] sm:text-right">
                     {service.priceLabel}
                   </p>
                 </CardHeader>
@@ -165,9 +165,9 @@ export default function ServicesPage(): React.ReactElement {
                     {service.includes.map((item) => (
                       <li
                         key={item}
-                        className="flex items-start gap-2 font-[family-name:var(--font-barlow-condensed)] text-sm text-white/70"
+                        className="flex items-start gap-2 font-body text-sm text-[var(--color-text-muted)]"
                       >
-                        <Check className="mt-0.5 size-4 shrink-0 text-sky-DEFAULT" />
+                        <Check className="mt-0.5 size-4 shrink-0 text-[var(--color-primary)]" />
                         {item}
                       </li>
                     ))}
@@ -179,13 +179,13 @@ export default function ServicesPage(): React.ReactElement {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-black/20 py-20">
+      <section className="border-y border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <h2 className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+            <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
               UPGRADE ADD-ONS
             </h2>
-            <p className="mt-4 font-[family-name:var(--font-barlow-condensed)] text-base text-white/60">
+            <p className="mt-4 font-body text-base text-[var(--color-text-muted)]">
               Add to any visit or bundle with your booking. Storm Ready members
               save 10% on all upgrades.
             </p>
@@ -193,18 +193,18 @@ export default function ServicesPage(): React.ReactElement {
 
           <div className="mt-12">
             <div className="mb-6 flex items-center gap-3">
-              <Lightbulb className="size-5 text-sky-DEFAULT" />
-              <h3 className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-white">
+              <Lightbulb className="size-5 text-[var(--color-primary)]" />
+              <h3 className="font-display text-2xl tracking-wide text-[var(--color-text)]">
                 LED PACKAGE
               </h3>
             </div>
-            <Card className="border-white/10 bg-white/5 text-white ring-white/10">
+            <Card className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]">
               <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                <p className="font-[family-name:var(--font-barlow-condensed)] text-base text-white/80">
+                <p className="font-body text-base text-[var(--color-text-muted)]">
                   Bright LED lighting upgrade for any shelter size. Installed
                   and tested during your visit.
                 </p>
-                <p className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-wheat-DEFAULT">
+                <p className="font-display text-3xl tracking-wide text-[var(--color-accent)]">
                   {formatCurrency(PRICING.addons.led_package)}
                 </p>
               </CardContent>
@@ -213,8 +213,8 @@ export default function ServicesPage(): React.ReactElement {
 
           <div className="mt-12">
             <div className="mb-6 flex items-center gap-3">
-              <Package className="size-5 text-sky-DEFAULT" />
-              <h3 className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-white">
+              <Package className="size-5 text-[var(--color-primary)]" />
+              <h3 className="font-display text-2xl tracking-wide text-[var(--color-text)]">
                 SUPPLY KIT TIERS
               </h3>
             </div>
@@ -222,13 +222,13 @@ export default function ServicesPage(): React.ReactElement {
               {Object.entries(SUPPLY_KITS).map(([key, kit]) => (
                 <Card
                   key={key}
-                  className="border-white/10 bg-white/5 text-white ring-white/10"
+                  className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
                 >
                   <CardHeader>
-                    <CardTitle className="font-[family-name:var(--font-bebas)] text-xl tracking-wide">
+                    <CardTitle className="font-display text-xl tracking-wide">
                       {kit.name}
                     </CardTitle>
-                    <p className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-wheat-DEFAULT">
+                    <p className="font-display text-2xl tracking-wide text-[var(--color-accent)]">
                       {formatCurrency(kit.price)}
                     </p>
                   </CardHeader>
@@ -237,9 +237,9 @@ export default function ServicesPage(): React.ReactElement {
                       {kit.items.map((item) => (
                         <li
                           key={item}
-                          className="flex items-start gap-2 font-[family-name:var(--font-barlow-condensed)] text-xs text-white/60"
+                          className="flex items-start gap-2 font-body text-xs text-[var(--color-text-muted)]"
                         >
-                          <Check className="mt-0.5 size-3 shrink-0 text-sky-DEFAULT" />
+                          <Check className="mt-0.5 size-3 shrink-0 text-[var(--color-primary)]" />
                           {item}
                         </li>
                       ))}
@@ -252,8 +252,8 @@ export default function ServicesPage(): React.ReactElement {
 
           <div className="mt-12">
             <div className="mb-6 flex items-center gap-3">
-              <DoorOpen className="size-5 text-sky-DEFAULT" />
-              <h3 className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-white">
+              <DoorOpen className="size-5 text-[var(--color-primary)]" />
+              <h3 className="font-display text-2xl tracking-wide text-[var(--color-text)]">
                 DOOR &amp; HARDWARE UPGRADES
               </h3>
             </div>
@@ -261,26 +261,26 @@ export default function ServicesPage(): React.ReactElement {
               {DOOR_HARDWARE_UPGRADES.map((upgrade) => (
                 <Card
                   key={upgrade.name}
-                  className="border-white/10 bg-white/5 text-white ring-white/10"
+                  className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
                 >
                   <CardContent className="flex items-start gap-4 pt-6">
-                    <Wrench className="mt-0.5 size-5 shrink-0 text-sky-DEFAULT" />
+                    <Wrench className="mt-0.5 size-5 shrink-0 text-[var(--color-primary)]" />
                     <div className="flex-1">
-                      <p className="font-[family-name:var(--font-barlow-condensed)] text-base font-semibold text-white">
+                      <p className="font-body text-base font-semibold text-[var(--color-text)]">
                         {upgrade.name}
                       </p>
-                      <p className="mt-1 font-[family-name:var(--font-barlow-condensed)] text-sm text-white/60">
+                      <p className="mt-1 font-body text-sm text-[var(--color-text-muted)]">
                         {upgrade.description}
                       </p>
                     </div>
-                    <p className="font-[family-name:var(--font-bebas)] text-xl tracking-wide text-wheat-DEFAULT">
+                    <p className="font-display text-xl tracking-wide text-[var(--color-accent)]">
                       {formatCurrency(upgrade.price)}
                     </p>
                   </CardContent>
                 </Card>
               ))}
             </div>
-            <p className="mt-4 font-[family-name:var(--font-barlow-condensed)] text-sm text-white/50">
+            <p className="mt-4 font-body text-sm text-[var(--color-text-muted)]">
               Major door or structural repairs are quoted on-site after
               inspection. Your Sweeper will flag issues during every visit.
             </p>
@@ -288,12 +288,12 @@ export default function ServicesPage(): React.ReactElement {
         </div>
       </section>
 
-      <section className="bg-tornado py-16">
+      <section className="bg-[var(--color-danger)] py-16">
         <div className="mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+          <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
             Ready to book your sweep?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl font-[family-name:var(--font-barlow-condensed)] text-base text-white/90">
+          <p className="mx-auto mt-4 max-w-xl font-body text-base text-[var(--color-text)]">
             Choose your services, pick a date, and a Norman Sweeper will arrive
             within 48 hours with everything needed to get your shelter storm
             ready.
@@ -302,7 +302,7 @@ export default function ServicesPage(): React.ReactElement {
             href="/book"
             className={cn(
               buttonVariants({ size: 'lg' }),
-              'mt-8 h-12 bg-white px-8 text-base font-semibold uppercase tracking-wide text-tornado hover:bg-white/90'
+              'mt-8 h-12 bg-white px-8 text-base font-semibold uppercase tracking-wide text-[var(--color-danger)] hover:bg-white/90'
             )}
           >
             Book a Sweep

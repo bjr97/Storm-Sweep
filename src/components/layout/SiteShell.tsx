@@ -17,14 +17,14 @@ export function SiteShell({
 
   if (isAuthPage) {
     return (
-      <div className="min-h-screen bg-[#F7F7F4] font-[family-name:var(--font-barlow)] text-foreground">
+      <div className="min-h-screen bg-[#F7F7F4] font-body text-foreground">
         {children}
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-shelter font-[family-name:var(--font-barlow-condensed)] text-white">
+    <div className="min-h-screen bg-[var(--color-bg)] font-body text-[var(--color-text)]">
       <Navbar />
       <main>{children}</main>
       <Footer />

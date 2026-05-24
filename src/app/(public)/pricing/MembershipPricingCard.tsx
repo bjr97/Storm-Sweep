@@ -27,28 +27,28 @@ export function MembershipPricingCard(): React.ReactElement {
     plan === 'annual' ? '/book?membership=annual' : '/book?membership=monthly'
 
   return (
-    <Card className="border-wheat-DEFAULT/40 bg-wheat-DEFAULT/5 text-white ring-wheat-DEFAULT/20">
+    <Card className="border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 text-[var(--color-text)] ring-[var(--color-accent)]/20">
       <CardHeader>
-        <p className="font-[family-name:var(--font-barlow-condensed)] text-xs font-semibold uppercase tracking-[0.2em] text-wheat-DEFAULT">
+        <p className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
           Most Popular
         </p>
-        <CardTitle className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide">
+        <CardTitle className="font-display text-3xl tracking-wide">
           STORM READY
         </CardTitle>
-        <CardDescription className="text-white/60">
+        <CardDescription className="text-[var(--color-text-muted)]">
           2 visits per year + 10% off upgrades
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="inline-flex rounded-lg border border-white/10 bg-black/30 p-1">
+        <div className="inline-flex rounded-lg border border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-black/30 p-1">
           <button
             type="button"
             onClick={() => setPlan('annual')}
             className={cn(
-              'rounded-md px-4 py-2 font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold uppercase tracking-wide transition-colors',
+              'rounded-md px-4 py-2 font-body text-sm font-semibold uppercase tracking-wide transition-colors',
               plan === 'annual'
-                ? 'bg-wheat-DEFAULT text-shelter'
-                : 'text-white/70 hover:text-white'
+                ? 'bg-[var(--color-accent)] text-[var(--color-bg)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
             )}
           >
             Annual
@@ -57,32 +57,32 @@ export function MembershipPricingCard(): React.ReactElement {
             type="button"
             onClick={() => setPlan('monthly')}
             className={cn(
-              'rounded-md px-4 py-2 font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold uppercase tracking-wide transition-colors',
+              'rounded-md px-4 py-2 font-body text-sm font-semibold uppercase tracking-wide transition-colors',
               plan === 'monthly'
-                ? 'bg-wheat-DEFAULT text-shelter'
-                : 'text-white/70 hover:text-white'
+                ? 'bg-[var(--color-accent)] text-[var(--color-bg)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
             )}
           >
             Monthly
           </button>
         </div>
 
-        <p className="font-[family-name:var(--font-bebas)] text-5xl tracking-wide text-wheat-DEFAULT">
+        <p className="font-display text-5xl tracking-wide text-[var(--color-accent)]">
           {formatCurrency(price)}
-          <span className="text-2xl text-white/60">{priceSuffix}</span>
+          <span className="text-2xl text-[var(--color-text-muted)]">{priceSuffix}</span>
         </p>
 
         {plan === 'monthly' ? (
-          <p className="font-[family-name:var(--font-barlow-condensed)] text-xs text-white/50">
+          <p className="font-body text-xs text-[var(--color-text-muted)]">
             Billed monthly. Cancel anytime from your customer portal.
           </p>
         ) : (
-          <p className="font-[family-name:var(--font-barlow-condensed)] text-xs text-white/50">
+          <p className="font-body text-xs text-[var(--color-text-muted)]">
             Save vs. monthly billing — best value for year-round peace of mind.
           </p>
         )}
 
-        <ul className="space-y-2 font-[family-name:var(--font-barlow-condensed)] text-sm text-white/70">
+        <ul className="space-y-2 font-body text-sm text-[var(--color-text-muted)]">
           <li>· 2 scheduled visits per year</li>
           <li>· Priority booking before storm season</li>
           <li>· 10% off all upgrades &amp; add-ons</li>
@@ -93,7 +93,7 @@ export function MembershipPricingCard(): React.ReactElement {
           href={bookHref}
           className={cn(
             buttonVariants({ size: 'lg' }),
-            'mt-4 h-11 w-full bg-wheat-DEFAULT text-shelter hover:bg-wheat-light'
+            'mt-4 h-11 w-full bg-[var(--color-accent)] text-[var(--color-bg)] hover:opacity-90'
           )}
         >
           Book Now

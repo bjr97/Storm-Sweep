@@ -193,7 +193,7 @@ export default async function BookingConfirmationPage({
     <section className="mx-auto max-w-2xl px-4 py-16">
       <div className="mb-8 text-center">
         <CheckCircle2 className="mx-auto size-14 text-sky" />
-        <h1 className="mt-4 font-['Bebas_Neue'] text-4xl tracking-wide text-shelter">
+        <h1 className="mt-4 font-['Bebas_Neue'] text-4xl tracking-wide text-[var(--color-bg)]">
           {isQuoteRequest ? 'QUOTE REQUEST RECEIVED' : "YOU'RE BOOKED"}
         </h1>
         <p className="mt-2 font-['Barlow'] text-muted-foreground">
@@ -263,7 +263,7 @@ export default async function BookingConfirmationPage({
       )}
 
       {!isQuoteRequest ? (
-        <div className="mb-8 flex items-start gap-3 rounded-lg border border-sky/20 bg-sky-pale px-4 py-4 font-['Barlow'] text-sm text-shelter">
+        <div className="mb-8 flex items-start gap-3 rounded-lg border border-sky/20 bg-sky-pale px-4 py-4 font-['Barlow'] text-sm text-[var(--color-bg)]">
           <MessageSquare className="mt-0.5 size-5 shrink-0 text-sky" />
           <p>
             You&apos;ll receive a text confirmation shortly with your visit
@@ -271,7 +271,7 @@ export default async function BookingConfirmationPage({
           </p>
         </div>
       ) : (
-        <div className="mb-8 flex items-start gap-3 rounded-lg border border-wheat/40 bg-wheat-pale px-4 py-4 font-['Barlow'] text-sm text-shelter">
+        <div className="mb-8 flex items-start gap-3 rounded-lg border border-wheat/40 bg-wheat-pale px-4 py-4 font-['Barlow'] text-sm text-[var(--color-bg)]">
           <MessageSquare className="mt-0.5 size-5 shrink-0 text-wheat" />
           <p>
             You&apos;ll receive a text confirmation shortly once we&apos;ve
@@ -282,7 +282,7 @@ export default async function BookingConfirmationPage({
 
       {!user ? (
         <div className="rounded-lg border border-wheat/40 bg-wheat-pale px-4 py-5 text-center">
-          <p className="font-['Barlow'] text-sm text-shelter">
+          <p className="font-['Barlow'] text-sm text-[var(--color-bg)]">
             Create an account to track your visit, view photos, and manage
             future bookings.
           </p>
@@ -290,7 +290,7 @@ export default async function BookingConfirmationPage({
             href="/register"
             className={cn(
               buttonVariants({ size: 'lg' }),
-              'mt-4 bg-sky text-white hover:bg-sky-dark'
+              'mt-4 bg-sky text-[var(--color-text)] hover:opacity-90'
             )}
           >
             Create account to track your visit

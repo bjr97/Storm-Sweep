@@ -59,13 +59,13 @@ export default async function BookPage({
   const referralCode = searchParams.ref?.trim()
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F4] py-10 font-[family-name:var(--font-barlow)] text-shelter sm:py-14">
+    <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F4] py-10 font-body text-shelter sm:py-14">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
-          <p className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold uppercase tracking-widest text-sky-DEFAULT">
+          <p className="font-body text-sm font-semibold uppercase tracking-widest text-[var(--color-primary)]">
             Norman, OK
           </p>
-          <h1 className="mt-2 font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-shelter sm:text-5xl">
+          <h1 className="mt-2 font-display text-4xl tracking-wide text-shelter sm:text-5xl">
             BOOK YOUR STORM SHELTER CLEAN
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">

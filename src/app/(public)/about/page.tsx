@@ -89,18 +89,18 @@ const TEAM_PLACEHOLDERS = [
 export default function AboutPage(): React.ReactElement {
   return (
     <>
-      <section className="relative overflow-hidden border-b border-white/10">
+      <section className="relative overflow-hidden border-b border-[color-mix(in_srgb,var(--color-border)_40%,transparent)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,134,193,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <p className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold uppercase tracking-[0.2em] text-sky-light">
+          <p className="font-body text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary-light)]">
             Norman, Oklahoma
           </p>
-          <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-bebas)] text-5xl leading-none tracking-wide text-white sm:text-6xl">
+          <h1 className="mt-4 max-w-3xl font-display text-5xl leading-none tracking-wide text-[var(--color-text)] sm:text-6xl">
             ROOTED IN
             <br />
-            <span className="text-sky-DEFAULT">TORNADO ALLEY.</span>
+            <span className="text-[var(--color-primary)]">TORNADO ALLEY.</span>
           </h1>
-          <p className="mt-6 max-w-2xl font-[family-name:var(--font-barlow-condensed)] text-lg leading-relaxed text-white/70">
+          <p className="mt-6 max-w-2xl font-body text-lg leading-relaxed text-[var(--color-text-muted)]">
             Storm Sweep was founded to solve a problem every Norman homeowner
             knows: underground storm shelters get neglected until the sky turns
             green — and by then it is too late.
@@ -112,10 +112,10 @@ export default function AboutPage(): React.ReactElement {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <h2 className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+              <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
                 OUR STORY
               </h2>
-              <div className="mt-6 space-y-4 font-[family-name:var(--font-barlow-condensed)] text-base leading-relaxed text-white/70">
+              <div className="mt-6 space-y-4 font-body text-base leading-relaxed text-[var(--color-text)]/70">
                 <p>
                   Norman sits at the heart of Tornado Alley. Most homes here have
                   an in-ground garage storm shelter — a concrete lifeline buried
@@ -137,15 +137,15 @@ export default function AboutPage(): React.ReactElement {
               </div>
             </div>
 
-            <Card className="border-white/10 bg-white/5 text-white ring-white/10">
+            <Card className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]">
               <CardHeader>
-                <Target className="size-8 text-wheat-DEFAULT" />
-                <CardTitle className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide">
+                <Target className="size-8 text-[var(--color-accent)]" />
+                <CardTitle className="font-display text-3xl tracking-wide">
                   OUR MISSION
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="font-[family-name:var(--font-barlow-condensed)] text-base leading-relaxed text-white/70">
+                <p className="font-body text-base leading-relaxed text-[var(--color-text)]/70">
                   Make every underground storm shelter in Norman clean, lit,
                   stocked, and inspection-ready — so Oklahoma families never
                   hesitate to go underground when it matters most.
@@ -156,13 +156,13 @@ export default function AboutPage(): React.ReactElement {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-black/20 py-20">
+      <section className="border-y border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+            <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
               BY THE NUMBERS
             </h2>
-            <p className="mx-auto mt-4 max-w-xl font-[family-name:var(--font-barlow-condensed)] text-base text-white/60">
+            <p className="mx-auto mt-4 max-w-xl font-body text-base text-[var(--color-text)]/60">
               Oklahoma storm shelter stats that matter to Norman families.
             </p>
           </div>
@@ -171,16 +171,16 @@ export default function AboutPage(): React.ReactElement {
             {LOCAL_STATS.map((stat) => (
               <Card
                 key={stat.label}
-                className="border-white/10 bg-white/5 text-center text-white ring-white/10"
+                className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-center text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
               >
                 <CardContent className="pt-6">
-                  <p className="font-[family-name:var(--font-bebas)] text-5xl tracking-wide text-sky-DEFAULT">
+                  <p className="font-display text-5xl tracking-wide text-[var(--color-primary)]">
                     {stat.value}
                   </p>
-                  <p className="mt-2 font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold uppercase tracking-wide text-white">
+                  <p className="mt-2 font-body text-sm font-semibold uppercase tracking-wide text-[var(--color-text)]">
                     {stat.label}
                   </p>
-                  <p className="mt-2 font-[family-name:var(--font-barlow-condensed)] text-xs text-white/50">
+                  <p className="mt-2 font-body text-xs text-[var(--color-text)]/50">
                     {stat.description}
                   </p>
                 </CardContent>
@@ -193,10 +193,10 @@ export default function AboutPage(): React.ReactElement {
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <h2 className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+            <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
               WHY STORM SWEEP?
             </h2>
-            <p className="mt-4 font-[family-name:var(--font-barlow-condensed)] text-base text-white/60">
+            <p className="mt-4 font-body text-base text-[var(--color-text)]/60">
               Not just a cleaning service — a storm preparedness partner for
               Norman homeowners.
             </p>
@@ -206,14 +206,14 @@ export default function AboutPage(): React.ReactElement {
             {WHY_STORM_SWEEP.map((item) => (
               <Card
                 key={item.title}
-                className="border-white/10 bg-white/5 text-white ring-white/10"
+                className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
               >
                 <CardHeader>
-                  <item.icon className="size-7 text-sky-DEFAULT" />
-                  <CardTitle className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide">
+                  <item.icon className="size-7 text-[var(--color-primary)]" />
+                  <CardTitle className="font-display text-2xl tracking-wide">
                     {item.title}
                   </CardTitle>
-                  <CardDescription className="text-base text-white/60">
+                  <CardDescription className="text-base text-[var(--color-text)]/60">
                     {item.description}
                   </CardDescription>
                 </CardHeader>
@@ -223,13 +223,13 @@ export default function AboutPage(): React.ReactElement {
         </div>
       </section>
 
-      <section className="border-t border-white/10 bg-black/20 py-20">
+      <section className="border-t border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+            <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
               THE TEAM
             </h2>
-            <p className="mx-auto mt-4 max-w-xl font-[family-name:var(--font-barlow-condensed)] text-base text-white/60">
+            <p className="mx-auto mt-4 max-w-xl font-body text-base text-[var(--color-text)]/60">
               Norman locals building something Oklahoma families can count on.
             </p>
           </div>
@@ -238,19 +238,19 @@ export default function AboutPage(): React.ReactElement {
             {TEAM_PLACEHOLDERS.map((member) => (
               <Card
                 key={member.role}
-                className="border-white/10 bg-white/5 text-center text-white ring-white/10"
+                className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-center text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
               >
                 <CardContent className="pt-8">
-                  <div className="mx-auto flex size-20 items-center justify-center rounded-full border border-sky-DEFAULT/30 bg-sky-DEFAULT/10">
-                    <Users className="size-8 text-sky-DEFAULT" />
+                  <div className="mx-auto flex size-20 items-center justify-center rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10">
+                    <Users className="size-8 text-[var(--color-primary)]" />
                   </div>
-                  <p className="mt-2 font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white/20">
+                  <p className="mt-2 font-display text-4xl tracking-wide text-[var(--color-text)]/20">
                     {member.initials}
                   </p>
-                  <p className="mt-4 font-[family-name:var(--font-barlow-condensed)] text-base font-semibold text-white">
+                  <p className="mt-4 font-body text-base font-semibold text-[var(--color-text)]">
                     {member.name}
                   </p>
-                  <p className="font-[family-name:var(--font-barlow-condensed)] text-sm text-white/50">
+                  <p className="font-body text-sm text-[var(--color-text)]/50">
                     {member.role}
                   </p>
                 </CardContent>
@@ -260,12 +260,12 @@ export default function AboutPage(): React.ReactElement {
         </div>
       </section>
 
-      <section className="bg-tornado py-16">
+      <section className="bg-[var(--color-danger)] py-16">
         <div className="mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+          <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
             Ready when Oklahoma is not.
           </h2>
-          <p className="mx-auto mt-4 max-w-xl font-[family-name:var(--font-barlow-condensed)] text-base text-white/90">
+          <p className="mx-auto mt-4 max-w-xl font-body text-base text-[var(--color-text)]/90">
             Book your first sweep or join Storm Ready — Norman&apos;s underground
             shelter specialists are standing by.
           </p>
@@ -274,7 +274,7 @@ export default function AboutPage(): React.ReactElement {
               href="/book"
               className={cn(
                 buttonVariants({ size: 'lg' }),
-                'h-12 bg-white px-8 text-base font-semibold uppercase tracking-wide text-tornado hover:bg-white/90'
+                'h-12 bg-white px-8 text-base font-semibold uppercase tracking-wide text-[var(--color-danger)] hover:bg-white/90'
               )}
             >
               Book a Sweep
@@ -283,7 +283,7 @@ export default function AboutPage(): React.ReactElement {
               href="/pricing"
               className={cn(
                 buttonVariants({ size: 'lg', variant: 'outline' }),
-                'h-12 border-white bg-transparent px-8 text-base font-semibold uppercase tracking-wide text-white hover:bg-white/10'
+                'h-12 border-white bg-transparent px-8 text-base font-semibold uppercase tracking-wide text-[var(--color-text)] hover:bg-white/10'
               )}
             >
               View Pricing

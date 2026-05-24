@@ -93,26 +93,26 @@ const FAQ_ITEMS = [
 
 function FeatureIcon({ included }: { included: boolean }): React.ReactElement {
   if (included) {
-    return <Check className="size-5 text-sky-DEFAULT" aria-hidden="true" />
+    return <Check className="size-5 text-[var(--color-primary)]" aria-hidden="true" />
   }
-  return <Minus className="size-5 text-white/30" aria-hidden="true" />
+  return <Minus className="size-5 text-[var(--color-text)]/30" aria-hidden="true" />
 }
 
 export default function PricingPage(): React.ReactElement {
   return (
     <>
-      <section className="relative overflow-hidden border-b border-white/10">
+      <section className="relative overflow-hidden border-b border-[color-mix(in_srgb,var(--color-border)_40%,transparent)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,134,193,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <p className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold uppercase tracking-[0.2em] text-sky-light">
+          <p className="font-body text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary-light)]">
             Transparent Pricing
           </p>
-          <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-bebas)] text-5xl leading-none tracking-wide text-white sm:text-6xl">
+          <h1 className="mt-4 max-w-3xl font-display text-5xl leading-none tracking-wide text-[var(--color-text)] sm:text-6xl">
             SIMPLE PLANS.
             <br />
-            <span className="text-sky-DEFAULT">REAL PROTECTION.</span>
+            <span className="text-[var(--color-primary)]">REAL PROTECTION.</span>
           </h1>
-          <p className="mt-6 max-w-2xl font-[family-name:var(--font-barlow-condensed)] text-lg leading-relaxed text-white/70">
+          <p className="mt-6 max-w-2xl font-body text-lg leading-relaxed text-[var(--color-text-muted)]">
             One-time sweep or year-round Storm Ready membership — both include
             our full checklist, inspection, and photo report.
           </p>
@@ -122,31 +122,31 @@ export default function PricingPage(): React.ReactElement {
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 lg:grid-cols-2">
-            <Card className="border-white/10 bg-white/5 text-white ring-white/10">
+            <Card className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]">
               <CardHeader>
-                <CardTitle className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide">
+                <CardTitle className="font-display text-3xl tracking-wide">
                   SINGLE SWEEP
                 </CardTitle>
-                <CardDescription className="text-white/60">
+                <CardDescription className="text-[var(--color-text-muted)]">
                   One-time underground shelter deep clean
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <p className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold uppercase tracking-wide text-white/50">
+                  <p className="font-body text-sm font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                     Pricing by shelter size
                   </p>
-                  <div className="mt-4 overflow-hidden rounded-lg border border-white/10">
+                  <div className="mt-4 overflow-hidden rounded-lg border border-[color-mix(in_srgb,var(--color-border)_40%,transparent)]">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-white/10 bg-black/20">
-                          <th className="px-4 py-3 text-left font-[family-name:var(--font-barlow-condensed)] text-xs font-semibold uppercase tracking-wide text-white/50">
+                        <tr className="border-b border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
+                          <th className="px-4 py-3 text-left font-body text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                             Size
                           </th>
-                          <th className="px-4 py-3 text-left font-[family-name:var(--font-barlow-condensed)] text-xs font-semibold uppercase tracking-wide text-white/50">
+                          <th className="px-4 py-3 text-left font-body text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                             Description
                           </th>
-                          <th className="px-4 py-3 text-right font-[family-name:var(--font-barlow-condensed)] text-xs font-semibold uppercase tracking-wide text-white/50">
+                          <th className="px-4 py-3 text-right font-body text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                             Price
                           </th>
                         </tr>
@@ -157,17 +157,17 @@ export default function PricingPage(): React.ReactElement {
                             key={size.label}
                             className={
                               index < SHELTER_SIZES.length - 1
-                                ? 'border-b border-white/10'
+                                ? 'border-b border-[color-mix(in_srgb,var(--color-border)_40%,transparent)]'
                                 : undefined
                             }
                           >
-                            <td className="px-4 py-3 font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold text-white">
+                            <td className="px-4 py-3 font-body text-sm font-semibold text-[var(--color-text)]">
                               {size.label}
                             </td>
-                            <td className="px-4 py-3 font-[family-name:var(--font-barlow-condensed)] text-sm text-white/60">
+                            <td className="px-4 py-3 font-body text-sm text-[var(--color-text-muted)]">
                               {size.description}
                             </td>
-                            <td className="px-4 py-3 text-right font-[family-name:var(--font-bebas)] text-xl tracking-wide text-wheat-DEFAULT">
+                            <td className="px-4 py-3 text-right font-display text-xl tracking-wide text-[var(--color-accent)]">
                               {formatCurrency(size.price)}
                             </td>
                           </tr>
@@ -177,7 +177,7 @@ export default function PricingPage(): React.ReactElement {
                   </div>
                 </div>
 
-                <ul className="space-y-2 font-[family-name:var(--font-barlow-condensed)] text-sm text-white/70">
+                <ul className="space-y-2 font-body text-sm text-[var(--color-text-muted)]">
                   <li>· Full deep clean checklist</li>
                   <li>· Before &amp; after photo report</li>
                   <li>· Mold treatment &amp; deodorizer</li>
@@ -188,7 +188,7 @@ export default function PricingPage(): React.ReactElement {
                   href="/book"
                   className={cn(
                     buttonVariants({ size: 'lg' }),
-                    'h-11 w-full bg-sky-DEFAULT text-white hover:bg-sky-dark'
+                    'h-11 w-full bg-[var(--color-primary)] text-[var(--color-text)] hover:opacity-90'
                   )}
                 >
                   Book Now
@@ -201,24 +201,24 @@ export default function PricingPage(): React.ReactElement {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-black/20 py-20">
+      <section className="border-y border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+          <h2 className="text-center font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
             FEATURE COMPARISON
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-center font-[family-name:var(--font-barlow-condensed)] text-base text-white/60">
+          <p className="mx-auto mt-4 max-w-xl text-center font-body text-base text-[var(--color-text-muted)]">
             See what you get with each plan at a glance.
           </p>
 
-          <div className="mt-12 overflow-hidden rounded-lg border border-white/10">
-            <div className="grid grid-cols-[1fr_auto_auto] border-b border-white/10 bg-black/30">
-              <div className="px-4 py-4 font-[family-name:var(--font-barlow-condensed)] text-xs font-semibold uppercase tracking-wide text-white/50">
+          <div className="mt-12 overflow-hidden rounded-lg border border-[color-mix(in_srgb,var(--color-border)_40%,transparent)]">
+            <div className="grid grid-cols-[1fr_auto_auto] border-b border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-black/30">
+              <div className="px-4 py-4 font-body text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                 Feature
               </div>
-              <div className="px-6 py-4 text-center font-[family-name:var(--font-barlow-condensed)] text-xs font-semibold uppercase tracking-wide text-white/50">
+              <div className="px-6 py-4 text-center font-body text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                 Single
               </div>
-              <div className="px-6 py-4 text-center font-[family-name:var(--font-barlow-condensed)] text-xs font-semibold uppercase tracking-wide text-wheat-DEFAULT">
+              <div className="px-6 py-4 text-center font-body text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">
                 Storm Ready
               </div>
             </div>
@@ -228,10 +228,10 @@ export default function PricingPage(): React.ReactElement {
                 className={cn(
                   'grid grid-cols-[1fr_auto_auto] items-center',
                   index < COMPARISON_FEATURES.length - 1 &&
-                    'border-b border-white/10'
+                    'border-b border-[color-mix(in_srgb,var(--color-border)_40%,transparent)]'
                 )}
               >
-                <div className="px-4 py-4 font-[family-name:var(--font-barlow-condensed)] text-sm text-white/80">
+                <div className="px-4 py-4 font-body text-sm text-[var(--color-text-muted)]">
                   {feature.label}
                 </div>
                 <div className="flex justify-center px-6 py-4">
@@ -248,22 +248,22 @@ export default function PricingPage(): React.ReactElement {
 
       <section className="py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center font-[family-name:var(--font-bebas)] text-4xl tracking-wide text-white sm:text-5xl">
+          <h2 className="text-center font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
             FREQUENTLY ASKED QUESTIONS
           </h2>
           <div className="mt-12 space-y-4">
             {FAQ_ITEMS.map((item) => (
               <Card
                 key={item.question}
-                className="border-white/10 bg-white/5 text-white ring-white/10"
+                className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
               >
                 <CardHeader>
-                  <CardTitle className="font-[family-name:var(--font-barlow-condensed)] text-base font-semibold text-white">
+                  <CardTitle className="font-body text-base font-semibold text-[var(--color-text)]">
                     {item.question}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="font-[family-name:var(--font-barlow-condensed)] text-sm leading-relaxed text-white/60">
+                  <p className="font-body text-sm leading-relaxed text-[var(--color-text-muted)]">
                     {'answer' in item ? item.answer : item.getAnswer()}
                   </p>
                 </CardContent>
