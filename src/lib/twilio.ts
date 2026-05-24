@@ -258,7 +258,10 @@ export async function sendBookingConfirmedSms(params: {
     }
   )
 
-  const body = renderSmsTemplate('booking_confirmed', templateData)
+  const body = renderSmsTemplate(
+    'booking_confirmed',
+    templateData as SmsTemplateData['booking_confirmed']
+  )
 
   return sendSms({
     to: params.phone,
