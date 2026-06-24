@@ -2,34 +2,28 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addDays, format } from 'date-fns'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 
 import { AddressAutocomplete } from '@/components/booking/AddressAutocomplete'
+import { BookingFooter } from '@/components/booking/BookingFooter'
 import { BookingProgressNav } from '@/components/booking/BookingProgressNav'
 import { persistKitConfirmationMessage } from '@/components/booking/ConfirmationKitMessage'
-import { KitSelector, type KitSelection } from '@/components/booking/KitSelector'
+import { canProceedWithKit, KitSelector, type KitSelection } from '@/components/booking/KitSelector'
 import { PaymentStep } from '@/components/booking/PaymentStep'
 import { PhotoUpload, type PhotoScreenResult } from '@/components/booking/PhotoUpload'
 import { ServiceSelector } from '@/components/booking/ServiceSelector'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { buildPaymentData, buildQuoteBookingPayload } from '@/lib/booking/payment'
 import { calculateBookingPrice } from '@/lib/booking/pricing'
 import {
+  BOOKING_STEPS,
   REFERRAL_SOURCES,
   customerDetailsSchema,
   serviceSelectionSchema,
+  splitFullName,
   type CustomerDetailsValues,
   type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
@@ -196,10 +190,13 @@ export function BookingForm({
     mode: 'onChange',
   })
 
+  const defaultCustomerNames = splitFullName(initialCustomer?.full_name ?? '')
+
   const customerForm = useForm<CustomerDetailsValues>({
     resolver: zodResolver(customerDetailsSchema),
     defaultValues: {
-      full_name: initialCustomer?.full_name ?? '',
+      first_name: defaultCustomerNames.first_name,
+      last_name: defaultCustomerNames.last_name,
       email: initialCustomer?.email ?? '',
       phone: initialCustomer?.phone ?? '',
       address: initialCustomer?.address ?? '',
@@ -207,9 +204,18 @@ export function BookingForm({
       notes: '',
       referral_source: defaultReferral || '',
     },
+    mode: 'onTouched',
   })
 
-  const customerValues = customerForm.watch()
+  const {
+    register,
+    control,
+    watch,
+    trigger,
+    formState: { errors: customerErrors, submitCount },
+  } = customerForm
+
+  const customerValues = watch()
 
   const bookingState = useMemo<BookingState>(() => {
     const basePricing = calculateBookingPrice({
@@ -277,12 +283,21 @@ export function BookingForm({
     }
 
     if (currentStep === 2) {
+      if (!canProceedWithKit(kitSelection)) {
+        return
+      }
+      setCurrentStep(3)
       return
     }
 
     if (currentStep === 3) {
-      const valid = await customerForm.trigger()
-      if (!valid) return
+      const valid = await trigger()
+      if (!valid) {
+        const firstInvalid = document.querySelector<HTMLElement>('[aria-invalid="true"]')
+        firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        firstInvalid?.focus()
+        return
+      }
       setCurrentStep(4)
       return
     }
@@ -295,7 +310,7 @@ export function BookingForm({
   async function submitQuoteRequest(): Promise<void> {
     setQuoteError(null)
     const serviceValid = await serviceForm.trigger()
-    const customerValid = await customerForm.trigger()
+    const customerValid = await trigger()
     if (!serviceValid || !customerValid) {
       return
     }
@@ -354,35 +369,52 @@ export function BookingForm({
           <KitSelector
             shelterSize={bookingState.shelterSize}
             membershipPlan={bookingState.membershipPlan}
-            serviceTotal={bookingState.serviceTotal}
             onSelect={(selection) => setKitSelection(selection)}
             onSkip={() => setCurrentStep(3)}
-            onContinue={() => setCurrentStep(3)}
           />
         )
 
       case 3:
         return (
-          <form className="space-y-4" onSubmit={(event) => event.preventDefault()}>
+          <div className="space-y-4">
             {isLoggedIn ? (
               <p className="rounded-lg bg-sky-pale px-3 py-2 text-sm text-sky-dark">
                 Signed in — your details were pre-filled from your account.
               </p>
             ) : null}
 
+            {submitCount > 0 && Object.keys(customerErrors).length > 0 ? (
+              <p className="rounded-lg border border-tornado/30 bg-tornado/5 px-4 py-3 text-sm text-tornado">
+                Please fix the highlighted fields below to continue.
+              </p>
+            ) : null}
+
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="full_name">Full name</Label>
+              <div className="space-y-2">
+                <Label htmlFor="first_name">First name</Label>
                 <Input
-                  id="full_name"
+                  id="first_name"
+                  autoComplete="given-name"
                   className="h-10 bg-white"
-                  aria-invalid={Boolean(customerForm.formState.errors.full_name)}
-                  {...customerForm.register('full_name')}
+                  aria-invalid={Boolean(customerErrors.first_name)}
+                  {...register('first_name')}
                 />
-                {customerForm.formState.errors.full_name ? (
-                  <p className="text-sm text-tornado">
-                    {customerForm.formState.errors.full_name.message}
-                  </p>
+                {customerErrors.first_name ? (
+                  <p className="text-sm text-tornado">{customerErrors.first_name.message}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Last name</Label>
+                <Input
+                  id="last_name"
+                  autoComplete="family-name"
+                  className="h-10 bg-white"
+                  aria-invalid={Boolean(customerErrors.last_name)}
+                  {...register('last_name')}
+                />
+                {customerErrors.last_name ? (
+                  <p className="text-sm text-tornado">{customerErrors.last_name.message}</p>
                 ) : null}
               </div>
 
@@ -393,13 +425,11 @@ export function BookingForm({
                   type="email"
                   autoComplete="email"
                   className="h-10 bg-white"
-                  aria-invalid={Boolean(customerForm.formState.errors.email)}
-                  {...customerForm.register('email')}
+                  aria-invalid={Boolean(customerErrors.email)}
+                  {...register('email')}
                 />
-                {customerForm.formState.errors.email ? (
-                  <p className="text-sm text-tornado">
-                    {customerForm.formState.errors.email.message}
-                  </p>
+                {customerErrors.email ? (
+                  <p className="text-sm text-tornado">{customerErrors.email.message}</p>
                 ) : null}
               </div>
 
@@ -411,31 +441,31 @@ export function BookingForm({
                   autoComplete="tel"
                   className="h-10 bg-white"
                   placeholder="(405) 555-0123"
-                  aria-invalid={Boolean(customerForm.formState.errors.phone)}
-                  {...customerForm.register('phone')}
+                  aria-invalid={Boolean(customerErrors.phone)}
+                  {...register('phone')}
                 />
-                {customerForm.formState.errors.phone ? (
-                  <p className="text-sm text-tornado">
-                    {customerForm.formState.errors.phone.message}
-                  </p>
+                {customerErrors.phone ? (
+                  <p className="text-sm text-tornado">{customerErrors.phone.message}</p>
                 ) : null}
               </div>
 
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="address">Service address</Label>
-                <AddressAutocomplete
-                  id="address"
-                  value={customerForm.watch('address')}
-                  onChange={(value) =>
-                    customerForm.setValue('address', value, { shouldValidate: true })
-                  }
-                  onBlur={() => void customerForm.trigger('address')}
-                  invalid={Boolean(customerForm.formState.errors.address)}
+                <Controller
+                  name="address"
+                  control={control}
+                  render={({ field }) => (
+                    <AddressAutocomplete
+                      id="address"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      invalid={Boolean(customerErrors.address)}
+                    />
+                  )}
                 />
-                {customerForm.formState.errors.address ? (
-                  <p className="text-sm text-tornado">
-                    {customerForm.formState.errors.address.message}
-                  </p>
+                {customerErrors.address ? (
+                  <p className="text-sm text-tornado">{customerErrors.address.message}</p>
                 ) : null}
               </div>
 
@@ -446,12 +476,12 @@ export function BookingForm({
                   type="date"
                   min={minDate}
                   className="h-10 bg-white"
-                  aria-invalid={Boolean(customerForm.formState.errors.preferred_date)}
-                  {...customerForm.register('preferred_date')}
+                  aria-invalid={Boolean(customerErrors.preferred_date)}
+                  {...register('preferred_date')}
                 />
-                {customerForm.formState.errors.preferred_date ? (
+                {customerErrors.preferred_date ? (
                   <p className="text-sm text-tornado">
-                    {customerForm.formState.errors.preferred_date.message}
+                    {customerErrors.preferred_date.message}
                   </p>
                 ) : null}
               </div>
@@ -461,8 +491,8 @@ export function BookingForm({
                 <select
                   id="referral_source"
                   className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                  aria-invalid={Boolean(customerForm.formState.errors.referral_source)}
-                  {...customerForm.register('referral_source')}
+                  aria-invalid={Boolean(customerErrors.referral_source)}
+                  {...register('referral_source')}
                 >
                   <option value="">Select one…</option>
                   {referralCode ? (
@@ -476,9 +506,9 @@ export function BookingForm({
                     </option>
                   ))}
                 </select>
-                {customerForm.formState.errors.referral_source ? (
+                {customerErrors.referral_source ? (
                   <p className="text-sm text-tornado">
-                    {customerForm.formState.errors.referral_source.message}
+                    {customerErrors.referral_source.message}
                   </p>
                 ) : null}
               </div>
@@ -490,16 +520,14 @@ export function BookingForm({
                   rows={3}
                   placeholder="Gate codes, dogs, access instructions…"
                   className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                  {...customerForm.register('notes')}
+                  {...register('notes')}
                 />
-                {customerForm.formState.errors.notes ? (
-                  <p className="text-sm text-tornado">
-                    {customerForm.formState.errors.notes.message}
-                  </p>
+                {customerErrors.notes ? (
+                  <p className="text-sm text-tornado">{customerErrors.notes.message}</p>
                 ) : null}
               </div>
             </div>
-          </form>
+          </div>
         )
 
       case 4:
@@ -507,7 +535,7 @@ export function BookingForm({
 
       case 5:
         return paymentData ? (
-          <PaymentStep booking={paymentData} onBack={goToPreviousStep} />
+          <PaymentStep booking={paymentData} />
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
@@ -519,14 +547,6 @@ export function BookingForm({
                 {quoteError}
               </p>
             ) : null}
-            <Button
-              type="button"
-              onClick={() => void submitQuoteRequest()}
-              disabled={quoteSubmitting}
-              className="bg-sky-DEFAULT text-white hover:bg-sky-dark"
-            >
-              {quoteSubmitting ? 'Submitting…' : 'Submit quote request'}
-            </Button>
           </div>
         )
 
@@ -536,51 +556,61 @@ export function BookingForm({
   }
 
   const stepMeta = STEP_TITLES[currentStep]
+  const isQuoteStep = currentStep === 5 && !paymentData
+  const footerContinueDisabled =
+    (currentStep === 2 && !canProceedWithKit(kitSelection)) ||
+    (isQuoteStep && quoteSubmitting)
+
+  function handleFooterContinue(): void {
+    if (currentStep === 3) {
+      void customerForm.handleSubmit(() => {
+        setCurrentStep(4)
+      })()
+      return
+    }
+
+    if (isQuoteStep) {
+      void submitQuoteRequest()
+      return
+    }
+    void goToNextStep()
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl">
       <BookingProgressNav currentStep={currentStep} />
 
-      <Card className="border-border/60 bg-white shadow-sm">
+      <div className="rounded-xl border border-border/60 bg-white shadow-sm">
         {stepMeta ? (
-          <CardHeader>
-            <CardTitle className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-shelter">
+          <div className="border-b border-border/60 px-6 py-6">
+            <h2 className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-shelter">
               {stepMeta.title}
-            </CardTitle>
-            <CardDescription>{stepMeta.description}</CardDescription>
-          </CardHeader>
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">{stepMeta.description}</p>
+          </div>
         ) : null}
 
-        <CardContent className="space-y-6">
+        <div className="space-y-6 px-6 py-6">
           {renderStep()}
 
-          {!(currentStep === 5 && paymentData) && currentStep !== 2 ? (
-            <div className="flex items-center justify-between border-t border-border pt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={goToPreviousStep}
-                disabled={currentStep === 1}
-                className="gap-2"
-              >
-                <ArrowLeft className="size-4" />
-                Back
-              </Button>
-
-              {currentStep < 5 ? (
-                <Button
-                  type="button"
-                  onClick={() => void goToNextStep()}
-                  className="gap-2 bg-sky-DEFAULT text-white hover:bg-sky-dark"
-                >
-                  Continue
-                  <ArrowRight className="size-4" />
-                </Button>
-              ) : null}
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
+          <BookingFooter
+            currentStep={currentStep}
+            totalSteps={BOOKING_STEPS.length}
+            pricing={pricing}
+            onBack={goToPreviousStep}
+            onContinue={handleFooterContinue}
+            continueLabel={
+              isQuoteStep
+                ? quoteSubmitting
+                  ? 'Submitting…'
+                  : 'Submit quote request'
+                : 'Continue'
+            }
+            continueDisabled={footerContinueDisabled}
+            showContinue={!(currentStep === 5 && paymentData)}
+          />
+        </div>
+      </div>
     </div>
   )
 }

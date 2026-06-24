@@ -147,6 +147,27 @@ Font UI: font-['Barlow_Condensed'] or font-['Barlow']
 - Mobile-first for sweeper app (field workers use phones)
 - Desktop-first for admin dashboard (managed from computer)
 
+### Booking flow UI — MANDATORY consistency
+The booking flow at `/book` has 6 steps:
+1. Service Selection · 2. Prep Kit (KitSelector) · 3. Customer Details ·
+4. Shelter Photo (AI screening) · 5. Payment · 6. Confirmation
+
+ALL steps MUST use the shared `<BookingFooter>` component. Never build a
+per-step footer or place nav buttons anywhere else. The footer is:
+- Price summary bar on top: running total + itemized line breakdown of all
+  current selections, updating reactively from booking state (never hardcoded)
+- Nav row below: text-only "← Back" left (hidden on Step 1), prominent
+  primary "Continue" right
+- Continue button visible BY DEFAULT in both themes (a prior bug made it
+  invisible until hover — never reintroduce this). Dark: bg-[#2E86C1] white
+  text, hover bg-[#5DADE2]. Retro: match existing retro primary button.
+- Positioning matches Step 1 (keep its sticky/static behavior)
+
+Customer Details (Step 3) specifics:
+- First Name and Last Name are SEPARATE fields (never a single full-name field)
+- Address field uses Google Places autocomplete (Norman OK biased), with
+  graceful fallback to plain text if the Places API is unavailable
+
 ---
 
 ## BUSINESS LOGIC — CRITICAL RULES
@@ -212,6 +233,9 @@ Font UI: font-['Barlow_Condensed'] or font-['Barlow']
 - **Never** expose `SUPABASE_SERVICE_ROLE_KEY` to the browser
 - **Never** publish social content without verifying `photo_consent: true`
 - **Never** make Anthropic API calls from client components — server/API only
+- **Never** give a booking step its own footer/nav — always use `<BookingFooter>`
+- **Never** ship a Continue button that's invisible until hover — must be visible by default in both themes
+- **Never** use a single combined "Full Name" field in booking — first + last are separate
 
 ---
 

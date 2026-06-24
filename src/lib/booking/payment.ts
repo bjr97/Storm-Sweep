@@ -1,9 +1,10 @@
 import type { PhotoScreenResult } from '@/components/booking/PhotoUpload'
 import type { KitSelection } from '@/components/booking/KitSelector'
 import type { BookingPayload, BookingPaymentData } from '@/lib/bookings/types'
-import type {
-  CustomerDetailsValues,
-  ServiceSelectionValues,
+import {
+  formatCustomerFullName,
+  type CustomerDetailsValues,
+  type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
 import type { BookingPriceBreakdown } from '@/lib/booking/pricing'
 import { SUPPLY_KITS } from '@/lib/utils'
@@ -76,7 +77,7 @@ export function buildPaymentData(
       })),
     totalAmount: pricing.total,
     depositAmount: pricing.deposit,
-    customerName: customerValues.full_name,
+    customerName: formatCustomerFullName(customerValues),
     customerEmail: customerValues.email,
     customerPhone: customerValues.phone,
     address: customerValues.address,
@@ -122,7 +123,7 @@ export function buildQuoteBookingPayload(
   }
 
   return {
-    customerName: customerValues.full_name,
+    customerName: formatCustomerFullName(customerValues),
     customerEmail: customerValues.email,
     customerPhone: customerValues.phone,
     address: customerValues.address,

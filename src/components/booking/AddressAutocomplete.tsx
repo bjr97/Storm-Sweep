@@ -1,10 +1,18 @@
 'use client'
 
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+
+/** Norman, OK and surrounding Cleveland County / south OKC metro. */
+const NORMAN_AREA_BOUNDS = {
+  north: 35.55,
+  south: 34.88,
+  east: -97.05,
+  west: -97.82,
+}
 
 type AddressAutocompleteProps = {
   id: string
@@ -23,6 +31,9 @@ export function AddressAutocomplete({
   invalid,
   placeholder = 'Start typing your address…',
 }: AddressAutocompleteProps): React.ReactElement {
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
     const inputElement = document.getElementById(id) as HTMLInputElement | null
@@ -35,30 +46,36 @@ export function AddressAutocomplete({
 
     setOptions({ key: apiKey, v: 'weekly' })
 
-    void importLibrary('places').then((placesLibrary) => {
-      if (cancelled || !inputElement) {
-        return
-      }
-
-      const autocomplete = new placesLibrary.Autocomplete(inputElement, {
-        componentRestrictions: { country: 'us' },
-        fields: ['formatted_address'],
-        types: ['address'],
-      })
-
-      listener = autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace()
-        if (place.formatted_address) {
-          onChange(place.formatted_address)
+    void importLibrary('places')
+      .then((placesLibrary) => {
+        if (cancelled || !inputElement) {
+          return
         }
+
+        const autocomplete = new placesLibrary.Autocomplete(inputElement, {
+          bounds: NORMAN_AREA_BOUNDS,
+          strictBounds: false,
+          componentRestrictions: { country: 'us' },
+          fields: ['formatted_address'],
+          types: ['address'],
+        })
+
+        listener = autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace()
+          if (place.formatted_address) {
+            onChangeRef.current(place.formatted_address)
+          }
+        })
       })
-    })
+      .catch((error: unknown) => {
+        console.error('[AddressAutocomplete] Places API unavailable:', error)
+      })
 
     return () => {
       cancelled = true
       listener?.remove()
     }
-  }, [id, onChange])
+  }, [id])
 
   return (
     <Input

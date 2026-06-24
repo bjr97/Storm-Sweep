@@ -2,8 +2,6 @@
 
 import { Check, Lightbulb, Package, ShieldCheck, Sparkles } from 'lucide-react'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { calculateBookingPrice, formatPriceDisplay } from '@/lib/booking/pricing'
 import { SHELTER_SIZE_OPTIONS, type ServiceSelectionValues } from '@/lib/booking/schemas'
 import { cn, formatCurrency, PRICING, SUPPLY_KITS } from '@/lib/utils'
 import type { ShelterSize } from '@/types/database'
@@ -23,9 +21,6 @@ const SUPPLY_KIT_OPTIONS = [
 ] as const
 
 export function ServiceSelector({ values, onChange }: ServiceSelectorProps): React.ReactElement {
-  const pricing = calculateBookingPrice(values)
-  const activeKitKey = values.full_package ? 'essential' : values.supply_kit
-
   function updateField<K extends keyof ServiceSelectionValues>(
     field: K,
     value: ServiceSelectionValues[K]
@@ -40,6 +35,8 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
         : { ...values, full_package: false }
     )
   }
+
+  const activeKitKey = values.full_package ? 'essential' : values.supply_kit
 
   function getShelterPriceLabel(size: ShelterSize): string {
     const price = PRICING.shelter[size]
@@ -201,43 +198,6 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
           })}
         </div>
       </section>
-
-      <Card className="border-sky-DEFAULT/20 bg-white shadow-sm">
-        <CardHeader className="border-b border-border/60">
-          <CardTitle className="font-[family-name:var(--font-bebas)] text-xl tracking-wide text-shelter">
-            PRICE SUMMARY
-          </CardTitle>
-          <CardDescription>50% deposit due today at checkout</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 pt-4">
-          {pricing.isQuoteRequired ? (
-            <p className="text-sm text-muted-foreground">
-              X-Large shelters require a custom quote. Continue to share your details and our team will follow up.
-            </p>
-          ) : (
-            <>
-              {pricing.lineItems.map((item) => (
-                <div key={item.label} className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{item.label}</span>
-                  <span className="font-medium text-shelter">{formatPriceDisplay(item.amount)}</span>
-                </div>
-              ))}
-              <div className="flex items-center justify-between border-t border-border pt-3">
-                <span className="font-medium text-shelter">Total</span>
-                <span className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-sky-DEFAULT">
-                  {formatPriceDisplay(pricing.total)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Deposit due today (50%)</span>
-                <span className="font-semibold text-wheat-DEFAULT">
-                  {formatPriceDisplay(pricing.deposit)}
-                </span>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }

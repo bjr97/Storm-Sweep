@@ -28,10 +28,8 @@ export interface KitSelection {
 export interface KitSelectorProps {
   shelterSize: 'small' | 'standard' | 'large' | 'xlarge'
   membershipPlan: 'none' | 'annual' | 'monthly' | 'annual_2yr'
-  serviceTotal: number
   onSelect: (selection: KitSelection) => void
   onSkip: () => void
-  onContinue: () => void
 }
 
 const SHELTER_READY_KIT_DISCOUNT = 59
@@ -168,13 +166,33 @@ function bundleRequiresSelector(
   return (bundle.requiresSelector as readonly string[]).includes(selector)
 }
 
+export function canProceedWithKit(kitSelection: KitSelection): boolean {
+  const hasKitSelected =
+    kitSelection.selectedBundle !== null || kitSelection.aLaCarteItems.length > 0
+
+  if (!hasKitSelected) {
+    return true
+  }
+
+  const needsAge =
+    bundleRequiresSelector(kitSelection.selectedBundle, 'age') ||
+    kitSelection.aLaCarteItems.includes('little_ones')
+
+  const needsPetSize =
+    bundleRequiresSelector(kitSelection.selectedBundle, 'pet_size') ||
+    kitSelection.aLaCarteItems.includes('pets')
+
+  return (
+    (!needsAge || kitSelection.ageSelector !== null) &&
+    (!needsPetSize || kitSelection.petSizeSelector !== null)
+  )
+}
+
 export function KitSelector({
   shelterSize,
   membershipPlan,
-  serviceTotal,
   onSelect,
   onSkip,
-  onContinue,
 }: KitSelectorProps): React.ReactElement {
   const [selectedBundle, setSelectedBundle] = useState<KitSelection['selectedBundle']>(null)
   const [aLaCarteItems, setALaCarteItems] = useState<string[]>([])
@@ -206,17 +224,6 @@ export function KitSelector({
     bundleIncludes(activeBundle, 'little_ones') || aLaCarteItems.includes('little_ones')
   const showPetSizeSelector =
     bundleIncludes(activeBundle, 'pets') || aLaCarteItems.includes('pets')
-
-  const needsAge =
-    bundleRequiresSelector(selectedBundle, 'age') || aLaCarteItems.includes('little_ones')
-
-  const needsPetSize =
-    bundleRequiresSelector(selectedBundle, 'pet_size') || aLaCarteItems.includes('pets')
-
-  const hasKitSelected = selectedBundle !== null || aLaCarteItems.length > 0
-  const canContinue =
-    !hasKitSelected ||
-    ((!needsAge || ageSelector !== null) && (!needsPetSize || petSizeSelector !== null))
 
   useEffect(() => {
     if (!showAgeSelector && ageSelector !== null) {
@@ -305,8 +312,7 @@ export function KitSelector({
   }
 
   return (
-    <>
-    <div className="space-y-6 bg-[#F7F7F4] pb-24 font-['Barlow']">
+    <div className="space-y-6 font-['Barlow']">
       <section>
         <h2 className="font-['Barlow_Condensed'] text-2xl font-semibold text-shelter">
           Prep your shelter while we&apos;re there.
@@ -521,35 +527,5 @@ export function KitSelector({
         )}
       </div>
     </div>
-
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t border-gray-200 bg-white px-6 py-4 shadow-lg">
-      <div className="flex items-center gap-3 font-['Barlow'] text-sm text-gray-600">
-        <span>
-          Service <strong className="text-gray-900">${serviceTotal}</strong>
-        </span>
-        {kitTotal > 0 ? (
-          <>
-            <span className="text-gray-300">+</span>
-            <span>
-              Kit <strong className="text-gray-900">${kitTotal}</strong>
-            </span>
-            <span className="text-gray-300">=</span>
-            <span className="text-base font-bold text-gray-900">${serviceTotal + kitTotal}</span>
-          </>
-        ) : (
-          <span className="ml-2 text-xs text-gray-400">No kit selected</span>
-        )}
-      </div>
-
-      <Button
-        type="button"
-        onClick={onContinue}
-        disabled={!canContinue}
-        className="bg-[#2E86C1] px-8 text-white hover:bg-[#1A5276]"
-      >
-        Continue →
-      </Button>
-    </div>
-    </>
   )
 }

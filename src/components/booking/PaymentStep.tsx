@@ -20,7 +20,6 @@ import { formatCurrency, PRICING } from '@/lib/utils'
 
 type PaymentStepProps = {
   booking: BookingPaymentData
-  onBack?: () => void
 }
 
 function toBookingPayload(booking: BookingPaymentData): BookingPayload {
@@ -61,7 +60,6 @@ function toBookingPayload(booking: BookingPaymentData): BookingPayload {
 
 export function PaymentStep({
   booking,
-  onBack,
 }: PaymentStepProps): React.ReactElement {
   const [error, setError] = useState<string | null>(null)
   const [loadingMethod, setLoadingMethod] = useState<'stripe' | 'paypal' | null>(
@@ -238,11 +236,6 @@ export function PaymentStep({
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        {onBack ? (
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back
-          </Button>
-        ) : null}
         <Button
           type="button"
           className="flex-1 bg-sky text-white hover:bg-sky-dark"

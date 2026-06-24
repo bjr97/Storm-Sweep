@@ -1,7 +1,40 @@
-import { addHours, startOfDay } from 'date-fns'
+import { addDays, startOfDay } from 'date-fns'
 import { z } from 'zod'
 
 import type { ShelterSize } from '@/types/database'
+
+const nameFieldSchema = z
+  .string()
+  .trim()
+  .min(1, 'This field is required')
+  .max(50, 'Must be 50 characters or less')
+
+export function splitFullName(fullName: string): {
+  first_name: string
+  last_name: string
+} {
+  const trimmed = fullName.trim()
+  if (!trimmed) {
+    return { first_name: '', last_name: '' }
+  }
+
+  const parts = trimmed.split(/\s+/)
+  if (parts.length === 1) {
+    return { first_name: parts[0], last_name: '' }
+  }
+
+  return {
+    first_name: parts[0],
+    last_name: parts.slice(1).join(' '),
+  }
+}
+
+export function formatCustomerFullName(values: {
+  first_name: string
+  last_name: string
+}): string {
+  return `${values.first_name.trim()} ${values.last_name.trim()}`.trim()
+}
 
 export const shelterSizeSchema = z.enum([
   'small',
@@ -33,24 +66,23 @@ export const serviceSelectionSchema = z.object({
 export type ServiceSelectionValues = z.infer<typeof serviceSelectionSchema>
 
 export const customerDetailsSchema = z.object({
-  full_name: z
-    .string()
-    .min(2, 'Enter your full name')
-    .max(100, 'Name is too long'),
-  email: z.string().email('Enter a valid email address'),
+  first_name: nameFieldSchema,
+  last_name: nameFieldSchema,
+  email: z.string().trim().email('Enter a valid email address'),
   phone: z
     .string()
+    .trim()
     .min(10, 'Enter a valid phone number')
     .regex(/^[\d\s()+-]+$/, 'Enter a valid phone number'),
-  address: z.string().min(5, 'Enter your service address'),
+  address: z.string().trim().min(5, 'Enter your service address'),
   preferred_date: z
     .string()
     .min(1, 'Select a preferred date')
     .refine((value) => {
       const selected = startOfDay(new Date(`${value}T12:00:00`))
-      const minimum = addHours(new Date(), 24)
-      return selected >= startOfDay(minimum)
-    }, 'Preferred date must be at least 24 hours from now'),
+      const minimum = startOfDay(addDays(new Date(), 1))
+      return selected >= minimum
+    }, 'Preferred date must be at least 1 day from today'),
   notes: z.string().max(500, 'Notes must be 500 characters or less').optional(),
   referral_source: z.string().min(1, 'Select how you heard about us'),
 })

@@ -2,6 +2,13 @@ export {}
 
 declare global {
   namespace google.maps {
+    interface LatLngBoundsLiteral {
+      east: number
+      north: number
+      south: number
+      west: number
+    }
+
     interface MapsEventListener {
       remove(): void
     }
@@ -11,6 +18,8 @@ declare global {
         constructor(
           inputField: HTMLInputElement,
           opts?: {
+            bounds?: LatLngBoundsLiteral
+            strictBounds?: boolean
             componentRestrictions?: { country: string | string[] }
             fields?: string[]
             types?: string[]
