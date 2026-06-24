@@ -13,8 +13,11 @@ in-ground garage storm shelters.
 ### Business Model
 - One-time service visits ($129–$299+ depending on shelter size + services)
 - Annual Storm Ready membership ($249/yr or $24/mo — customer chooses at checkout)
-- Upgrade add-ons: LED lighting ($89), supply kits ($29–$149 in 5 tiers), 
-  door/hardware upgrades (quoted on-site)
+- Upgrade add-ons: LED lighting ($89, separate service), prep kits à la carte ($24–$59),
+  named bundles ($79–$149), door/hardware upgrades (quoted on-site)
+- Free click-on/click-off LED included in all first-time cleaning visits
+- Prep kit categories: Shelter Ready, Little Ones, Pets, Hygiene — mix & match or bundle
+- Water/food excluded from kits (humidity degrades underground) — educate via service report
 - Independent contractor Sweepers paid 60–68% of job revenue based on 
   accept speed + turnaround bonuses
 - Strategic referral partners: roofing companies, realtors, lawn services
@@ -496,10 +499,11 @@ storm-sweep/
 │   │   │   ├── Footer.tsx
 │   │   │   └── AdminSidebar.tsx
 │   │   ├── booking/
-│   │   │   ├── BookingForm.tsx
-│   │   │   ├── PhotoUpload.tsx
-│   │   │   ├── ServiceSelector.tsx
-│   │   │   └── PaymentStep.tsx
+│   │   │   ├── BookingForm.tsx             # Step state manager (6 steps)
+│   │   │   ├── ServiceSelector.tsx         # Step 1
+│   │   │   ├── KitSelector.tsx             # Step 2 — bundle + à la carte upsell
+│   │   │   ├── PhotoUpload.tsx             # Step 4
+│   │   │   └── PaymentStep.tsx             # Step 5
 │   │   ├── jobs/
 │   │   │   ├── JobCard.tsx
 │   │   │   ├── Checklist.tsx
@@ -593,38 +597,118 @@ Brand colors: sky (#2E86C1), wheat (#D4A843), charcoal (#141416)
 Fonts: Bebas Neue (display), Barlow Condensed + Barlow (body)
 
 #### 1.4 — Booking Flow
-Multi-step booking form at `/book`:
+Multi-step booking form at `/book`.
+Component: `src/components/booking/BookingForm.tsx` — client component managing step state.
+Step progress bar shown at top throughout all steps.
+
+**STEP OVERVIEW**
+```
+Step 1 → Service Selection
+Step 2 → Prep Kit (upsell)
+Step 3 → Customer Details
+Step 4 → Shelter Photo Upload
+Step 5 → Payment
+Step 6 → Confirmation
+```
+
+---
 
 **Step 1 — Service Selection**
-- Shelter size selector (small $129 / standard $149 / large $179)
-- Service type checkboxes: Deep Clean, LED Package (+$89), Supply Kit (tier selector), Full Package
-- Membership option: One-time visit OR Storm Ready annual ($249) OR monthly ($24/mo)
-- Dynamic price calculation as selections change
+- Shelter size selector (small $129 / standard $149 / large $179 / xlarge — quoted)
+- Membership option: One-time visit OR Storm Ready annual ($249/yr) OR Storm Ready monthly ($24/mo) OR Storm Ready 2yr ($199/yr — kit included free)
+- Service add-ons: LED Package (+$89), door/hardware upgrades (noted for on-site quote)
+- Dynamic price calculation updates as selections change
+- Selections stored in booking state: `{ shelterSize, membershipPlan, addons[] }`
+- On continue: pass `shelterSize` and `membershipPlan` to Step 2 for smart defaults
 
-**Step 2 — Customer Details**
+---
+
+**Step 2 — Prep Kit**
+Component: `src/components/booking/KitSelector.tsx`
+
+*Headline:* "Prep your shelter while we're there."
+*Subhead:* "Your Sweeper can install your kit same visit. No extra trip."
+
+**Default view — Bundles first (2x2 grid):**
+| Bundle | Price | Savings |
+|--------|-------|---------|
+| Storm Starter | $79 | save $4 |
+| Family Ready ⭐ | $89 | save $23 |
+| Pet Ready | $89 | save $13 |
+| Full House | $149 | save $22 |
+
+- Each card shows: name, emoji, price, savings badge, tagline, bullet item list, SELECT button
+- Selected card: highlighted sky-blue border + checkmark in corner
+- ⭐ Family Ready pre-tagged "Most Popular"
+- Below grid: muted text link — *"Build your own instead →"* — expands à la carte section inline
+
+**À La Carte section (collapsed by default, expands inline):**
+- 4 toggle cards: Shelter Ready $59 / Little Ones $49 / Pets $39 / Hygiene $24
+- Each card toggles on/off independently with a checkbox
+- Running subtotal updates live as toggles flip
+- Auto-bundle detection: if customer's active toggles match a named bundle →
+  show toast: *"Nice — we switched you to the Family Ready bundle and saved you $23."*
+  and swap selection to that bundle's price automatically
+
+**Inline selectors (conditional):**
+- If Little Ones is selected (bundle or à la carte) → age dropdown appears immediately below:
+  `Infant (0–12mo) / Toddler (1–4yr) / Big Kid (5–10yr)`
+- If Pets is selected → size/type dropdown appears immediately below:
+  `Small Breed / Large Breed / Cat`
+- Both selectors required before "Continue" is enabled if those kits are in selection
+
+**Smart defaults based on Step 1:**
+- If customer selected 2yr membership → Shelter Ready Kit shows "Included free with your plan 🎉" badge, $0 price, pre-selected and locked
+- If shelter size is `large` or `xlarge` → Full House card gets subtle tag: *"Popular for larger households"*
+
+**Skip behavior:**
+- "Skip for now" text link — bottom left, muted gray, not a button
+- On click: show inline soft message below the link (no modal):
+  *"No worries — you can always add a kit after your visit from your customer portal."*
+- Auto-advance to Step 3 after 1.5 seconds
+
+**Sticky price summary bar (bottom of screen):**
+- Always visible: `Service $149 + Kit $89 = $238`
+- Updates live as selections change
+- "Continue →" button right side — disabled if required selectors (age/pet size) not filled
+
+**State stored:** `{ selectedBundle, aLaCarteItems[], ageSelector, petSizeSelector, kitTotal }`
+
+---
+
+**Step 3 — Customer Details**
 - Name, email, phone, service address
 - Preferred date (date picker, min 24hrs out)
 - Notes field (gate codes, dogs, access info)
-- How did you hear about us? (dropdown includes partner referral codes)
-- Auto-populate if logged in
+- How did you hear about us? (dropdown — includes partner referral codes)
+- Auto-populate fields if customer is logged in
 
-**Step 3 — Shelter Photo Upload (AI Screening)**
-- Optional but encouraged: "Upload a photo of your shelter so your Sweeper arrives prepared"
-- Upload to Supabase Storage → call `/api/photo-screen` → display grade to customer
+---
+
+**Step 4 — Shelter Photo Upload (AI Screening)**
+- Optional but encouraged: *"Upload a photo of your shelter so your Sweeper arrives prepared"*
+- Upload to Supabase Storage → call `POST /api/photo-screen` → display grade to customer
 - Grade A/B: "Looks great! Your booking is confirmed."
 - Grade C: "We'll review this and confirm within 2 hours."
 - Grade D/F: "Our team will contact you shortly to discuss before confirming."
 - Notify admin via SMS for C/D/F grades
 
-**Step 4 — Payment**
-- Show Stripe Checkout for card payment (deposit = 50% of total, balance due after service)
-- Show PayPal button as alternative
+---
+
+**Step 5 — Payment**
+- Order summary shown: service line item + kit line item (if selected) + membership (if selected)
+- If 2yr member + Shelter Ready Kit: show "2yr Member Kit Credit  –$59" as line item
+- Stripe Checkout for card payment (deposit = 50% of total, balance due after service)
+- PayPal button as alternative
 - On Stripe success: webhook fires → create job record → send confirmation SMS + email
 - On PayPal success: capture order → create job record → send confirmation SMS + email
-- Redirect to `/book/confirmation`
+- Redirect to Step 6
 
-**Step 5 — Confirmation**
-- Display booking summary
+---
+
+**Step 6 — Confirmation**
+- Display full booking summary including kit selection
+- If kit selected: *"Your Sweeper will bring your [Bundle Name] kit to the visit."*
 - Link to create account (if not logged in) to access customer portal
 - "You'll receive a text confirmation shortly"
 
@@ -935,25 +1019,32 @@ export const PRICING = {
     xlarge: null, // quoted
   },
   addons: {
-    led_package: 89,
-    supply_kit_starter: 29,
-    supply_kit_essential: 49,
-    supply_kit_family: 79,
-    supply_kit_pro: 109,
-    supply_kit_elite: 149,
+    led_package: 89,            // installed same visit — separate service channel
+    // Prep kit à la carte
+    kit_shelter_ready: 59,      // foundation kit — included free with 2yr membership
+    kit_little_ones: 49,        // age selector: infant / toddler / big kid
+    kit_pets: 39,               // size selector: small breed / large breed / cat
+    kit_hygiene: 24,            // toothbrush, paste, wipes, sanitizer, tissues, waste bags
+    // Structural / hardware upgrades
     interior_handle: 45,
     hinge_service: 35,
     lock_replacement: 65,
     extension_cord: 15,
   },
   membership: {
-    annual: 249,
+    annual: 249,                // 1yr — kit paid separately
+    annual_2yr: 199,            // 2yr committed — Shelter Ready Kit included free ($59 value)
     monthly: 24,
   },
   bundles: {
-    clean_plus_led: 219,        // standard clean + LED
-    clean_plus_kit_basic: 179,  // standard + essential kit
-    full_package: 299,           // clean + LED + standard kit
+    // Cleaning service bundles
+    clean_plus_led: 219,        // standard clean + LED installed
+    full_package: 299,          // standard clean + LED + Shelter Ready Kit
+    // Prep kit bundles (add-ons at booking checkout)
+    storm_starter: 79,          // Shelter Ready Kit + Hygiene Pack (save $4)
+    family_ready: 89,           // Shelter Ready Kit + Little Ones + Hygiene Pack (save $23)
+    pet_ready: 89,              // Shelter Ready Kit + Pets + Hygiene Pack (save $13)
+    full_house: 149,            // Shelter Ready Kit + Little Ones + Pets + Hygiene Pack (save $22)
   },
   sweeper: {
     base_pct: 0.60,
@@ -1026,32 +1117,148 @@ export const CHECKLIST_ITEMS = [
 
 ---
 
-## SUPPLY KIT TIERS
+## PREP KITS & BUNDLES
+
+### Design Principles
+- Water and food storage intentionally excluded — underground heat/humidity degrades them fast
+- Service report includes printed card: "We recommend storing sealed water pouches and refreshing every 6 months. Ask your Sweeper for recommendations."
+- LED lighting is a separate service channel — one free click-on/click-off LED included in all first-time cleaning visits
+- No deodorant in hygiene pack — melts underground
+- Kits are physical items assembled and delivered by Sweeper at time of service
+
+### À La Carte Kits
 
 ```typescript
-export const SUPPLY_KITS = {
-  starter: {
-    name: 'Starter Kit', price: 29,
-    items: ['1L water (2-pack)', 'Mini first aid kit', 'Emergency whistle', 'LED keychain flashlight', 'Storm Sweep checklist card']
+export const PREP_KITS = {
+  shelter_ready: {
+    name: 'Shelter Ready Kit',
+    price: 59,
+    tagline: 'The foundation every shelter needs.',
+    description: "Hand-crank power bank, basic first aid kit, waterproof document pouch, laminated family emergency card, two mylar blankets, whistle, glow sticks, hand sanitizer, and wipes. The stuff you'll actually reach for when the sirens go off.",
+    items: [
+      'Hand-crank power bank',
+      'Basic first aid kit',
+      'Waterproof document pouch',
+      'Laminated family emergency card',
+      'Mylar blankets (2)',
+      'Emergency whistle',
+      'Glow sticks (4-pack)',
+      'Hand sanitizer',
+      'Wet wipes packet',
+    ],
+    included_free_with: '2yr Storm Ready membership',
   },
-  essential: {
-    name: 'Essential Kit', price: 49,
-    items: ['2L water (3-pack)', 'Standard first aid kit', 'Hand-crank weather radio', 'Emergency mylar blankets (2)', 'USB power bank 5000mAh', 'Universal phone cable']
+
+  little_ones: {
+    name: 'Little Ones Add-on',
+    price: 49,
+    tagline: "Because "we'll figure it out" isn't a plan when you've got a toddler.",
+    description: 'Choose infant, toddler, or big kid at checkout. Includes age-appropriate snacks, comfort item, diapers or activity pack, and wipes.',
+    age_selector: ['infant', 'toddler', 'big_kid'],
+    items_by_age: {
+      infant: ['Diapers (6-pack, size NB/1)', 'Formula packets (2)', 'Pacifiers (2)', 'Swaddle blanket', 'Baby wipes (travel pack)', 'Hand sanitizer'],
+      toddler: ['Pull-ups or diapers (4-pack)', 'Toddler snack bars (4)', 'Comfort stuffed animal (small)', 'Wet wipes (travel pack)', 'Juice pouches (2)'],
+      big_kid: ['Snack bars (4)', 'Small activity kit (coloring + crayons)', 'Glow sticks (2)', 'Juice pouches (2)', 'Wet wipes'],
+    },
   },
-  family: {
-    name: 'Family Kit', price: 79,
-    items: ['Everything in Essential', 'Extra water (6-pack total)', '3-day food bars (2 person)', 'Baby/toddler comfort items', 'Extra mylar blankets (4)', 'Dust masks (4-pack)', 'Glow sticks (6-pack)']
+
+  pets: {
+    name: 'Pets Add-on',
+    price: 39,
+    tagline: "They don't understand what's happening. You can still be ready for them.",
+    description: 'Choose small breed, large breed, or cat. Includes 2-day food supply, collapsible bowl, backup leash, and waste bags.',
+    size_selector: ['small_breed', 'large_breed', 'cat'],
+    items_by_size: {
+      small_breed: ['Dry food (2-day supply, small breed)', 'Collapsible bowl', 'Backup leash', 'Waste bags (6-pack)'],
+      large_breed: ['Dry food (2-day supply, large breed)', 'Collapsible bowl (large)', 'Backup leash (heavy duty)', 'Waste bags (6-pack)'],
+      cat: ['Dry food (2-day supply)', 'Collapsible bowl', 'Portable litter pan + liner', 'Waste bags (6-pack)', 'Familiar-scent cloth'],
+    },
   },
-  pro: {
-    name: 'Pro Kit', price: 109,
-    items: ['Everything in Family', '72-hr water supply (family of 4)', 'Full first aid with trauma items', 'Hand-crank + solar radio/flashlight', '20,000mAh power bank', 'Multi-tool', 'Waterproof document pouch', 'N95 masks (4-pack)']
+
+  hygiene: {
+    name: 'Hygiene Pack',
+    price: 24,
+    tagline: 'Six hours underground hits different without a toothbrush.',
+    description: 'Toothbrush, travel toothpaste, large wet wipes pack, hand sanitizer, tissues, and waste bags. Optional feminine hygiene basics — toggle at checkout. No deodorant — melts underground.',
+    items: [
+      'Toothbrush',
+      'Travel toothpaste',
+      'Wet wipes (large pack)',
+      'Hand sanitizer',
+      'Tissues',
+      'Waste bags',
+    ],
+    optional_toggle: 'feminine_hygiene_basics',
   },
-  elite: {
-    name: 'Storm Ready Elite', price: 149,
-    items: ['Everything in Pro', '7-day water supply', '72-hr emergency food (4 person)', 'Portable toilet kit', 'Cash envelope ($20 small bills)', 'Extra medication organizer', 'Kids activity/comfort pack', 'Laminated family emergency card', 'Storm Sweep branded storage bin']
-  }
 }
 ```
+
+### Named Bundles
+
+```typescript
+export const PREP_BUNDLES = {
+  storm_starter: {
+    name: 'Storm Starter',
+    emoji: '🌪️',
+    price: 79,
+    savings: 4,
+    tagline: 'The essentials. No fluff.',
+    description: "Shelter Ready Kit + Hygiene Pack. If you've got one adult or a couple with no kids or pets, this is your move.",
+    includes: ['shelter_ready', 'hygiene'],
+  },
+
+  family_ready: {
+    name: 'Family Ready',
+    emoji: '👨‍👩‍👧',
+    price: 89,
+    savings: 23,
+    tagline: 'For the household that actually has a lot going on.',
+    description: 'Shelter Ready Kit + Little Ones Add-on + Hygiene Pack. Our most popular bundle for young families.',
+    includes: ['shelter_ready', 'little_ones', 'hygiene'],
+    requires_selector: ['age'],
+    popular: true,
+  },
+
+  pet_ready: {
+    name: 'Pet Ready',
+    emoji: '🐾',
+    price: 89,
+    savings: 13,
+    tagline: "You already know they're coming down there with you.",
+    description: 'Shelter Ready Kit + Pets Add-on + Hygiene Pack. Built for the household where someone has four legs.',
+    includes: ['shelter_ready', 'pets', 'hygiene'],
+    requires_selector: ['pet_size'],
+  },
+
+  full_house: {
+    name: 'Full House',
+    emoji: '🏠',
+    price: 149,
+    savings: 22,
+    tagline: 'Kids, pets, adults. Every scenario. One box.',
+    description: 'Shelter Ready Kit + Little Ones + Pets + Hygiene Pack. If your household has all the moving parts — this is the one.',
+    includes: ['shelter_ready', 'little_ones', 'pets', 'hygiene'],
+    requires_selector: ['age', 'pet_size'],
+  },
+}
+```
+
+### Membership Kit Rule
+```typescript
+// Shelter Ready Kit ($59) included free when customer selects 2-year Storm Ready plan
+// Applied as $59 discount at checkout — shown as line item "2yr Member Kit Credit  –$59"
+// 1-year annual plan: kit sold separately at $59 or as part of any bundle
+// monthly plan: kit sold separately
+```
+
+### Water & Food Policy
+Water and food storage are intentionally excluded from all kits.
+Underground heat and humidity degrade most packaged food and water over time.
+Every completed service report includes this printed recommendation card:
+
+> "Storm Sweep Tip: We recommend storing sealed mylar water pouches (not plastic bottles)
+> in your shelter and refreshing them every 6 months. Ask your Sweeper for brand recommendations.
+> We don't stock these — but we'll always remind you."
 
 ---
 

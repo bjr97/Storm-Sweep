@@ -1,5 +1,8 @@
-import { CheckCircle2, MessageSquare } from 'lucide-react'
+import { ConfirmationKitMessage } from '@/components/booking/ConfirmationKitMessage'
+import { BookingProgressNav } from '@/components/booking/BookingProgressNav'
 import Link from 'next/link'
+
+import { CheckCircle2, MessageSquare } from 'lucide-react'
 
 import { buttonVariants } from '@/components/ui/button'
 import {
@@ -191,6 +194,8 @@ export default async function BookingConfirmationPage({
 
   return (
     <section className="mx-auto max-w-2xl px-4 py-16">
+      <BookingProgressNav currentStep={6} />
+
       <div className="mb-8 text-center">
         <CheckCircle2 className="mx-auto size-14 text-sky" />
         <h1 className="mt-4 font-['Bebas_Neue'] text-4xl tracking-wide text-[var(--color-bg)]">
@@ -261,6 +266,8 @@ export default async function BookingConfirmationPage({
           </CardContent>
         </Card>
       )}
+
+      <ConfirmationKitMessage serviceTypes={summary?.serviceTypes ?? []} />
 
       {!isQuoteRequest ? (
         <div className="mb-8 flex items-start gap-3 rounded-lg border border-sky/20 bg-sky-pale px-4 py-4 font-['Barlow'] text-sm text-[var(--color-bg)]">

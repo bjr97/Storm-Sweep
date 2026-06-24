@@ -99,7 +99,9 @@ export const SHELTER_SIZE_OPTIONS: {
 
 export const BOOKING_STEPS = [
   { id: 1, label: 'Service' },
-  { id: 2, label: 'Details' },
-  { id: 3, label: 'Photo' },
-  { id: 4, label: 'Payment' },
+  { id: 2, label: 'Prep Kit' },
+  { id: 3, label: 'Details' },
+  { id: 4, label: 'Photo' },
+  { id: 5, label: 'Payment' },
+  { id: 6, label: 'Confirm' },
 ] as const

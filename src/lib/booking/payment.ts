@@ -1,4 +1,5 @@
 import type { PhotoScreenResult } from '@/components/booking/PhotoUpload'
+import type { KitSelection } from '@/components/booking/KitSelector'
 import type { BookingPayload, BookingPaymentData } from '@/lib/bookings/types'
 import type {
   CustomerDetailsValues,
@@ -7,11 +8,32 @@ import type {
 import type { BookingPriceBreakdown } from '@/lib/booking/pricing'
 import { SUPPLY_KITS } from '@/lib/utils'
 
+const KIT_BUNDLE_LABELS: Record<NonNullable<KitSelection['selectedBundle']>, string> = {
+  storm_starter: 'Storm Starter',
+  family_ready: 'Family Ready',
+  pet_ready: 'Pet Ready',
+  full_house: 'Full House',
+}
+
+function kitServiceTypeLabel(kitSelection: KitSelection | null): string | null {
+  if (!kitSelection || kitSelection.kitTotal <= 0) {
+    return null
+  }
+  if (kitSelection.selectedBundle) {
+    return `Prep Kit — ${KIT_BUNDLE_LABELS[kitSelection.selectedBundle]}`
+  }
+  if (kitSelection.aLaCarteItems.length > 0) {
+    return 'Prep Kit — Custom'
+  }
+  return null
+}
+
 export function buildPaymentData(
   serviceSelection: ServiceSelectionValues,
   customerValues: CustomerDetailsValues,
   pricing: BookingPriceBreakdown,
-  photoResult: PhotoScreenResult | null
+  photoResult: PhotoScreenResult | null,
+  kitSelection: KitSelection | null = null
 ): BookingPaymentData | null {
   if (pricing.total === null || pricing.deposit === null) {
     return null
@@ -37,6 +59,11 @@ export function buildPaymentData(
         `Supply Kit — ${SUPPLY_KITS[serviceSelection.supply_kit].name}`
       )
     }
+  }
+
+  const kitLabel = kitServiceTypeLabel(kitSelection)
+  if (kitLabel) {
+    serviceTypes.push(kitLabel)
   }
 
   return {
@@ -74,14 +101,25 @@ export function buildPaymentData(
 export function buildQuoteBookingPayload(
   serviceSelection: ServiceSelectionValues,
   customerValues: CustomerDetailsValues,
-  photoResult: PhotoScreenResult | null
+  photoResult: PhotoScreenResult | null,
+  kitSelection: KitSelection | null = null
 ): BookingPayload {
   const referralSource = customerValues.referral_source.startsWith('partner:')
     ? customerValues.referral_source.replace('partner:', '')
     : customerValues.referral_source
 
   const quoteNote = 'X-Large shelter — custom quote requested. Team will contact customer to confirm pricing.'
-  const notes = [customerValues.notes, quoteNote].filter(Boolean).join('\n\n')
+  const kitNote =
+    kitSelection && kitSelection.kitTotal > 0
+      ? `Prep kit interest: ${kitServiceTypeLabel(kitSelection) ?? 'Custom kit'} ($${kitSelection.kitTotal})`
+      : null
+  const notes = [customerValues.notes, kitNote, quoteNote].filter(Boolean).join('\n\n')
+
+  const quoteServiceTypes = ['Custom quote — X-Large shelter']
+  const kitLabel = kitServiceTypeLabel(kitSelection)
+  if (kitLabel) {
+    quoteServiceTypes.push(kitLabel)
+  }
 
   return {
     customerName: customerValues.full_name,
@@ -92,7 +130,7 @@ export function buildQuoteBookingPayload(
       ? new Date(`${customerValues.preferred_date}T12:00:00`).toISOString()
       : null,
     shelterSize: serviceSelection.shelter_size,
-    serviceTypes: ['Custom quote — X-Large shelter'],
+    serviceTypes: quoteServiceTypes,
     notes,
     referralSource,
     totalAmount: 1,

@@ -2,12 +2,15 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addDays, format } from 'date-fns'
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { AddressAutocomplete } from '@/components/booking/AddressAutocomplete'
+import { BookingProgressNav } from '@/components/booking/BookingProgressNav'
+import { persistKitConfirmationMessage } from '@/components/booking/ConfirmationKitMessage'
+import { KitSelector, type KitSelection } from '@/components/booking/KitSelector'
 import { PaymentStep } from '@/components/booking/PaymentStep'
 import { PhotoUpload, type PhotoScreenResult } from '@/components/booking/PhotoUpload'
 import { ServiceSelector } from '@/components/booking/ServiceSelector'
@@ -24,14 +27,13 @@ import { Label } from '@/components/ui/label'
 import { buildPaymentData, buildQuoteBookingPayload } from '@/lib/booking/payment'
 import { calculateBookingPrice } from '@/lib/booking/pricing'
 import {
-  BOOKING_STEPS,
   REFERRAL_SOURCES,
   customerDetailsSchema,
   serviceSelectionSchema,
   type CustomerDetailsValues,
   type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
-import { cn } from '@/lib/utils'
+import { PRICING } from '@/lib/utils'
 
 export type BookingInitialCustomer = {
   full_name: string
@@ -46,6 +48,15 @@ type BookingFormProps = {
   isLoggedIn?: boolean
 }
 
+type BookingMembershipPlan = 'none' | 'annual' | 'monthly' | 'annual_2yr'
+
+type BookingState = {
+  shelterSize: ServiceSelectionValues['shelter_size']
+  membershipPlan: BookingMembershipPlan
+  serviceTotal: number
+  kitSelection: KitSelection
+}
+
 const DEFAULT_SERVICE: ServiceSelectionValues = {
   shelter_size: 'standard',
   deep_clean: true,
@@ -53,6 +64,103 @@ const DEFAULT_SERVICE: ServiceSelectionValues = {
   supply_kit: 'none',
   full_package: false,
   membership: 'one_time',
+}
+
+const SHELTER_READY_KIT_DISCOUNT = 59
+
+const KIT_BUNDLE_CATALOG: Record<
+  NonNullable<KitSelection['selectedBundle']>,
+  { name: string; price: number }
+> = {
+  storm_starter: { name: 'Storm Starter', price: 79 },
+  family_ready: { name: 'Family Ready', price: 89 },
+  pet_ready: { name: 'Pet Ready', price: 89 },
+  full_house: { name: 'Full House', price: 149 },
+}
+
+const A_LA_CARTE_CATALOG: Record<string, { name: string; price: number }> = {
+  shelter_ready: { name: 'Shelter Ready Kit', price: 59 },
+  little_ones: { name: 'Little Ones', price: 49 },
+  pets: { name: 'Pets Add-on', price: 39 },
+  hygiene: { name: 'Hygiene Pack', price: 24 },
+}
+
+function mapMembershipPlan(
+  membership: ServiceSelectionValues['membership']
+): BookingMembershipPlan {
+  if (membership === 'one_time') {
+    return 'none'
+  }
+  return membership
+}
+
+function kitIncludesShelterReady(kitSelection: KitSelection): boolean {
+  if (kitSelection.selectedBundle) {
+    return true
+  }
+  return kitSelection.aLaCarteItems.includes('shelter_ready')
+}
+
+function buildKitLineItems(
+  kitSelection: KitSelection,
+  membershipPlan: BookingMembershipPlan
+): { label: string; amount: number }[] {
+  if (
+    !kitSelection.selectedBundle &&
+    kitSelection.aLaCarteItems.length === 0
+  ) {
+    return []
+  }
+
+  const lines: { label: string; amount: number }[] = []
+
+  if (kitSelection.selectedBundle) {
+    const bundle = KIT_BUNDLE_CATALOG[kitSelection.selectedBundle]
+    lines.push({ label: bundle.name, amount: bundle.price })
+  } else {
+    for (const itemId of kitSelection.aLaCarteItems) {
+      const item = A_LA_CARTE_CATALOG[itemId]
+      if (item) {
+        lines.push({ label: item.name, amount: item.price })
+      }
+    }
+  }
+
+  if (
+    membershipPlan === 'annual_2yr' &&
+    kitIncludesShelterReady(kitSelection) &&
+    kitSelection.kitTotal > 0
+  ) {
+    lines.push({
+      label: '2yr Member Kit Credit',
+      amount: -SHELTER_READY_KIT_DISCOUNT,
+    })
+  }
+
+  return lines
+}
+
+const STEP_TITLES: Record<number, { title: string; description: string }> = {
+  1: {
+    title: 'BOOK YOUR SWEEP',
+    description: 'Select your shelter size and services.',
+  },
+  2: {
+    title: 'PREP YOUR SHELTER',
+    description: 'Add a prep kit — your Sweeper installs it during the same visit.',
+  },
+  3: {
+    title: 'YOUR DETAILS',
+    description: 'Tell us where and when to arrive.',
+  },
+  4: {
+    title: 'SHELTER PHOTO',
+    description: 'Help your Sweeper arrive prepared.',
+  },
+  5: {
+    title: 'PAYMENT',
+    description: 'Secure your spot with a 50% deposit.',
+  },
 }
 
 export function BookingForm({
@@ -67,6 +175,13 @@ export function BookingForm({
   const [quoteError, setQuoteError] = useState<string | null>(null)
   const [serviceSelection, setServiceSelection] =
     useState<ServiceSelectionValues>(DEFAULT_SERVICE)
+  const [kitSelection, setKitSelection] = useState<KitSelection>({
+    selectedBundle: null,
+    aLaCarteItems: [],
+    ageSelector: null,
+    petSizeSelector: null,
+    kitTotal: 0,
+  })
   const [photoResult, setPhotoResult] = useState<PhotoScreenResult | null>(null)
 
   const minDate = format(addDays(new Date(), 1), 'yyyy-MM-dd')
@@ -96,16 +211,61 @@ export function BookingForm({
 
   const customerValues = customerForm.watch()
 
-  const pricing = useMemo(
-    () => calculateBookingPrice(serviceSelection),
-    [serviceSelection]
-  )
+  const bookingState = useMemo<BookingState>(() => {
+    const basePricing = calculateBookingPrice({
+      ...serviceSelection,
+      supply_kit: 'none',
+    })
+
+    return {
+      shelterSize: serviceSelection.shelter_size,
+      membershipPlan: mapMembershipPlan(serviceSelection.membership),
+      serviceTotal: basePricing.serviceSubtotal ?? 0,
+      kitSelection,
+    }
+  }, [serviceSelection, kitSelection])
+
+  const pricing = useMemo(() => {
+    const base = calculateBookingPrice({
+      ...serviceSelection,
+      supply_kit: 'none',
+    })
+
+    if (base.isQuoteRequired || base.total === null || kitSelection.kitTotal <= 0) {
+      return base
+    }
+
+    const kitLines = buildKitLineItems(
+      kitSelection,
+      bookingState.membershipPlan
+    )
+    const total = base.total + kitSelection.kitTotal
+
+    return {
+      ...base,
+      addonsPrice: base.addonsPrice + kitSelection.kitTotal,
+      serviceSubtotal: (base.serviceSubtotal ?? 0) + kitSelection.kitTotal,
+      total,
+      deposit: Math.round(total * PRICING.deposit_pct),
+      lineItems: [...base.lineItems, ...kitLines],
+    }
+  }, [serviceSelection, kitSelection, bookingState.membershipPlan])
 
   const paymentData = useMemo(
     () =>
-      buildPaymentData(serviceSelection, customerValues, pricing, photoResult),
-    [serviceSelection, customerValues, pricing, photoResult]
+      buildPaymentData(
+        serviceSelection,
+        customerValues,
+        pricing,
+        photoResult,
+        kitSelection
+      ),
+    [serviceSelection, customerValues, pricing, photoResult, kitSelection]
   )
+
+  useEffect(() => {
+    persistKitConfirmationMessage(kitSelection)
+  }, [kitSelection])
 
   async function goToNextStep(): Promise<void> {
     if (currentStep === 1) {
@@ -117,14 +277,18 @@ export function BookingForm({
     }
 
     if (currentStep === 2) {
-      const valid = await customerForm.trigger()
-      if (!valid) return
-      setCurrentStep(3)
       return
     }
 
     if (currentStep === 3) {
+      const valid = await customerForm.trigger()
+      if (!valid) return
       setCurrentStep(4)
+      return
+    }
+
+    if (currentStep === 4) {
+      setCurrentStep(5)
     }
   }
 
@@ -136,12 +300,15 @@ export function BookingForm({
       return
     }
 
+    persistKitConfirmationMessage(kitSelection)
+
     setQuoteSubmitting(true)
     try {
       const bookingPayload = buildQuoteBookingPayload(
         serviceSelection,
         customerValues,
-        photoResult
+        photoResult,
+        kitSelection
       )
 
       const response = await fetch('/api/bookings', {
@@ -169,261 +336,225 @@ export function BookingForm({
     setCurrentStep((step) => Math.max(1, step - 1))
   }
 
-  return (
-    <div className="mx-auto w-full max-w-3xl">
-      <nav aria-label="Booking progress" className="mb-8">
-        <ol className="flex items-center justify-between gap-2">
-          {BOOKING_STEPS.map((step, index) => {
-            const isComplete = currentStep > step.id
-            const isCurrent = currentStep === step.id
-            return (
-              <li key={step.id} className="flex flex-1 flex-col items-center gap-2">
-                <div className="flex w-full items-center">
-                  {index > 0 ? (
-                    <div
-                      className={cn(
-                        'h-0.5 flex-1',
-                        isComplete || isCurrent ? 'bg-sky-DEFAULT' : 'bg-border'
-                      )}
-                    />
-                  ) : (
-                    <div className="flex-1" />
-                  )}
-                  <div
-                    className={cn(
-                      'flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold transition-colors',
-                      isComplete
-                        ? 'border-sky-DEFAULT bg-sky-DEFAULT text-white'
-                        : isCurrent
-                          ? 'border-sky-DEFAULT bg-white text-sky-DEFAULT'
-                          : 'border-border bg-white text-muted-foreground'
-                    )}
-                  >
-                    {isComplete ? <Check className="size-4" /> : step.id}
-                  </div>
-                  {index < BOOKING_STEPS.length - 1 ? (
-                    <div
-                      className={cn(
-                        'h-0.5 flex-1',
-                        currentStep > step.id ? 'bg-sky-DEFAULT' : 'bg-border'
-                      )}
-                    />
-                  ) : (
-                    <div className="flex-1" />
-                  )}
-                </div>
-                <span
-                  className={cn(
-                    'hidden text-xs font-medium sm:block',
-                    isCurrent ? 'text-sky-DEFAULT' : 'text-muted-foreground'
-                  )}
-                >
-                  {step.label}
-                </span>
-              </li>
-            )
-          })}
-        </ol>
-      </nav>
+  function renderStep(): React.ReactElement | null {
+    switch (currentStep) {
+      case 1:
+        return (
+          <ServiceSelector
+            values={serviceSelection}
+            onChange={(values) => {
+              setServiceSelection(values)
+              serviceForm.reset(values)
+            }}
+          />
+        )
 
-      <Card className="border-border/60 bg-white shadow-sm">
-        <CardHeader>
-          <CardTitle className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-shelter">
-            {currentStep === 1 && 'BOOK YOUR SWEEP'}
-            {currentStep === 2 && 'YOUR DETAILS'}
-            {currentStep === 3 && 'SHELTER PHOTO'}
-            {currentStep === 4 && 'PAYMENT'}
-          </CardTitle>
-          <CardDescription>
-            {currentStep === 1 && 'Select your shelter size and services.'}
-            {currentStep === 2 && 'Tell us where and when to arrive.'}
-            {currentStep === 3 && 'Help your Sweeper arrive prepared.'}
-            {currentStep === 4 && 'Secure your spot with a 50% deposit.'}
-          </CardDescription>
-        </CardHeader>
+      case 2:
+        return (
+          <KitSelector
+            shelterSize={bookingState.shelterSize}
+            membershipPlan={bookingState.membershipPlan}
+            serviceTotal={bookingState.serviceTotal}
+            onSelect={(selection) => setKitSelection(selection)}
+            onSkip={() => setCurrentStep(3)}
+            onContinue={() => setCurrentStep(3)}
+          />
+        )
 
-        <CardContent className="space-y-6">
-          {currentStep === 1 ? (
-            <ServiceSelector
-              values={serviceSelection}
-              onChange={(values) => {
-                setServiceSelection(values)
-                serviceForm.reset(values)
-              }}
-            />
-          ) : null}
+      case 3:
+        return (
+          <form className="space-y-4" onSubmit={(event) => event.preventDefault()}>
+            {isLoggedIn ? (
+              <p className="rounded-lg bg-sky-pale px-3 py-2 text-sm text-sky-dark">
+                Signed in — your details were pre-filled from your account.
+              </p>
+            ) : null}
 
-          {currentStep === 2 ? (
-            <form className="space-y-4" onSubmit={(event) => event.preventDefault()}>
-              {isLoggedIn ? (
-                <p className="rounded-lg bg-sky-pale px-3 py-2 text-sm text-sky-dark">
-                  Signed in — your details were pre-filled from your account.
-                </p>
-              ) : null}
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="full_name">Full name</Label>
-                  <Input
-                    id="full_name"
-                    className="h-10 bg-white"
-                    aria-invalid={Boolean(customerForm.formState.errors.full_name)}
-                    {...customerForm.register('full_name')}
-                  />
-                  {customerForm.formState.errors.full_name ? (
-                    <p className="text-sm text-tornado">
-                      {customerForm.formState.errors.full_name.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    className="h-10 bg-white"
-                    aria-invalid={Boolean(customerForm.formState.errors.email)}
-                    {...customerForm.register('email')}
-                  />
-                  {customerForm.formState.errors.email ? (
-                    <p className="text-sm text-tornado">
-                      {customerForm.formState.errors.email.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    className="h-10 bg-white"
-                    placeholder="(405) 555-0123"
-                    aria-invalid={Boolean(customerForm.formState.errors.phone)}
-                    {...customerForm.register('phone')}
-                  />
-                  {customerForm.formState.errors.phone ? (
-                    <p className="text-sm text-tornado">
-                      {customerForm.formState.errors.phone.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="address">Service address</Label>
-                  <AddressAutocomplete
-                    id="address"
-                    value={customerForm.watch('address')}
-                    onChange={(value) =>
-                      customerForm.setValue('address', value, { shouldValidate: true })
-                    }
-                    onBlur={() => void customerForm.trigger('address')}
-                    invalid={Boolean(customerForm.formState.errors.address)}
-                  />
-                  {customerForm.formState.errors.address ? (
-                    <p className="text-sm text-tornado">
-                      {customerForm.formState.errors.address.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="preferred_date">Preferred date</Label>
-                  <Input
-                    id="preferred_date"
-                    type="date"
-                    min={minDate}
-                    className="h-10 bg-white"
-                    aria-invalid={Boolean(customerForm.formState.errors.preferred_date)}
-                    {...customerForm.register('preferred_date')}
-                  />
-                  {customerForm.formState.errors.preferred_date ? (
-                    <p className="text-sm text-tornado">
-                      {customerForm.formState.errors.preferred_date.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="referral_source">How did you hear about us?</Label>
-                  <select
-                    id="referral_source"
-                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    aria-invalid={Boolean(customerForm.formState.errors.referral_source)}
-                    {...customerForm.register('referral_source')}
-                  >
-                    <option value="">Select one…</option>
-                    {referralCode ? (
-                      <option value={`partner:${referralCode}`}>
-                        Partner referral ({referralCode})
-                      </option>
-                    ) : null}
-                    {REFERRAL_SOURCES.map((source) => (
-                      <option key={source.value} value={source.value}>
-                        {source.label}
-                      </option>
-                    ))}
-                  </select>
-                  {customerForm.formState.errors.referral_source ? (
-                    <p className="text-sm text-tornado">
-                      {customerForm.formState.errors.referral_source.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="notes">Notes (optional)</Label>
-                  <textarea
-                    id="notes"
-                    rows={3}
-                    placeholder="Gate codes, dogs, access instructions…"
-                    className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    {...customerForm.register('notes')}
-                  />
-                  {customerForm.formState.errors.notes ? (
-                    <p className="text-sm text-tornado">
-                      {customerForm.formState.errors.notes.message}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-            </form>
-          ) : null}
-
-          {currentStep === 3 ? (
-            <PhotoUpload bookingId={bookingId} onResult={setPhotoResult} />
-          ) : null}
-
-          {currentStep === 4 ? (
-            paymentData ? (
-              <PaymentStep booking={paymentData} onBack={goToPreviousStep} />
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  X-Large shelters require a custom quote. Our team will contact you after you
-                  submit your details to finalize pricing and schedule your visit.
-                </p>
-                {quoteError ? (
-                  <p className="rounded-lg border border-tornado/30 bg-tornado/5 px-4 py-3 text-sm text-tornado">
-                    {quoteError}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="full_name">Full name</Label>
+                <Input
+                  id="full_name"
+                  className="h-10 bg-white"
+                  aria-invalid={Boolean(customerForm.formState.errors.full_name)}
+                  {...customerForm.register('full_name')}
+                />
+                {customerForm.formState.errors.full_name ? (
+                  <p className="text-sm text-tornado">
+                    {customerForm.formState.errors.full_name.message}
                   </p>
                 ) : null}
-                <Button
-                  type="button"
-                  onClick={() => void submitQuoteRequest()}
-                  disabled={quoteSubmitting}
-                  className="bg-sky-DEFAULT text-white hover:bg-sky-dark"
-                >
-                  {quoteSubmitting ? 'Submitting…' : 'Submit quote request'}
-                </Button>
               </div>
-            )
-          ) : null}
 
-          {!(currentStep === 4 && paymentData) ? (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  className="h-10 bg-white"
+                  aria-invalid={Boolean(customerForm.formState.errors.email)}
+                  {...customerForm.register('email')}
+                />
+                {customerForm.formState.errors.email ? (
+                  <p className="text-sm text-tornado">
+                    {customerForm.formState.errors.email.message}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  className="h-10 bg-white"
+                  placeholder="(405) 555-0123"
+                  aria-invalid={Boolean(customerForm.formState.errors.phone)}
+                  {...customerForm.register('phone')}
+                />
+                {customerForm.formState.errors.phone ? (
+                  <p className="text-sm text-tornado">
+                    {customerForm.formState.errors.phone.message}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="address">Service address</Label>
+                <AddressAutocomplete
+                  id="address"
+                  value={customerForm.watch('address')}
+                  onChange={(value) =>
+                    customerForm.setValue('address', value, { shouldValidate: true })
+                  }
+                  onBlur={() => void customerForm.trigger('address')}
+                  invalid={Boolean(customerForm.formState.errors.address)}
+                />
+                {customerForm.formState.errors.address ? (
+                  <p className="text-sm text-tornado">
+                    {customerForm.formState.errors.address.message}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="preferred_date">Preferred date</Label>
+                <Input
+                  id="preferred_date"
+                  type="date"
+                  min={minDate}
+                  className="h-10 bg-white"
+                  aria-invalid={Boolean(customerForm.formState.errors.preferred_date)}
+                  {...customerForm.register('preferred_date')}
+                />
+                {customerForm.formState.errors.preferred_date ? (
+                  <p className="text-sm text-tornado">
+                    {customerForm.formState.errors.preferred_date.message}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="referral_source">How did you hear about us?</Label>
+                <select
+                  id="referral_source"
+                  className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                  aria-invalid={Boolean(customerForm.formState.errors.referral_source)}
+                  {...customerForm.register('referral_source')}
+                >
+                  <option value="">Select one…</option>
+                  {referralCode ? (
+                    <option value={`partner:${referralCode}`}>
+                      Partner referral ({referralCode})
+                    </option>
+                  ) : null}
+                  {REFERRAL_SOURCES.map((source) => (
+                    <option key={source.value} value={source.value}>
+                      {source.label}
+                    </option>
+                  ))}
+                </select>
+                {customerForm.formState.errors.referral_source ? (
+                  <p className="text-sm text-tornado">
+                    {customerForm.formState.errors.referral_source.message}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="notes">Notes (optional)</Label>
+                <textarea
+                  id="notes"
+                  rows={3}
+                  placeholder="Gate codes, dogs, access instructions…"
+                  className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                  {...customerForm.register('notes')}
+                />
+                {customerForm.formState.errors.notes ? (
+                  <p className="text-sm text-tornado">
+                    {customerForm.formState.errors.notes.message}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </form>
+        )
+
+      case 4:
+        return <PhotoUpload bookingId={bookingId} onResult={setPhotoResult} />
+
+      case 5:
+        return paymentData ? (
+          <PaymentStep booking={paymentData} onBack={goToPreviousStep} />
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              X-Large shelters require a custom quote. Our team will contact you after you
+              submit your details to finalize pricing and schedule your visit.
+            </p>
+            {quoteError ? (
+              <p className="rounded-lg border border-tornado/30 bg-tornado/5 px-4 py-3 text-sm text-tornado">
+                {quoteError}
+              </p>
+            ) : null}
+            <Button
+              type="button"
+              onClick={() => void submitQuoteRequest()}
+              disabled={quoteSubmitting}
+              className="bg-sky-DEFAULT text-white hover:bg-sky-dark"
+            >
+              {quoteSubmitting ? 'Submitting…' : 'Submit quote request'}
+            </Button>
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
+  const stepMeta = STEP_TITLES[currentStep]
+
+  return (
+    <div className="mx-auto w-full max-w-3xl">
+      <BookingProgressNav currentStep={currentStep} />
+
+      <Card className="border-border/60 bg-white shadow-sm">
+        {stepMeta ? (
+          <CardHeader>
+            <CardTitle className="font-[family-name:var(--font-bebas)] text-3xl tracking-wide text-shelter">
+              {stepMeta.title}
+            </CardTitle>
+            <CardDescription>{stepMeta.description}</CardDescription>
+          </CardHeader>
+        ) : null}
+
+        <CardContent className="space-y-6">
+          {renderStep()}
+
+          {!(currentStep === 5 && paymentData) && currentStep !== 2 ? (
             <div className="flex items-center justify-between border-t border-border pt-6">
               <Button
                 type="button"
@@ -436,7 +567,7 @@ export function BookingForm({
                 Back
               </Button>
 
-              {currentStep < 4 ? (
+              {currentStep < 5 ? (
                 <Button
                   type="button"
                   onClick={() => void goToNextStep()}
