@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -14,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn, formatCurrency } from '@/lib/utils'
+import { toast } from 'sonner'
 
 export interface KitSelection {
   selectedBundle: 'storm_starter' | 'family_ready' | 'pet_ready' | 'full_house' | null
@@ -106,6 +108,37 @@ const BUNDLES = [
   },
 ] as const
 
+const A_LA_CARTE_ITEMS = [
+  {
+    id: 'shelter_ready',
+    name: 'Shelter Ready Kit',
+    emoji: '🌪️',
+    price: 59,
+    desc: 'Power bank, first aid, docs pouch, mylar blankets, whistle, glow sticks, wipes',
+  },
+  {
+    id: 'little_ones',
+    name: 'Little Ones',
+    emoji: '🧒',
+    price: 49,
+    desc: 'Age-matched comfort pack — infant, toddler, or big kid',
+  },
+  {
+    id: 'pets',
+    name: 'Pets Add-on',
+    emoji: '🐾',
+    price: 39,
+    desc: '2-day food supply, collapsible bowl, backup leash, waste bags',
+  },
+  {
+    id: 'hygiene',
+    name: 'Hygiene Pack',
+    emoji: '🧼',
+    price: 24,
+    desc: 'Toothbrush, toothpaste, wipes, hand sanitizer, tissues, waste bags',
+  },
+]
+
 type BundleId = (typeof BUNDLES)[number]['id']
 type AgeSelector = NonNullable<KitSelection['ageSelector']>
 type PetSizeSelector = NonNullable<KitSelection['petSizeSelector']>
@@ -117,6 +150,24 @@ function getDisplayPrice(
   return membershipPlan === 'annual_2yr' ? price - SHELTER_READY_KIT_DISCOUNT : price
 }
 
+function bundleIncludes(
+  bundle: (typeof BUNDLES)[number] | null | undefined,
+  item: string
+): boolean {
+  if (!bundle) return false
+  return (bundle.includes as readonly string[]).includes(item)
+}
+
+function bundleRequiresSelector(
+  bundleId: KitSelection['selectedBundle'],
+  selector: 'age' | 'pet_size'
+): boolean {
+  if (!bundleId) return false
+  const bundle = BUNDLES.find((b) => b.id === bundleId)
+  if (!bundle || !('requiresSelector' in bundle)) return false
+  return (bundle.requiresSelector as readonly string[]).includes(selector)
+}
+
 export function KitSelector({
   shelterSize,
   membershipPlan,
@@ -126,7 +177,8 @@ export function KitSelector({
   onContinue,
 }: KitSelectorProps): React.ReactElement {
   const [selectedBundle, setSelectedBundle] = useState<KitSelection['selectedBundle']>(null)
-  const [aLaCarteItems] = useState<string[]>([])
+  const [aLaCarteItems, setALaCarteItems] = useState<string[]>([])
+  const [showALaCarte, setShowALaCarte] = useState(false)
   const [ageSelector, setAgeSelector] = useState<KitSelection['ageSelector']>(null)
   const [petSizeSelector, setPetSizeSelector] = useState<KitSelection['petSizeSelector']>(null)
   const [showSkipMessage, setShowSkipMessage] = useState(false)
@@ -134,22 +186,32 @@ export function KitSelector({
   const has2yrPlan = membershipPlan === 'annual_2yr'
 
   const activeBundle = selectedBundle ? BUNDLES.find((b) => b.id === selectedBundle) : null
-  const kitTotal = activeBundle?.price ?? 0
+
+  function calculateALaCarteTotal(items: string[]): number {
+    let total = items.reduce((sum, id) => {
+      const item = A_LA_CARTE_ITEMS.find((i) => i.id === id)
+      return sum + (item?.price ?? 0)
+    }, 0)
+    if (has2yrPlan && items.includes('shelter_ready')) {
+      total -= SHELTER_READY_KIT_DISCOUNT
+    }
+    return total
+  }
+
+  const kitTotal = selectedBundle
+    ? (activeBundle?.price ?? 0)
+    : calculateALaCarteTotal(aLaCarteItems)
 
   const showAgeSelector =
-    activeBundle?.includes.includes('little_ones') || aLaCarteItems.includes('little_ones')
+    bundleIncludes(activeBundle, 'little_ones') || aLaCarteItems.includes('little_ones')
   const showPetSizeSelector =
-    activeBundle?.includes.includes('pets') || aLaCarteItems.includes('pets')
+    bundleIncludes(activeBundle, 'pets') || aLaCarteItems.includes('pets')
 
   const needsAge =
-    (selectedBundle !== null &&
-      BUNDLES.find((b) => b.id === selectedBundle)?.requiresSelector?.includes('age')) ||
-    aLaCarteItems.includes('little_ones')
+    bundleRequiresSelector(selectedBundle, 'age') || aLaCarteItems.includes('little_ones')
 
   const needsPetSize =
-    (selectedBundle !== null &&
-      BUNDLES.find((b) => b.id === selectedBundle)?.requiresSelector?.includes('pet_size')) ||
-    aLaCarteItems.includes('pets')
+    bundleRequiresSelector(selectedBundle, 'pet_size') || aLaCarteItems.includes('pets')
 
   const hasKitSelected = selectedBundle !== null || aLaCarteItems.length > 0
   const canContinue =
@@ -177,6 +239,51 @@ export function KitSelector({
       kitTotal,
     })
   }, [selectedBundle, aLaCarteItems, ageSelector, petSizeSelector, kitTotal, onSelect])
+
+  function tryAutoBundle(items: string[]): boolean {
+    const sorted = [...items].sort()
+    const matchedBundle = BUNDLES.find((bundle) => {
+      const includes = [...bundle.includes].sort()
+      return (
+        sorted.length === includes.length && sorted.every((id, index) => id === includes[index])
+      )
+    })
+
+    if (!matchedBundle) return false
+
+    setSelectedBundle(matchedBundle.id)
+    setALaCarteItems([])
+    setShowALaCarte(false)
+    toast.success(
+      `Nice — we switched you to ${matchedBundle.name} and saved you $${matchedBundle.savings}! 🎉`
+    )
+    return true
+  }
+
+  function handleBuildYourOwnClick(): void {
+    if (selectedBundle) {
+      setSelectedBundle(null)
+    }
+
+    const nextShow = !showALaCarte
+    setShowALaCarte(nextShow)
+
+    if (nextShow && has2yrPlan && !aLaCarteItems.includes('shelter_ready')) {
+      setALaCarteItems([...aLaCarteItems, 'shelter_ready'])
+    }
+  }
+
+  function handleALaCarteToggle(itemId: string): void {
+    if (has2yrPlan && itemId === 'shelter_ready') return
+
+    const next = aLaCarteItems.includes(itemId)
+      ? aLaCarteItems.filter((id) => id !== itemId)
+      : [...aLaCarteItems, itemId]
+
+    if (tryAutoBundle(next)) return
+
+    setALaCarteItems(next)
+  }
 
   function handleBundleSelect(bundleId: BundleId): void {
     setSelectedBundle(selectedBundle === bundleId ? null : bundleId)
@@ -288,11 +395,72 @@ export function KitSelector({
         })}
       </div>
 
-      <div
-        id="a-la-carte-section"
-        className="rounded-lg border border-dashed border-border bg-white/50 px-4 py-6 text-center text-sm text-muted-foreground"
-      >
-        À la carte section coming in next prompt
+      <div id="a-la-carte-section">
+        <button
+          type="button"
+          onClick={handleBuildYourOwnClick}
+          className="cursor-pointer text-sm text-gray-400 underline hover:text-gray-600"
+        >
+          Build your own instead →
+        </button>
+
+        {showALaCarte ? (
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-500">Build your own kit</h3>
+              <span className="text-sm font-semibold text-shelter">
+                Subtotal: {formatCurrency(calculateALaCarteTotal(aLaCarteItems))}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {A_LA_CARTE_ITEMS.map((item) => {
+                const isShelterIncluded = has2yrPlan && item.id === 'shelter_ready'
+                const isChecked = isShelterIncluded || aLaCarteItems.includes(item.id)
+
+                return (
+                  <div
+                    key={item.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleALaCarteToggle(item.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleALaCarteToggle(item.id)
+                      }
+                    }}
+                    className={cn(
+                      'flex cursor-pointer gap-3 rounded-lg border bg-white p-3 transition-colors',
+                      isShelterIncluded && 'border-green-300 bg-green-50',
+                      isChecked && !isShelterIncluded && 'border-[#2E86C1] bg-blue-50',
+                      !isChecked && 'border-border'
+                    )}
+                  >
+                    <Checkbox
+                      checked={isChecked}
+                      disabled={isShelterIncluded}
+                      onCheckedChange={() => handleALaCarteToggle(item.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-0.5"
+                    />
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-shelter">
+                          {item.emoji} {item.name}
+                        </span>
+                        <span className="shrink-0 text-sm font-semibold text-[#2E86C1]">
+                          {isShelterIncluded ? '$0 (included)' : formatCurrency(item.price)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">{item.desc}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {showAgeSelector ? (
