@@ -1,6 +1,7 @@
 import type { PhotoScreenResult } from '@/components/booking/PhotoUpload'
 import type { KitSelection } from '@/components/booking/KitSelector'
 import type { BookingPayload, BookingPaymentData } from '@/lib/bookings/types'
+import { formatServiceAddress } from '@/lib/booking/address'
 import {
   formatCustomerFullName,
   type CustomerDetailsValues,
@@ -90,7 +91,7 @@ export function buildPaymentData(
     customerName: formatCustomerFullName(customerValues),
     customerEmail: customerValues.email,
     customerPhone: customerValues.phone,
-    address: customerValues.address,
+    address: formatServiceAddress(customerValues),
     scheduledAt: customerValues.preferred_date
       ? new Date(`${customerValues.preferred_date}T12:00:00`).toISOString()
       : null,
@@ -136,7 +137,7 @@ export function buildQuoteBookingPayload(
     customerName: formatCustomerFullName(customerValues),
     customerEmail: customerValues.email,
     customerPhone: customerValues.phone,
-    address: customerValues.address,
+    address: formatServiceAddress(customerValues),
     scheduledAt: customerValues.preferred_date
       ? new Date(`${customerValues.preferred_date}T12:00:00`).toISOString()
       : null,

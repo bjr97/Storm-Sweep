@@ -57,6 +57,8 @@ export type ApplicantDetail = {
   tools: ToolPhotoView[]
   readyToApprove: boolean
   blockers: string[]
+  /** Signed (1 hour) link to the signed agreement PDF, if any. */
+  agreementUrl: string | null
 }
 
 export async function getApplicant(id: string): Promise<ApplicantDetail | null> {
@@ -91,7 +93,18 @@ export async function getApplicant(id: string): Promise<ApplicantDetail | null> 
   if (!applicant.all_tools_verified) {
     blockers.push(`Tool photos incomplete (${tools.filter((t) => t.uploaded).length}/${tools.length})`)
   }
-  if (!applicant.agreement_signed) blockers.push('IC agreement not signed yet (DocuSeal)')
+  if (!applicant.agreement_signed) blockers.push('IC agreement not signed yet')
 
-  return { applicant, tools, readyToApprove: blockers.length === 0, blockers }
+  let agreementUrl: string | null = null
+  const agreementPath = applicant.agreement_pdf_path
+  if (agreementPath) {
+    if (/^https?:\/\//.test(agreementPath)) {
+      agreementUrl = agreementPath // legacy DocuSeal document URL
+    } else {
+      const { data } = await createServiceClient().storage.from('agreements').createSignedUrl(agreementPath, 3600)
+      agreementUrl = data?.signedUrl ?? null
+    }
+  }
+
+  return { applicant, tools, readyToApprove: blockers.length === 0, blockers, agreementUrl }
 }

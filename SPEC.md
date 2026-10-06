@@ -49,7 +49,7 @@ SMS:           Twilio
 Email:         Resend (React Email templates)
 Maps:          Google Maps API
 AI Screening:  Anthropic Claude API (claude-sonnet-4-5, vision)
-E-Signature:   DocuSeal
+E-Signature:   In-app (typed-name signature + pdf-lib signed PDF)
 Social:        TikTok Content Posting API (Phase 4)
 ```
 
@@ -394,9 +394,6 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Google Maps
 NEXT_PUBLIC_GOOGLE_MAPS_KEY=AIza...
 
-# DocuSeal (IC Agreements)
-DOCUSEAL_API_KEY=your-api-key
-DOCUSEAL_IC_TEMPLATE_ID=template-id
 
 # TikTok (Phase 4)
 TIKTOK_ACCESS_TOKEN=your-access-token
@@ -463,7 +460,7 @@ storm-sweep/
 │   │   │   └── apply/
 │   │   │       ├── page.tsx                # Step 1: Application form
 │   │   │       ├── tools/page.tsx          # Step 2: Tool photo uploads
-│   │   │       ├── agreement/page.tsx      # Step 3: DocuSeal e-sign
+│   │   │       ├── agreement/page.tsx      # Step 3: in-app e-sign (signed PDF)
 │   │   │       └── confirmation/page.tsx   # Step 4: Pending review
 │   │   │
 │   │   └── api/
@@ -683,8 +680,13 @@ Upload to Supabase Storage `applicant-tools` bucket
 Track completion: all_tools_verified = true when all 7 uploaded
 
 **Step 3 — IC Agreement** (`/sweepers/apply/agreement`)
-Embed DocuSeal signing iframe using DOCUSEAL_IC_TEMPLATE_ID
-On completion webhook: set agreement_signed = true, store PDF path
+In-app e-signature (no third-party service): applicant reads the agreement
+(`src/lib/sweepers/agreement.ts`, pay figures read from PRICING), checks
+"I agree", and types their full legal name (must match the application).
+`POST /api/sweepers/agreement` renders a signed PDF (pdf-lib) with a signature
+record (name, timestamp, IP, browser, agreement version + SHA-256 of the text),
+stores it in the private `agreements` bucket, and sets agreement_signed = true,
+agreement_pdf_path = storage path. Agreement text is a DRAFT pending attorney review.
 Agreement covers: scope of work, IC status, 1099 acknowledgment, 
 pay structure, non-solicitation, photo/content consent, equipment responsibility
 

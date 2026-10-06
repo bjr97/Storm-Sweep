@@ -4,7 +4,6 @@ import {
   ShieldCheck,
   Target,
   Tornado,
-  Users,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -65,24 +64,6 @@ const WHY_STORM_SWEEP = [
     title: 'Family-First Approach',
     description:
       'From baby-proofing supply kits to bright LED lighting, we design every service around keeping Oklahoma families safe underground.',
-  },
-] as const
-
-const TEAM_PLACEHOLDERS = [
-  {
-    name: 'Founder & CEO',
-    role: 'Operations',
-    initials: 'SS',
-  },
-  {
-    name: 'Lead Sweeper',
-    role: 'Field Operations',
-    initials: 'LS',
-  },
-  {
-    name: 'Customer Success',
-    role: 'Member Support',
-    initials: 'CS',
   },
 ] as const
 
@@ -217,43 +198,6 @@ export default function AboutPage(): React.ReactElement {
                     {item.description}
                   </CardDescription>
                 </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
-              THE TEAM
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl font-body text-base text-[var(--color-text)]/60">
-              Norman locals building something Oklahoma families can count on.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            {TEAM_PLACEHOLDERS.map((member) => (
-              <Card
-                key={member.role}
-                className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-center text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
-              >
-                <CardContent className="pt-8">
-                  <div className="mx-auto flex size-20 items-center justify-center rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10">
-                    <Users className="size-8 text-[var(--color-primary)]" />
-                  </div>
-                  <p className="mt-2 font-display text-4xl tracking-wide text-[var(--color-text)]/20">
-                    {member.initials}
-                  </p>
-                  <p className="mt-4 font-body text-base font-semibold text-[var(--color-text)]">
-                    {member.name}
-                  </p>
-                  <p className="font-body text-sm text-[var(--color-text)]/50">
-                    {member.role}
-                  </p>
-                </CardContent>
               </Card>
             ))}
           </div>

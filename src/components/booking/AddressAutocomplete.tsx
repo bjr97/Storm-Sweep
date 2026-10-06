@@ -4,6 +4,7 @@ import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
 import { useEffect, useRef } from 'react'
 
 import { Input } from '@/components/ui/input'
+import { partsFromPlace, type AddressParts } from '@/lib/booking/address'
 import { cn } from '@/lib/utils'
 
 /** Norman, OK and surrounding Cleveland County / south OKC metro. */
@@ -21,6 +22,8 @@ type AddressAutocompleteProps = {
   onBlur?: () => void
   invalid?: boolean
   placeholder?: string
+  /** Called with street/city/state/ZIP when a Google suggestion is picked. */
+  onPlace?: (parts: Partial<AddressParts>) => void
 }
 
 export function AddressAutocomplete({
@@ -30,9 +33,12 @@ export function AddressAutocomplete({
   onBlur,
   invalid,
   placeholder = 'Start typing your address…',
+  onPlace,
 }: AddressAutocompleteProps): React.ReactElement {
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
+  const onPlaceRef = useRef(onPlace)
+  onPlaceRef.current = onPlace
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
@@ -56,13 +62,17 @@ export function AddressAutocomplete({
           bounds: NORMAN_AREA_BOUNDS,
           strictBounds: false,
           componentRestrictions: { country: 'us' },
-          fields: ['formatted_address'],
+          fields: ['formatted_address', 'address_components'],
           types: ['address'],
         })
 
         listener = autocomplete.addListener('place_changed', () => {
           const place = autocomplete.getPlace()
-          if (place.formatted_address) {
+          const parts = partsFromPlace(place.address_components)
+          if (parts.address && onPlaceRef.current) {
+            onChangeRef.current(parts.address)
+            onPlaceRef.current(parts)
+          } else if (place.formatted_address) {
             onChangeRef.current(place.formatted_address)
           }
         })

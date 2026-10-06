@@ -18,6 +18,8 @@ export type DashboardKpis = {
   jobsThisWeek: number
   jobsLastWeek: number
   activeMembers: number
+  /** Paying customers who are NOT active members (bought at least one visit). */
+  oneTimeCustomers: number
   /** Mean list value of this month's paid jobs; null when there are none. */
   avgJobValue: number | null
   reviewAvg: number | null
@@ -133,10 +135,7 @@ export async function getDashboardData(now: Date = new Date()): Promise<Dashboar
         .not('completed_at', 'is', null)
         .order('completed_at', { ascending: false })
         .limit(5),
-      supabase
-        .from('profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('membership_status', 'active'),
+      supabase.from('profiles').select('id').eq('membership_status', 'active'),
       supabase.from('profiles').select('id, full_name').eq('role', 'sweeper').order('full_name'),
       supabase
         .from('reviews')
@@ -188,6 +187,15 @@ export async function getDashboardData(now: Date = new Date()): Promise<Dashboar
   const paidThisMonth = booked.filter((j) => isPaid(j) && within(j.created_at, thisMonth))
   const ratings = reviews.map((r) => r.rating)
 
+  // Customer mix: active members vs. paying one-time customers (all time).
+  const memberIds = new Set(membersRes.data.map((p) => p.id))
+  const { data: paidJobs, error: paidErr } = await supabase
+    .from('jobs')
+    .select('customer_id')
+    .in('payment_status', [...PAID_STATUSES])
+  if (paidErr) fail('paying customers', paidErr)
+  const paidCustomerIds = Array.from(new Set(paidJobs.map((j) => j.customer_id)))
+
   const kpis: DashboardKpis = {
     revenueMtd: paidThisMonth.reduce((sum, j) => sum + j.total_amount, 0),
     revenuePrevPeriod: booked
@@ -195,7 +203,8 @@ export async function getDashboardData(now: Date = new Date()): Promise<Dashboar
       .reduce((sum, j) => sum + j.total_amount, 0),
     jobsThisWeek: scheduled.filter((j) => within(j.scheduled_at, thisWeek)).length,
     jobsLastWeek: scheduled.filter((j) => within(j.scheduled_at, lastWeek)).length,
-    activeMembers: membersRes.count ?? 0,
+    activeMembers: memberIds.size,
+    oneTimeCustomers: paidCustomerIds.filter((id) => !memberIds.has(id)).length,
     avgJobValue:
       paidThisMonth.length > 0
         ? Math.round(paidThisMonth.reduce((sum, j) => sum + jobValue(j), 0) / paidThisMonth.length)

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { SERVICE_ADDRESS_PATTERN } from '@/lib/booking/address'
 import type { ShelterSize } from '@/types/database'
 
 // All amounts are integer cents. Item prices may be negative (kit credits);
@@ -14,7 +15,8 @@ export const bookingPayloadSchema = z.object({
   customerName: z.string().min(1),
   customerEmail: z.string().email(),
   customerPhone: z.string().min(10),
-  address: z.string().min(1),
+  /** "Street, City, ST 12345" — built from the required street/city/state/ZIP fields. */
+  address: z.string().trim().max(250).regex(SERVICE_ADDRESS_PATTERN, 'Address must include street, city, state and ZIP'),
   scheduledAt: z.string().nullable().optional(),
   shelterSize: z.enum(['small', 'standard', 'large', 'xlarge']),
   serviceTypes: z.array(z.string()).min(1),

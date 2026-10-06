@@ -27,7 +27,7 @@ export default async function AdminApplicantPage({ params }: { params: { id: str
   if (!/^[0-9a-f-]{36}$/i.test(params.id)) notFound()
   const detail = await getApplicant(params.id)
   if (!detail) notFound()
-  const { applicant: a, tools, readyToApprove, blockers } = detail
+  const { applicant: a, tools, readyToApprove, blockers, agreementUrl } = detail
   const uploaded = tools.filter((t) => t.uploaded).length
 
   return (
@@ -81,10 +81,10 @@ export default async function AdminApplicantPage({ params }: { params: { id: str
             <Panel title="IC agreement">
               <dl>
                 <Row label="Signed">{a.agreement_signed ? 'Yes' : <span className="text-[#F0B27A]">Not yet</span>}</Row>
-                {a.agreement_pdf_path ? (
+                {agreementUrl ? (
                   <Row label="Document">
-                    <a href={a.agreement_pdf_path} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sky-light hover:underline">
-                      View signed copy <ExternalLink className="size-3" aria-hidden="true" />
+                    <a href={agreementUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sky-light hover:underline">
+                      View signed PDF <ExternalLink className="size-3" aria-hidden="true" />
                     </a>
                   </Row>
                 ) : null}

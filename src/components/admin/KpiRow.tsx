@@ -4,7 +4,15 @@ import type { DashboardKpis } from '@/lib/admin/dashboard'
 import { cn, formatCurrency } from '@/lib/utils'
 
 type Trend = 'up' | 'down' | 'neutral'
-type Kpi = { label: string; value: string; delta: string; trend: Trend; accent: string }
+type Kpi = {
+  label: string
+  value: string
+  delta: string
+  trend: Trend
+  accent: string
+  /** Member share 0–100, drawn as a member/one-time split bar. */
+  share?: number
+}
 
 function compare(current: number, previous: number, unit: (n: number) => string, period: string): { delta: string; trend: Trend } {
   if (current === previous) {
@@ -43,13 +51,21 @@ function buildKpis(kpis: DashboardKpis): Kpi[] {
       trend: jobDiff > 0 ? 'up' : jobDiff < 0 ? 'down' : 'neutral',
       accent: 'before:bg-wheat',
     },
-    {
-      label: 'Active members',
-      value: String(kpis.activeMembers),
-      delta: 'Storm Ready · billed in Stripe',
-      trend: 'neutral',
-      accent: 'before:bg-[#27AE60]',
-    },
+    (() => {
+      const customers = kpis.activeMembers + kpis.oneTimeCustomers
+      const share = customers === 0 ? 0 : Math.round((kpis.activeMembers / customers) * 100)
+      return {
+        label: 'Members vs one-time',
+        value: customers === 0 ? '—' : `${share}%`,
+        delta:
+          customers === 0
+            ? 'No paying customers yet'
+            : `${kpis.activeMembers} member${kpis.activeMembers === 1 ? '' : 's'} · ${kpis.oneTimeCustomers} one-time`,
+        trend: 'neutral' as const,
+        accent: 'before:bg-[#27AE60]',
+        share: customers === 0 ? undefined : share,
+      }
+    })(),
     {
       label: 'Avg job value',
       value: kpis.avgJobValue === null ? '—' : formatCurrency(kpis.avgJobValue),
@@ -96,10 +112,22 @@ export function KpiRow({ kpis }: { kpis: DashboardKpis }): React.ReactElement {
             <p className="mb-1.5 font-[family-name:var(--font-bebas)] text-4xl leading-none tracking-wide text-white">
               {kpi.value}
             </p>
-            <p className={cn('flex items-center gap-1 text-[11px] font-semibold', trend.className)}>
-              <trend.icon className="size-3.5 shrink-0" aria-hidden="true" />
-              {kpi.delta}
-            </p>
+            {kpi.share !== undefined ? (
+              <>
+                <progress
+                  value={kpi.share}
+                  max={100}
+                  aria-label={`${kpi.share}% of paying customers are members`}
+                  className="mb-1.5 block h-1.5 w-full appearance-none overflow-hidden rounded-full bg-white/[0.12] [&::-moz-progress-bar]:bg-wheat [&::-webkit-progress-bar]:bg-white/[0.12] [&::-webkit-progress-value]:bg-wheat"
+                />
+                <p className="text-[11px] font-semibold text-[#9A9A9F]">{kpi.delta}</p>
+              </>
+            ) : (
+              <p className={cn('flex items-center gap-1 text-[11px] font-semibold', trend.className)}>
+                <trend.icon className="size-3.5 shrink-0" aria-hidden="true" />
+                {kpi.delta}
+              </p>
+            )}
           </div>
         )
       })}

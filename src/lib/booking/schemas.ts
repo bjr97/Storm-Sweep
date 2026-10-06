@@ -1,6 +1,7 @@
 import { addDays, startOfDay } from 'date-fns'
 import { z } from 'zod'
 
+import { addressPartsSchema } from '@/lib/booking/address'
 import type { ShelterSize } from '@/types/database'
 
 const nameFieldSchema = z
@@ -55,7 +56,8 @@ export const serviceSelectionSchema = z.object({
 
 export type ServiceSelectionValues = z.infer<typeof serviceSelectionSchema>
 
-export const customerDetailsSchema = z.object({
+// Street (`address`), city, state and ZIP are all required — see lib/booking/address.ts.
+export const customerDetailsSchema = addressPartsSchema.extend({
   first_name: nameFieldSchema,
   last_name: nameFieldSchema,
   email: z.string().trim().email('Enter a valid email address'),
@@ -64,7 +66,6 @@ export const customerDetailsSchema = z.object({
     .trim()
     .min(10, 'Enter a valid phone number')
     .regex(/^[\d\s()+-]+$/, 'Enter a valid phone number'),
-  address: z.string().trim().min(5, 'Enter your service address'),
   preferred_date: z
     .string()
     .min(1, 'Select a preferred date')

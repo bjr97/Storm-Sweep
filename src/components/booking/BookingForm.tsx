@@ -16,6 +16,7 @@ import { PhotoUpload, type PhotoScreenResult } from '@/components/booking/PhotoU
 import { ServiceSelector } from '@/components/booking/ServiceSelector'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { parseServiceAddress } from '@/lib/booking/address'
 import { buildPaymentData, buildQuoteBookingPayload } from '@/lib/booking/payment'
 import { priceKitSelection } from '@/lib/booking/prepKits'
 import { calculateBookingPrice } from '@/lib/booking/pricing'
@@ -28,7 +29,7 @@ import {
   type CustomerDetailsValues,
   type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
-import { calculateDeposit, PRICING } from '@/lib/utils'
+import { calculateDeposit, cn, PRICING } from '@/lib/utils'
 
 export type BookingInitialCustomer = {
   full_name: string
@@ -126,6 +127,7 @@ export function BookingForm({
   })
 
   const defaultCustomerNames = splitFullName(initialCustomer?.full_name ?? '')
+  const defaultAddress = parseServiceAddress(initialCustomer?.address)
 
   const customerForm = useForm<CustomerDetailsValues>({
     resolver: zodResolver(customerDetailsSchema),
@@ -134,7 +136,10 @@ export function BookingForm({
       last_name: defaultCustomerNames.last_name,
       email: initialCustomer?.email ?? '',
       phone: initialCustomer?.phone ?? '',
-      address: initialCustomer?.address ?? '',
+      address: defaultAddress.address,
+      city: defaultAddress.city,
+      state: defaultAddress.state,
+      zip: defaultAddress.zip,
       preferred_date: '',
       notes: '',
       referral_source: defaultReferral || '',
@@ -147,6 +152,7 @@ export function BookingForm({
     control,
     watch,
     trigger,
+    setValue,
     formState: { errors: customerErrors, submitCount },
   } = customerForm
 
@@ -384,7 +390,7 @@ export function BookingForm({
               </div>
 
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="address">Service address</Label>
+                <Label htmlFor="address">Street address</Label>
                 <Controller
                   name="address"
                   control={control}
@@ -395,12 +401,57 @@ export function BookingForm({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       invalid={Boolean(customerErrors.address)}
+                      onPlace={(parts) => {
+                        for (const key of ['city', 'state', 'zip'] as const) {
+                          const value = parts[key]
+                          if (value) setValue(key, value, { shouldValidate: true, shouldDirty: true })
+                        }
+                      }}
                     />
                   )}
                 />
                 {customerErrors.address ? (
                   <p className="text-sm text-tornado">{customerErrors.address.message}</p>
                 ) : null}
+              </div>
+
+              <div className="grid gap-4 sm:col-span-2 sm:grid-cols-[1fr_90px_130px]">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    autoComplete="address-level2"
+                    aria-invalid={Boolean(customerErrors.city)}
+                    className={cn('h-10 bg-white', customerErrors.city && 'border-tornado')}
+                    {...register('city')}
+                  />
+                  {customerErrors.city ? <p className="text-sm text-tornado">{customerErrors.city.message}</p> : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    autoComplete="address-level1"
+                    maxLength={2}
+                    aria-invalid={Boolean(customerErrors.state)}
+                    className={cn('h-10 bg-white uppercase', customerErrors.state && 'border-tornado')}
+                    {...register('state')}
+                  />
+                  {customerErrors.state ? <p className="text-sm text-tornado">{customerErrors.state.message}</p> : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="zip">ZIP code</Label>
+                  <Input
+                    id="zip"
+                    autoComplete="postal-code"
+                    inputMode="numeric"
+                    maxLength={10}
+                    aria-invalid={Boolean(customerErrors.zip)}
+                    className={cn('h-10 bg-white', customerErrors.zip && 'border-tornado')}
+                    {...register('zip')}
+                  />
+                  {customerErrors.zip ? <p className="text-sm text-tornado">{customerErrors.zip.message}</p> : null}
+                </div>
               </div>
 
               <div className="space-y-2">
