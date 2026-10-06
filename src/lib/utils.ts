@@ -20,9 +20,10 @@ export const PRICING = {
   addons: {
     led_package: 8900,
     interior_handle: 4500,
-    hinge_service: 3500,
-    lock_replacement: 6500,
-    extension_cord: 1500,
+    /** Hinge (swing hatch) or roller (sliding door) service. */
+    hinge_roller_service: 3500,
+    /** Cut-to-fit carpet, hook-and-loop backed — priced by shelter size; X-Large is quoted. */
+    flooring: { small: 9900, standard: 12900, large: 15900, xlarge: null },
   },
   /** Prep kits (booking Step 2). Catalog details live in PREP_KIT_BUNDLES / PREP_KIT_ITEMS. */
   kits: {

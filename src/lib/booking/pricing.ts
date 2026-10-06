@@ -1,3 +1,4 @@
+import { getHardwareAddon, hardwareAddonPrice } from '@/lib/booking/addons'
 import type { ServiceSelectionValues } from '@/lib/booking/schemas'
 import {
   PRICING,
@@ -122,6 +123,13 @@ export function calculateBookingPrice(
   } else if (selection.led_package) {
     upgrades = PRICING.addons.led_package
     lineItems.push({ label: 'LED Package', amount: upgrades })
+  }
+
+  for (const id of selection.hardware_addons) {
+    const price = hardwareAddonPrice(id, selection.shelter_size)
+    if (price === null) continue // only X-Large flooring, which is already a quote booking
+    upgrades += price
+    lineItems.push({ label: getHardwareAddon(id).name, amount: price })
   }
 
   let upgradeDiscount = 0

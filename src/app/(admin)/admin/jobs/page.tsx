@@ -13,7 +13,8 @@ import {
   type JobWhenFilter,
 } from '@/lib/admin/jobConstants'
 import { listJobs } from '@/lib/admin/jobs'
-import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
+import { formatBusinessDate } from '@/lib/admin/time'
+import { jobTimeLabel } from '@/lib/booking/timeWindows'
 import { formatCurrency } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -80,7 +81,7 @@ export default async function AdminJobsPage({
                         {job.scheduled_at ? (
                           <>
                             {formatBusinessDate(new Date(job.scheduled_at), { weekday: 'short', month: 'short', day: 'numeric' })}
-                            <span className="text-[#8A8A8F]"> · {formatBusinessTime(job.scheduled_at)}</span>
+                            <span className="text-[#8A8A8F]"> · {jobTimeLabel(job.scheduled_at, job.time_window)}</span>
                           </>
                         ) : (
                           <span className="text-[#F0B27A]">Not scheduled</span>

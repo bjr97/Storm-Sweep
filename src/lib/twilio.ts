@@ -1,7 +1,8 @@
 import twilio from 'twilio'
 
+import { timeWindowLabel } from '@/lib/booking/timeWindows'
 import { createServiceClient } from '@/lib/supabase/server'
-import type { Job, Profile } from '@/types/database'
+import type { Job, Profile, TimeWindow } from '@/types/database'
 
 export type SmsTrigger =
   | 'booking_confirmed'
@@ -267,7 +268,7 @@ export async function sendBookingConfirmedSms(params: {
     {
       name: params.name,
       date: formatJobDate(params.scheduledAt),
-      window: formatJobWindow(params.scheduledAt),
+      window: formatJobWindow(params.scheduledAt, job?.time_window),
       sweeperName: params.sweeperName,
     }
   )
@@ -322,7 +323,10 @@ export function formatJobDate(scheduledAt: string | null): string {
   })
 }
 
-export function formatJobWindow(scheduledAt: string | null): string {
+export function formatJobWindow(scheduledAt: string | null, timeWindow?: TimeWindow | null): string {
+  // The customer's chosen arrival window wins; older jobs fall back to a 2-hour window.
+  const label = timeWindowLabel(timeWindow)
+  if (label) return label
   if (!scheduledAt) return 'TBD'
   const start = new Date(scheduledAt)
   const end = new Date(start.getTime() + 2 * 60 * 60 * 1000)
@@ -390,7 +394,7 @@ export function buildTemplateDataFromContext(
         date: (customData.date as string) ?? formatJobDate(job?.scheduled_at ?? null),
         window:
           (customData.window as string) ??
-          formatJobWindow(job?.scheduled_at ?? null),
+          formatJobWindow(job?.scheduled_at ?? null, job?.time_window),
         sweeperName,
       }
     case 'day_before_reminder':
@@ -398,7 +402,7 @@ export function buildTemplateDataFromContext(
         name,
         window:
           (customData.window as string) ??
-          formatJobWindow(job?.scheduled_at ?? null),
+          formatJobWindow(job?.scheduled_at ?? null, job?.time_window),
       }
     case 'on_the_way':
       return { sweeperName }

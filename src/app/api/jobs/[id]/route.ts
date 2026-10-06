@@ -4,7 +4,7 @@ import { ADMIN_SETTABLE_STATUSES } from '@/lib/admin/jobConstants'
 import { requireRole } from '@/lib/auth/requireRole'
 import { createClient } from '@/lib/supabase/server'
 import { formatJobDate, renderSmsTemplate, sendSms } from '@/lib/twilio'
-import type { JobUpdate } from '@/types/database'
+import type { JobClaimEventInsert, JobUpdate } from '@/types/database'
 
 // Admin job updates. Sweeper updates (checklist, en route, start, complete)
 // will live here too once the Sweeper app (Phase 2.1–2.2) is built.
@@ -89,7 +89,15 @@ export async function PATCH(
           return Response.json({ error: 'That person is not a Sweeper' }, { status: 400 })
         }
         sweeperProfile = sweeper
+        if (input.sweeperId !== job.sweeper_id) {
+          // Manual assignment: base pay rate (no claim-speed clock).
+          update.assigned_via = 'admin'
+          update.claimed_at = new Date().toISOString()
+          update.claim_visible_at = null
+          update.claimed_tier = null
+        }
       }
+      // Unassigning (null) puts a confirmed job back on the board — DB trigger.
       update.sweeper_id = input.sweeperId
     }
 
@@ -100,6 +108,15 @@ export async function PATCH(
       .select()
       .single()
     if (updateError) throw updateError
+
+    // Claim history (admin changes never count against a Sweeper's score).
+    if (input.sweeperId !== undefined && input.sweeperId !== job.sweeper_id) {
+      const events: JobClaimEventInsert[] = []
+      if (job.sweeper_id) events.push({ job_id: jobId, sweeper_id: job.sweeper_id, event: 'admin_unassign' })
+      if (input.sweeperId) events.push({ job_id: jobId, sweeper_id: input.sweeperId, event: 'admin_assign' })
+      const { error: eventError } = await supabase.from('job_claim_events').insert(events)
+      if (eventError) console.error('[jobs/patch] claim event', eventError)
+    }
 
     // Text a newly assigned Sweeper. Best-effort: the assignment stands even if SMS fails.
     if (input.sweeperId && input.sweeperId !== job.sweeper_id && sweeperProfile?.phone) {

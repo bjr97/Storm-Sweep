@@ -6,7 +6,8 @@ import { AssignSweeperSelect } from '@/components/admin/AssignSweeperSelect'
 import { EmptyState, Panel } from '@/components/admin/Panel'
 import { JOB_STATUS_LABEL, StatusPill } from '@/components/admin/StatusPill'
 import { getScheduleMonth, listSweepers, type JobListItem, type ScheduleDay } from '@/lib/admin/jobs'
-import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
+import { formatBusinessDate } from '@/lib/admin/time'
+import { jobTimeLabel } from '@/lib/booking/timeWindows'
 import { cn } from '@/lib/utils'
 import type { JobStatus } from '@/types/database'
 
@@ -34,7 +35,7 @@ function JobChip({ job }: { job: JobListItem }): React.ReactElement {
       title={`${job.customer.name} · ${JOB_STATUS_LABEL[job.status]}${job.sweeperName ? ` · ${job.sweeperName}` : ' · Unassigned'}`}
       className={cn('block truncate rounded-sm border-l-2 px-1.5 py-0.5 text-[11px] text-[#F0F0F0] hover:brightness-125', CHIP_CLASS[job.status])}
     >
-      <span className="font-semibold">{job.scheduled_at ? formatBusinessTime(job.scheduled_at).replace(':00', '') : ''}</span>{' '}
+      <span className="font-semibold">{job.scheduled_at ? jobTimeLabel(job.scheduled_at, job.time_window, true) : ''}</span>{' '}
       {job.customer.name}
       {!job.sweeper_id && isActive(job) ? <span className="text-[#F0B27A]"> •</span> : null}
     </Link>
@@ -173,7 +174,7 @@ export default async function AdminSchedulePage({
                 return (
                   <li key={job.id} className="grid gap-2 border-b border-white/[0.07] py-3 last:border-b-0 sm:grid-cols-[70px_1fr_auto_200px] sm:items-center sm:gap-4">
                     <p className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold text-[#F0F0F0]">
-                      {job.scheduled_at ? formatBusinessTime(job.scheduled_at) : '—'}
+                      {jobTimeLabel(job.scheduled_at, job.time_window)}
                     </p>
                     <Link href={`/admin/jobs/${job.id}`} className="group min-w-0">
                       <span className="flex items-center gap-1 text-[13px] font-semibold text-[#F0F0F0] group-hover:text-sky-light group-hover:underline">

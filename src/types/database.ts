@@ -44,6 +44,14 @@ export type SweeperApplicantStatus = 'pending' | 'approved' | 'rejected'
 
 export type SocialPlatform = 'tiktok' | 'instagram' | 'facebook'
 
+export type TimeWindow = 'morning' | 'midday' | 'afternoon' | 'evening' | 'flexible'
+
+export type SweeperTier = 'gold' | 'silver' | 'standard'
+
+export type AssignedVia = 'claim' | 'admin'
+
+export type ClaimEventType = 'claim' | 'drop' | 'late_drop' | 'admin_assign' | 'admin_unassign'
+
 export interface Database {
   public: {
     Tables: {
@@ -61,6 +69,7 @@ export interface Database {
           membership_renews_at: string | null
           visits_used: number
           membership_commitment_ends_at: string | null
+          sweeper_tier_override: SweeperTier | null
           created_at: string
         }
         Insert: {
@@ -76,6 +85,7 @@ export interface Database {
           membership_renews_at?: string | null
           visits_used?: number
           membership_commitment_ends_at?: string | null
+          sweeper_tier_override?: SweeperTier | null
           created_at?: string
         }
         Update: {
@@ -91,6 +101,7 @@ export interface Database {
           membership_renews_at?: string | null
           visits_used?: number
           membership_commitment_ends_at?: string | null
+          sweeper_tier_override?: SweeperTier | null
           created_at?: string
         }
         Relationships: []
@@ -174,6 +185,12 @@ export interface Database {
           completed_at: string | null
           membership_visit: boolean
           service_value: number | null
+          time_window: TimeWindow | null
+          board_opened_at: string | null
+          claimed_at: string | null
+          assigned_via: AssignedVia | null
+          claim_visible_at: string | null
+          claimed_tier: SweeperTier | null
           created_at: string
         }
         Insert: {
@@ -206,6 +223,12 @@ export interface Database {
           completed_at?: string | null
           membership_visit?: boolean
           service_value?: number | null
+          time_window?: TimeWindow | null
+          board_opened_at?: string | null
+          claimed_at?: string | null
+          assigned_via?: AssignedVia | null
+          claim_visible_at?: string | null
+          claimed_tier?: SweeperTier | null
           created_at?: string
         }
         Update: {
@@ -238,6 +261,12 @@ export interface Database {
           completed_at?: string | null
           membership_visit?: boolean
           service_value?: number | null
+          time_window?: TimeWindow | null
+          board_opened_at?: string | null
+          claimed_at?: string | null
+          assigned_via?: AssignedVia | null
+          claim_visible_at?: string | null
+          claimed_tier?: SweeperTier | null
           created_at?: string
         }
         Relationships: [
@@ -308,6 +337,30 @@ export interface Database {
             referencedColumns: ['id']
           },
         ]
+      }
+      job_claim_events: {
+        Row: {
+          id: string
+          job_id: string
+          sweeper_id: string
+          event: ClaimEventType
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          sweeper_id: string
+          event: ClaimEventType
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          job_id?: string
+          sweeper_id?: string
+          event?: ClaimEventType
+          created_at?: string
+        }
+        Relationships: []
       }
       sweeper_applicants: {
         Row: {
@@ -542,6 +595,9 @@ export type PartnerUpdate = Database['public']['Tables']['partners']['Update']
 export type Job = Database['public']['Tables']['jobs']['Row']
 export type JobInsert = Database['public']['Tables']['jobs']['Insert']
 export type JobUpdate = Database['public']['Tables']['jobs']['Update']
+
+export type JobClaimEvent = Database['public']['Tables']['job_claim_events']['Row']
+export type JobClaimEventInsert = Database['public']['Tables']['job_claim_events']['Insert']
 
 export type JobPhoto = Database['public']['Tables']['job_photos']['Row']
 export type JobPhotoInsert = Database['public']['Tables']['job_photos']['Insert']

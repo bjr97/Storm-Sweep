@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { HARDWARE_ADDONS, hardwareAddonPrice } from '@/lib/booking/addons'
 import { cn, formatCurrency, PREP_KIT_BUNDLES, PRICING } from '@/lib/utils'
 
 const SERVICE_TYPES = [
@@ -80,28 +81,11 @@ const SERVICE_TYPES = [
   },
 ] as const
 
-const DOOR_HARDWARE_UPGRADES = [
-  {
-    name: 'Interior Handle Install',
-    price: PRICING.addons.interior_handle,
-    description: 'Replace missing or broken interior hatch handles for safe exit.',
-  },
-  {
-    name: 'Hinge Service',
-    price: PRICING.addons.hinge_service,
-    description: 'Lubricate, adjust, or repair sticky or rusted hatch hinges.',
-  },
-  {
-    name: 'Lock Replacement',
-    price: PRICING.addons.lock_replacement,
-    description: 'Install a new interior lock mechanism when yours fails inspection.',
-  },
-  {
-    name: 'Extension Cord',
-    price: PRICING.addons.extension_cord,
-    description: '25ft+ cord for powering equipment during service and shelter use.',
-  },
-] as const
+const DOOR_HARDWARE_UPGRADES = HARDWARE_ADDONS.map((addon) => {
+  // Flooring is priced by shelter size — show the starting price.
+  const price = hardwareAddonPrice(addon.id, 'small')
+  return { ...addon, priceLabel: addon.id === 'flooring' && price !== null ? `from ${formatCurrency(price)}` : formatCurrency(price ?? 0) }
+})
 
 export default function ServicesPage(): React.ReactElement {
   return (
@@ -254,7 +238,7 @@ export default function ServicesPage(): React.ReactElement {
             <div className="mb-6 flex items-center gap-3">
               <DoorOpen className="size-5 text-[var(--color-primary)]" />
               <h3 className="font-display text-2xl tracking-wide text-[var(--color-text)]">
-                DOOR &amp; HARDWARE UPGRADES
+                HARDWARE &amp; FLOORING UPGRADES
               </h3>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -274,7 +258,7 @@ export default function ServicesPage(): React.ReactElement {
                       </p>
                     </div>
                     <p className="font-display text-xl tracking-wide text-[var(--color-accent)]">
-                      {formatCurrency(upgrade.price)}
+                      {upgrade.priceLabel}
                     </p>
                   </CardContent>
                 </Card>

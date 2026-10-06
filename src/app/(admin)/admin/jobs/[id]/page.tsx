@@ -9,7 +9,8 @@ import { JobActions } from '@/components/admin/JobActions'
 import { EmptyState, Panel } from '@/components/admin/Panel'
 import { StatusPill } from '@/components/admin/StatusPill'
 import { getJobDetail, listSweepers } from '@/lib/admin/jobs'
-import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
+import { formatBusinessDate } from '@/lib/admin/time'
+import { jobTimeLabel } from '@/lib/booking/timeWindows'
 import { cn, formatCurrency, PRICING } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -76,7 +77,7 @@ export default async function AdminJobDetailPage({
               <dl>
                 <Row label="Scheduled">
                   {job.scheduled_at
-                    ? `${formatBusinessDate(new Date(job.scheduled_at), { weekday: 'long', month: 'long', day: 'numeric' })} · ${formatBusinessTime(job.scheduled_at)}`
+                    ? `${formatBusinessDate(new Date(job.scheduled_at), { weekday: 'long', month: 'long', day: 'numeric' })} · ${jobTimeLabel(job.scheduled_at, job.time_window)}`
                     : <span className="text-[#F0B27A]">Not scheduled (quote)</span>}
                 </Row>
                 <Row label="Address">

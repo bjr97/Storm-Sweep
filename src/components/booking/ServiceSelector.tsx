@@ -1,7 +1,8 @@
 'use client'
 
-import { Lightbulb, ShieldCheck, Sparkles } from 'lucide-react'
+import { DoorOpen, Layers, Lightbulb, ShieldCheck, Sparkles, Wrench, type LucideIcon } from 'lucide-react'
 
+import { HARDWARE_ADDONS, hardwareAddonPrice, type HardwareAddonId } from '@/lib/booking/addons'
 import { SHELTER_SIZE_OPTIONS, type ServiceSelectionValues } from '@/lib/booking/schemas'
 import { cn, formatCurrency, PREP_KIT_BUNDLES, PRICING } from '@/lib/utils'
 import type { ShelterSize } from '@/types/database'
@@ -9,6 +10,12 @@ import type { ShelterSize } from '@/types/database'
 type ServiceSelectorProps = {
   values: ServiceSelectionValues
   onChange: (values: ServiceSelectionValues) => void
+}
+
+const ADDON_ICONS: Record<HardwareAddonId, LucideIcon> = {
+  interior_handle: DoorOpen,
+  hinge_roller_service: Wrench,
+  flooring: Layers,
 }
 
 const FULL_PACKAGE_KIT_NAME =
@@ -105,6 +112,40 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
             disabled={values.full_package}
             onCheckedChange={(checked) => updateField('led_package', checked)}
           />
+        </div>
+      </section>
+
+      <section>
+        <h2 className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-shelter">
+          HARDWARE &amp; FLOORING
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Done during the same visit. Storm Ready members get 10% off.
+        </p>
+        <div className="mt-4 space-y-3">
+          {HARDWARE_ADDONS.map((addon) => {
+            const Icon = ADDON_ICONS[addon.id]
+            const price = hardwareAddonPrice(addon.id, values.shelter_size)
+            const checked = values.hardware_addons.includes(addon.id)
+            return (
+              <ServiceRow
+                key={addon.id}
+                icon={<Icon className="mt-0.5 size-5 text-sky" />}
+                title={addon.name}
+                description={addon.description}
+                priceLabel={price === null ? 'Quote' : `+${formatCurrency(price)}`}
+                checked={checked}
+                onCheckedChange={(on) =>
+                  updateField(
+                    'hardware_addons',
+                    on
+                      ? [...values.hardware_addons, addon.id]
+                      : values.hardware_addons.filter((id) => id !== addon.id)
+                  )
+                }
+              />
+            )
+          })}
         </div>
       </section>
 

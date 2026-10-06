@@ -1,7 +1,9 @@
 import type { PhotoScreenResult } from '@/components/booking/PhotoUpload'
 import type { KitSelection } from '@/components/booking/KitSelector'
 import type { BookingPayload, BookingPaymentData } from '@/lib/bookings/types'
+import { getHardwareAddon } from '@/lib/booking/addons'
 import { formatServiceAddress } from '@/lib/booking/address'
+import { windowStartIso } from '@/lib/booking/timeWindows'
 import {
   formatCustomerFullName,
   type CustomerDetailsValues,
@@ -70,6 +72,9 @@ export function buildPaymentData(
       serviceTypes.push('LED Package')
     }
   }
+  for (const id of serviceSelection.hardware_addons) {
+    serviceTypes.push(getHardwareAddon(id).name)
+  }
 
   const kitLabel = kitServiceTypeLabel(kitSelection)
   if (kitLabel) {
@@ -93,8 +98,9 @@ export function buildPaymentData(
     customerPhone: customerValues.phone,
     address: formatServiceAddress(customerValues),
     scheduledAt: customerValues.preferred_date
-      ? new Date(`${customerValues.preferred_date}T12:00:00`).toISOString()
+      ? windowStartIso(customerValues.preferred_date, customerValues.time_window)
       : null,
+    timeWindow: customerValues.time_window,
     shelterSize: serviceSelection.shelter_size,
     serviceTypes,
     notes: customerValues.notes,
@@ -127,7 +133,10 @@ export function buildQuoteBookingPayload(
       : null
   const notes = [customerValues.notes, kitNote, quoteNote].filter(Boolean).join('\n\n')
 
-  const quoteServiceTypes = ['Custom quote — X-Large shelter']
+  const quoteServiceTypes = [
+    'Custom quote — X-Large shelter',
+    ...serviceSelection.hardware_addons.map((id) => `${getHardwareAddon(id).name} (quote)`),
+  ]
   const kitLabel = kitServiceTypeLabel(kitSelection)
   if (kitLabel) {
     quoteServiceTypes.push(kitLabel)
@@ -139,8 +148,9 @@ export function buildQuoteBookingPayload(
     customerPhone: customerValues.phone,
     address: formatServiceAddress(customerValues),
     scheduledAt: customerValues.preferred_date
-      ? new Date(`${customerValues.preferred_date}T12:00:00`).toISOString()
+      ? windowStartIso(customerValues.preferred_date, customerValues.time_window)
       : null,
+    timeWindow: customerValues.time_window,
     shelterSize: serviceSelection.shelter_size,
     serviceTypes: quoteServiceTypes,
     notes,

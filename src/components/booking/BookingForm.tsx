@@ -20,6 +20,7 @@ import { parseServiceAddress } from '@/lib/booking/address'
 import { buildPaymentData, buildQuoteBookingPayload } from '@/lib/booking/payment'
 import { priceKitSelection } from '@/lib/booking/prepKits'
 import { calculateBookingPrice } from '@/lib/booking/pricing'
+import { TIME_WINDOWS } from '@/lib/booking/timeWindows'
 import {
   BOOKING_STEPS,
   REFERRAL_SOURCES,
@@ -58,6 +59,7 @@ const DEFAULT_SERVICE: ServiceSelectionValues = {
   deep_clean: true,
   led_package: false,
   full_package: false,
+  hardware_addons: [],
   membership: 'one_time',
 }
 
@@ -470,6 +472,49 @@ export function BookingForm({
                   </p>
                 ) : null}
               </div>
+
+              <fieldset className="space-y-2 sm:col-span-2">
+                <legend className="text-sm font-medium leading-none">Arrival window</legend>
+                <Controller
+                  name="time_window"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-5">
+                      {TIME_WINDOWS.map((w) => {
+                        const selected = field.value === w.value
+                        return (
+                          <label
+                            key={w.value}
+                            className={cn(
+                              'flex cursor-pointer flex-col rounded-lg border px-3 py-2 text-left transition-colors focus-within:ring-2 focus-within:ring-sky/40',
+                              selected ? 'border-sky bg-sky-pale ring-1 ring-sky' : 'border-border bg-white hover:border-sky/50',
+                              w.value === 'flexible' && 'col-span-2 sm:col-span-1'
+                            )}
+                          >
+                            <input
+                              type="radio"
+                              name={field.name}
+                              value={w.value}
+                              checked={selected}
+                              onChange={() => field.onChange(w.value)}
+                              onBlur={field.onBlur}
+                              className="sr-only"
+                            />
+                            <span className="text-sm font-semibold text-shelter">{w.label}</span>
+                            <span className="text-xs text-muted-foreground">{w.hours}</span>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Your Sweeper arrives within this window. Flexible bookings are the easiest to fill quickly.
+                </p>
+                {customerErrors.time_window ? (
+                  <p className="text-sm text-tornado">{customerErrors.time_window.message}</p>
+                ) : null}
+              </fieldset>
 
               <div className="space-y-2">
                 <Label htmlFor="referral_source">How did you hear about us?</Label>

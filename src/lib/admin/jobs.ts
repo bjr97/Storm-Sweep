@@ -14,12 +14,12 @@ export type PersonSummary = { id: string; name: string; phone: string | null; is
 
 export type JobListItem = Pick<
   Job,
-  'id' | 'status' | 'service_type' | 'scheduled_at' | 'address' | 'total_amount' | 'service_value' | 'payment_status' | 'photo_grade' | 'photo_approved' | 'sweeper_id' | 'created_at'
+  'id' | 'status' | 'service_type' | 'scheduled_at' | 'time_window' | 'address' | 'total_amount' | 'service_value' | 'payment_status' | 'photo_grade' | 'photo_approved' | 'sweeper_id' | 'created_at'
 > & { customer: PersonSummary; sweeperName: string | null }
 
 
 const LIST_COLUMNS =
-  'id, customer_id, sweeper_id, status, service_type, scheduled_at, address, total_amount, service_value, payment_status, photo_grade, photo_approved, created_at'
+  'id, customer_id, sweeper_id, status, service_type, scheduled_at, time_window, address, total_amount, service_value, payment_status, photo_grade, photo_approved, created_at'
 
 /** Strip characters that have meaning in PostgREST filter strings. */
 function sanitizeSearch(q: string): string {

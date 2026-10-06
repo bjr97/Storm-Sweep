@@ -216,6 +216,29 @@ Customer Details (Step 3) specifics:
    + Per upgrade sold:   +$15
    + Video bonus:        +$10 (both before + after videos uploaded)
    ```
+   - Rules + math live in `src/lib/sweepers/jobBoard.ts` (pure) and
+     `src/lib/sweepers/board.ts` (server). Never re-derive them elsewhere.
+   - **Job board:** confirmed + unassigned jobs go on the board
+     (`board_opened_at`, set by a DB trigger; reset when a Sweeper drops).
+     Tiers see a job Gold → Silver → Standard, 30 min apart; empty tiers skipped.
+   - **Speed % clock starts when the job became visible to the claimer's tier**
+     (`claim_visible_at`), not at booking. Admin assignments pay the base 60%.
+   - **Turnaround bonus = completed (report submitted) on the scheduled day**;
+     1/2/3 days late = $20/$10/$5. Customers pick the date, so never measure
+     from booking.
+   - Tier score: rating 40% + on-time 40% + reliability 20% (late drops in 90d).
+     Gold 5+ jobs & 85+, Silver 2+ jobs & 70+. Admin can pin a tier.
+   - Max 5 jobs per Sweeper per day. Dropping < 24h before = late drop.
+   - Open jobs show city + ZIP only until claimed.
+
+9. **Add-ons** (`src/lib/booking/addons.ts`, prices in `PRICING.addons`):
+   LED $89, Interior Handle $45, Hinge / Roller Service $35, Shelter Carpet
+   by size $99/$129/$159 (X-Large quoted). Count as upgrades (10% member
+   discount, $15 Sweeper commission when sold on site).
+
+10. **Arrival windows** (`src/lib/booking/timeWindows.ts`): Morning 8–11,
+    Midday 11–2, Afternoon 2–5, Evening 5–8, Flexible. Required at booking;
+    `scheduled_at` = window start (Chicago), `time_window` stores the choice.
 
 6. **IC Tax:** Sweepers are 1099 contractors. Never withhold taxes. 
    Generate 1099-NEC for earners over $600/yr by Jan 31.

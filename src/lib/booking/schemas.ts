@@ -1,7 +1,9 @@
 import { addDays, startOfDay } from 'date-fns'
 import { z } from 'zod'
 
+import { HARDWARE_ADDON_IDS } from '@/lib/booking/addons'
 import { addressPartsSchema } from '@/lib/booking/address'
+import { TIME_WINDOW_VALUES } from '@/lib/booking/timeWindows'
 import type { ShelterSize } from '@/types/database'
 
 const nameFieldSchema = z
@@ -51,6 +53,7 @@ export const serviceSelectionSchema = z.object({
   deep_clean: z.boolean(),
   led_package: z.boolean(),
   full_package: z.boolean(),
+  hardware_addons: z.array(z.enum(HARDWARE_ADDON_IDS)),
   membership: membershipTypeSchema,
 })
 
@@ -74,6 +77,7 @@ export const customerDetailsSchema = addressPartsSchema.extend({
       const minimum = startOfDay(addDays(new Date(), 1))
       return selected >= minimum
     }, 'Preferred date must be at least 1 day from today'),
+  time_window: z.enum(TIME_WINDOW_VALUES, { message: 'Pick a time window' }),
   notes: z.string().max(500, 'Notes must be 500 characters or less').optional(),
   referral_source: z.string().min(1, 'Select how you heard about us'),
 })
