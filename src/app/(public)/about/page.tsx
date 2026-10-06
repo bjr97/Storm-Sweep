@@ -30,9 +30,9 @@ const LOCAL_STATS = [
     description: 'Oklahoma leads the nation in tornado frequency and severity',
   },
   {
-    value: '48hr',
-    label: 'Response time',
-    description: 'Storm Sweep arrives within 48 hours of booking',
+    value: 'Your date',
+    label: 'Scheduling',
+    description: 'Pick your preferred date when you book — we confirm by text',
   },
   {
     value: '2×',

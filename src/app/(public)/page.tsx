@@ -24,7 +24,7 @@ import { cn, formatCurrency, PRICING } from '@/lib/utils'
 
 const TRUST_ITEMS = [
   'Norman-owned',
-  'Arrives within 48hrs',
+  'You pick the date',
   'Photo report every visit',
   'Checklist-based service',
 ] as const

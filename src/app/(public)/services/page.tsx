@@ -295,7 +295,7 @@ export default function ServicesPage(): React.ReactElement {
           </h2>
           <p className="mx-auto mt-4 max-w-xl font-body text-base text-[var(--color-text)]">
             Choose your services, pick a date, and a Norman Sweeper will arrive
-            within 48 hours with everything needed to get your shelter storm
+            on your scheduled day with everything needed to get your shelter storm
             ready.
           </p>
           <Link
