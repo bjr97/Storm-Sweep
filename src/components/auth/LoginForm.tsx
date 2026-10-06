@@ -33,7 +33,7 @@ export function LoginForm(): React.ReactElement {
   const searchParams = useSearchParams()
   const [authError, setAuthError] = useState<string | null>(
     searchParams.get('error') === 'confirmation_failed'
-      ? 'That confirmation link is invalid or expired. Sign in to get a new one.'
+      ? "We couldn't sign you in from that link. If you just confirmed your email (e.g. on another device), you're all set — sign in below. Otherwise, sign in to get a new link."
       : null
   )
   const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null)
