@@ -1,9 +1,9 @@
 'use client'
 
-import { Check, Lightbulb, Package, ShieldCheck, Sparkles } from 'lucide-react'
+import { Lightbulb, ShieldCheck, Sparkles } from 'lucide-react'
 
 import { SHELTER_SIZE_OPTIONS, type ServiceSelectionValues } from '@/lib/booking/schemas'
-import { cn, formatCurrency, PRICING, SUPPLY_KITS } from '@/lib/utils'
+import { cn, formatCurrency, PREP_KIT_BUNDLES, PRICING } from '@/lib/utils'
 import type { ShelterSize } from '@/types/database'
 
 type ServiceSelectorProps = {
@@ -11,14 +11,8 @@ type ServiceSelectorProps = {
   onChange: (values: ServiceSelectionValues) => void
 }
 
-const SUPPLY_KIT_OPTIONS = [
-  { value: 'none', label: 'No supply kit' },
-  { value: 'starter', label: `Starter — ${formatCurrency(PRICING.addons.supply_kit_starter)}` },
-  { value: 'essential', label: `Essential — ${formatCurrency(PRICING.addons.supply_kit_essential)}` },
-  { value: 'family', label: `Family — ${formatCurrency(PRICING.addons.supply_kit_family)}` },
-  { value: 'pro', label: `Pro — ${formatCurrency(PRICING.addons.supply_kit_pro)}` },
-  { value: 'elite', label: `Elite — ${formatCurrency(PRICING.addons.supply_kit_elite)}` },
-] as const
+const FULL_PACKAGE_KIT_NAME =
+  PREP_KIT_BUNDLES.find((bundle) => bundle.id === PRICING.full_package_kit)?.name ?? 'prep kit'
 
 export function ServiceSelector({ values, onChange }: ServiceSelectorProps): React.ReactElement {
   function updateField<K extends keyof ServiceSelectionValues>(
@@ -31,12 +25,10 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
   function toggleFullPackage(checked: boolean): void {
     onChange(
       checked
-        ? { ...values, full_package: true, led_package: true, supply_kit: 'essential' }
+        ? { ...values, full_package: true, led_package: true }
         : { ...values, full_package: false }
     )
   }
-
-  const activeKitKey = values.full_package ? 'essential' : values.supply_kit
 
   function getShelterPriceLabel(size: ShelterSize): string {
     const price = PRICING.shelter[size]
@@ -98,7 +90,7 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
           <ServiceRow
             icon={<ShieldCheck className="mt-0.5 size-5 text-wheat-DEFAULT" />}
             title="Full Package"
-            description="Deep clean + LED lighting + Essential supply kit bundle."
+            description={`Deep clean + LED lighting + ${FULL_PACKAGE_KIT_NAME} prep kit. Upgrade the kit in the next step.`}
             priceLabel={formatCurrency(PRICING.bundles.full_package)}
             checked={values.full_package}
             onCheckedChange={toggleFullPackage}
@@ -113,58 +105,16 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
             disabled={values.full_package}
             onCheckedChange={(checked) => updateField('led_package', checked)}
           />
-          <div
-            className={cn(
-              'rounded-xl border p-4 transition-all',
-              values.supply_kit !== 'none' && !values.full_package
-                ? 'border-sky-DEFAULT bg-sky-pale/50'
-                : 'border-border bg-white',
-              values.full_package && 'opacity-60'
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <Package className="mt-0.5 size-5 shrink-0 text-sky-DEFAULT" />
-              <div className="flex-1 space-y-3">
-                <div>
-                  <p className="font-medium text-shelter">Supply Kit</p>
-                  <p className="text-sm text-muted-foreground">
-                    Emergency supplies stocked and organized in your shelter.
-                  </p>
-                </div>
-                <select
-                  value={values.full_package ? 'essential' : values.supply_kit}
-                  disabled={values.full_package}
-                  onChange={(event) =>
-                    updateField('supply_kit', event.target.value as ServiceSelectionValues['supply_kit'])
-                  }
-                  className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {SUPPLY_KIT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                {activeKitKey !== 'none' ? (
-                  <ul className="space-y-1 text-xs text-muted-foreground">
-                    {SUPPLY_KITS[activeKitKey].items.slice(0, 4).map((item) => (
-                      <li key={item} className="flex items-center gap-1.5">
-                        <Check className="size-3 text-sky-DEFAULT" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
       <section>
         <h2 className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-shelter">MEMBERSHIP</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Storm Ready members get 2 visits per year and 10% off upgrades.
+          Storm Ready includes {PRICING.membership.visits_per_year} cleanings a year — today&apos;s
+          visit is your first, so the clean is covered (large shelters pay the size
+          difference). Members also get 10% off upgrades. Monthly is a{' '}
+          {PRICING.membership.monthly_commitment_months}-month commitment.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           {[

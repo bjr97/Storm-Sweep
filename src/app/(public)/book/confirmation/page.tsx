@@ -21,7 +21,7 @@ import { parseBookingMetadata, shelterSizeLabel } from '@/lib/bookings/types'
 import { capturePayPalOrder } from '@/lib/paypal'
 import { getStripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
-import { cn, formatCurrency, PRICING } from '@/lib/utils'
+import { calculateDeposit, cn, formatCurrency } from '@/lib/utils'
 import type { Job } from '@/types/database'
 
 type ConfirmationPageProps = {
@@ -99,7 +99,7 @@ async function loadStripeSummary(sessionId: string): Promise<{
       fallback: {
         customerName: booking.customerName,
         totalAmount: booking.totalAmount,
-        depositAmount: Math.round(booking.totalAmount * PRICING.deposit_pct),
+        depositAmount: calculateDeposit(booking.totalAmount),
         address: booking.address,
         scheduledAt: booking.scheduledAt ?? null,
         serviceTypes: booking.serviceTypes,

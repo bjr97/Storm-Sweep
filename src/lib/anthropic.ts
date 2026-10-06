@@ -13,6 +13,7 @@ export interface PhotoScreenResult {
   approved: boolean
   flags: string[]
   surcharge_suggested: boolean
+  /** Whole DOLLARS as the model returns them — multiply by 100 before storing (jobs.photo_surcharge is cents). */
   surcharge_amount: number
   admin_note: string
   customer_message: string

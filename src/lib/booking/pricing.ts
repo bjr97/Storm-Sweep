@@ -1,35 +1,64 @@
 import type { ServiceSelectionValues } from '@/lib/booking/schemas'
-import { PRICING, SUPPLY_KITS, formatCurrency } from '@/lib/utils'
+import {
+  PRICING,
+  PREP_KIT_BUNDLES,
+  calculateDeposit,
+  formatCurrency,
+  roundCents,
+} from '@/lib/utils'
 import type { ShelterSize } from '@/types/database'
 
+/**
+ * All amounts are integer cents.
+ *
+ * `total` is what the customer pays for THIS VISIT (deposit + balance). The
+ * Storm Ready membership is NOT part of it — Stripe bills that separately as
+ * a subscription — so it is reported in `membershipPrice` only.
+ */
 export type BookingPriceBreakdown = {
   shelterPrice: number | null
   addonsPrice: number
   serviceSubtotal: number | null
   membershipPrice: number
+  membershipLabel: string | null
+  /** Clean is covered by the membership (visit 1 of 2). */
+  isMemberVisit: boolean
   total: number | null
   deposit: number | null
   isQuoteRequired: boolean
   lineItems: { label: string; amount: number | null }[]
 }
 
-const SUPPLY_KIT_PRICES = {
-  none: 0,
-  starter: PRICING.addons.supply_kit_starter,
-  essential: PRICING.addons.supply_kit_essential,
-  family: PRICING.addons.supply_kit_family,
-  pro: PRICING.addons.supply_kit_pro,
-  elite: PRICING.addons.supply_kit_elite,
-} as const
+const FULL_PACKAGE_KIT_NAME =
+  PREP_KIT_BUNDLES.find((bundle) => bundle.id === PRICING.full_package_kit)?.name ?? 'prep kit'
 
 function getShelterPrice(size: ShelterSize): number | null {
   return PRICING.shelter[size]
+}
+
+/** 10% Storm Ready discount on an upgrade amount, as a negative cents value. */
+export function memberUpgradeDiscount(upgradeAmount: number): number {
+  return -roundCents(upgradeAmount * PRICING.member_upgrade_discount_pct)
+}
+
+function membershipDetails(
+  membership: ServiceSelectionValues['membership']
+): { price: number; label: string | null } {
+  if (membership === 'annual') {
+    return { price: PRICING.membership.annual, label: 'Storm Ready Annual' }
+  }
+  if (membership === 'monthly') {
+    return { price: PRICING.membership.monthly, label: 'Storm Ready Monthly' }
+  }
+  return { price: 0, label: null }
 }
 
 export function calculateBookingPrice(
   selection: ServiceSelectionValues
 ): BookingPriceBreakdown {
   const shelterPrice = getShelterPrice(selection.shelter_size)
+  const membership = membershipDetails(selection.membership)
+  const isMember = membership.price > 0
   const isQuoteRequired =
     selection.shelter_size === 'xlarge' || shelterPrice === null
 
@@ -38,7 +67,9 @@ export function calculateBookingPrice(
       shelterPrice: null,
       addonsPrice: 0,
       serviceSubtotal: null,
-      membershipPrice: 0,
+      membershipPrice: membership.price,
+      membershipLabel: membership.label,
+      isMemberVisit: false,
       total: null,
       deposit: null,
       isQuoteRequired: true,
@@ -46,71 +77,70 @@ export function calculateBookingPrice(
     }
   }
 
-  const lineItems: { label: string; amount: number | null }[] = [
-    {
-      label: `Deep Clean (${selection.shelter_size})`,
-      amount: shelterPrice,
-    },
-  ]
+  const coveredCleanPrice = PRICING.shelter[PRICING.membership.covered_shelter_size]
+  // Full Package price minus the standard clean it includes = LED + kit portion.
+  const fullPackageUpgrades = PRICING.bundles.full_package - PRICING.shelter.standard
+  const lineItems: { label: string; amount: number | null }[] = []
+  let cleanCharge: number
+  let upgrades = 0
 
-  let serviceSubtotal = shelterPrice
+  if (isMember) {
+    // Membership covers the clean up to standard size; larger pays the difference.
+    const sizeDifference = Math.max(0, shelterPrice - coveredCleanPrice)
+    lineItems.push({
+      label: `Deep Clean (${selection.shelter_size}) — Storm Ready visit 1 of ${PRICING.membership.visits_per_year}`,
+      amount: 0,
+    })
+    if (sizeDifference > 0) {
+      lineItems.push({
+        label: `${selection.shelter_size[0].toUpperCase()}${selection.shelter_size.slice(1)} shelter (above membership coverage)`,
+        amount: sizeDifference,
+      })
+    }
+    cleanCharge = sizeDifference
+  } else if (selection.full_package) {
+    // Non-member Full Package is one bundled line, size-adjusted.
+    cleanCharge = shelterPrice
+  } else {
+    lineItems.push({ label: `Deep Clean (${selection.shelter_size})`, amount: shelterPrice })
+    cleanCharge = shelterPrice
+  }
 
   if (selection.full_package) {
-    const standardBase = PRICING.shelter.standard
-    const sizeAdjustment = shelterPrice - standardBase
-    serviceSubtotal = PRICING.bundles.full_package + sizeAdjustment
-
-    lineItems[0] = {
-      label: 'Full Package (clean + LED + Essential kit)',
-      amount: serviceSubtotal,
-    }
-  } else {
-    if (selection.led_package) {
+    upgrades = fullPackageUpgrades
+    if (isMember) {
       lineItems.push({
-        label: 'LED Package',
-        amount: PRICING.addons.led_package,
+        label: `Full Package upgrades (LED + ${FULL_PACKAGE_KIT_NAME} kit)`,
+        amount: upgrades,
       })
-      serviceSubtotal += PRICING.addons.led_package
-    }
-
-    if (selection.supply_kit !== 'none') {
-      const kitPrice = SUPPLY_KIT_PRICES[selection.supply_kit]
-      const kitName = SUPPLY_KITS[selection.supply_kit].name
+    } else {
       lineItems.push({
-        label: `Supply Kit — ${kitName}`,
-        amount: kitPrice,
+        label: `Full Package (clean + LED + ${FULL_PACKAGE_KIT_NAME} kit)`,
+        amount: cleanCharge + upgrades,
       })
-      serviceSubtotal += kitPrice
     }
+  } else if (selection.led_package) {
+    upgrades = PRICING.addons.led_package
+    lineItems.push({ label: 'LED Package', amount: upgrades })
   }
 
-  const membershipPrice =
-    selection.membership === 'annual'
-      ? PRICING.membership.annual
-      : selection.membership === 'monthly'
-        ? PRICING.membership.monthly
-        : 0
-
-  if (membershipPrice > 0) {
-    lineItems.push({
-      label:
-        selection.membership === 'annual'
-          ? 'Storm Ready Annual membership'
-          : 'Storm Ready Monthly membership',
-      amount: membershipPrice,
-    })
+  let upgradeDiscount = 0
+  if (isMember && upgrades > 0) {
+    upgradeDiscount = memberUpgradeDiscount(upgrades)
+    lineItems.push({ label: 'Storm Ready member discount (10% off upgrades)', amount: upgradeDiscount })
   }
 
-  const total = serviceSubtotal + membershipPrice
-  const deposit = Math.round(total * PRICING.deposit_pct)
+  const total = cleanCharge + upgrades + upgradeDiscount
 
   return {
     shelterPrice,
-    addonsPrice: serviceSubtotal - shelterPrice,
-    serviceSubtotal,
-    membershipPrice,
+    addonsPrice: upgrades + upgradeDiscount,
+    serviceSubtotal: total,
+    membershipPrice: membership.price,
+    membershipLabel: membership.label,
+    isMemberVisit: isMember,
     total,
-    deposit,
+    deposit: calculateDeposit(total),
     isQuoteRequired: false,
     lineItems,
   }

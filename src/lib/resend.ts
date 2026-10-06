@@ -5,7 +5,7 @@ import { JobCompleteEmail } from '@/emails/JobCompleteEmail'
 import { MembershipReceiptEmail } from '@/emails/MembershipReceiptEmail'
 import { MembershipWelcomeEmail } from '@/emails/MembershipWelcomeEmail'
 import { getAppUrl } from '@/lib/twilio'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, PRICING } from '@/lib/utils'
 
 export interface SendEmailResult {
   id: string
@@ -130,7 +130,9 @@ export async function sendMembershipWelcomeEmail(
   const planLabel =
     params.plan === 'annual' ? 'Storm Ready — Annual' : 'Storm Ready — Monthly'
   const planPrice =
-    params.plan === 'annual' ? formatCurrency(249) : `${formatCurrency(24)}/mo`
+    params.plan === 'annual'
+      ? formatCurrency(PRICING.membership.annual)
+      : `${formatCurrency(PRICING.membership.monthly)}/mo`
 
   const { data, error } = await resend.emails.send({
     from: getFromEmail(),
@@ -158,6 +160,7 @@ export interface MembershipReceiptEmailParams {
   to: string
   customerName: string
   plan: 'annual' | 'monthly'
+  /** Integer cents (e.g. Stripe invoice.amount_paid). */
   amount: number
   paymentDate: string
   renewalDate: string

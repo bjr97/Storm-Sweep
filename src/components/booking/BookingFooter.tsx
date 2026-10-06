@@ -49,7 +49,7 @@ export function BookingFooter({
         ) : (
           <>
             <div className="mb-3 flex items-center justify-between gap-4">
-              <span className="font-body text-sm font-medium text-shelter">Total</span>
+              <span className="font-body text-sm font-medium text-shelter">Visit total</span>
               <span
                 className={cn(
                   'font-display text-2xl tracking-wide text-[var(--color-primary)] sm:text-3xl'
@@ -74,11 +74,31 @@ export function BookingFooter({
             </div>
 
             {pricing.deposit !== null ? (
-              <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3 font-body text-sm">
-                <span className="text-muted-foreground">Deposit due today (50%)</span>
-                <span className="font-semibold text-wheat-DEFAULT">
-                  {formatPriceDisplay(pricing.deposit)}
-                </span>
+              <div className="mt-3 space-y-1.5 border-t border-border/60 pt-3 font-body text-sm">
+                {pricing.membershipPrice > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {pricing.membershipLabel} membership
+                    </span>
+                    <span className="font-medium text-shelter">
+                      {formatPriceDisplay(pricing.membershipPrice)}
+                    </span>
+                  </div>
+                ) : null}
+                {pricing.deposit > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Visit deposit (50%)</span>
+                    <span className="font-medium text-shelter">
+                      {formatPriceDisplay(pricing.deposit)}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-shelter">Due today</span>
+                  <span className="font-semibold text-wheat-DEFAULT">
+                    {formatPriceDisplay(pricing.membershipPrice + pricing.deposit)}
+                  </span>
+                </div>
               </div>
             ) : null}
           </>

@@ -43,22 +43,12 @@ export const shelterSizeSchema = z.enum([
   'xlarge',
 ])
 
-export const supplyKitTierSchema = z.enum([
-  'none',
-  'starter',
-  'essential',
-  'family',
-  'pro',
-  'elite',
-])
-
 export const membershipTypeSchema = z.enum(['one_time', 'annual', 'monthly'])
 
 export const serviceSelectionSchema = z.object({
   shelter_size: shelterSizeSchema,
   deep_clean: z.boolean(),
   led_package: z.boolean(),
-  supply_kit: supplyKitTierSchema,
   full_package: z.boolean(),
   membership: membershipTypeSchema,
 })

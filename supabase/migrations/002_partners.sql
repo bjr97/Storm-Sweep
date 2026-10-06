@@ -1,4 +1,5 @@
 -- Migration 002 — partners
+-- All money columns are integer cents.
 
 create table if not exists public.partners (
   id uuid default gen_random_uuid() primary key,
@@ -7,7 +8,7 @@ create table if not exists public.partners (
   referral_code text unique not null,
   contact_name text,
   contact_phone text,
-  payout_per_referral integer default 20,
+  payout_per_referral integer default 2000,
   total_referrals integer default 0,
   total_payout_owed integer default 0,
   total_paid_out integer default 0,

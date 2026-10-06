@@ -6,14 +6,27 @@ import {
   type CustomerDetailsValues,
   type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
-import type { BookingPriceBreakdown } from '@/lib/booking/pricing'
-import { SUPPLY_KITS } from '@/lib/utils'
+import { getPrepKitBundle, priceKitSelection } from '@/lib/booking/prepKits'
+import { calculateBookingPrice, type BookingPriceBreakdown } from '@/lib/booking/pricing'
+import { formatCurrency, PRICING } from '@/lib/utils'
 
-const KIT_BUNDLE_LABELS: Record<NonNullable<KitSelection['selectedBundle']>, string> = {
-  storm_starter: 'Storm Starter',
-  family_ready: 'Family Ready',
-  pet_ready: 'Pet Ready',
-  full_house: 'Full House',
+/**
+ * List value of what's being delivered — the same services priced as a
+ * one-time visit (no membership coverage or member discounts). Sweeper pay
+ * is calculated on this so member visits pay the same as paid ones.
+ */
+function calculateServiceValue(
+  serviceSelection: ServiceSelectionValues,
+  kitSelection: KitSelection | null
+): number {
+  const base = calculateBookingPrice({ ...serviceSelection, membership: 'one_time' }).total ?? 0
+  const kit = kitSelection
+    ? priceKitSelection(kitSelection, {
+        membershipPlan: 'none',
+        includedBundle: serviceSelection.full_package ? PRICING.full_package_kit : null,
+      }).total
+    : 0
+  return base + kit
 }
 
 function kitServiceTypeLabel(kitSelection: KitSelection | null): string | null {
@@ -21,7 +34,7 @@ function kitServiceTypeLabel(kitSelection: KitSelection | null): string | null {
     return null
   }
   if (kitSelection.selectedBundle) {
-    return `Prep Kit — ${KIT_BUNDLE_LABELS[kitSelection.selectedBundle]}`
+    return `Prep Kit — ${getPrepKitBundle(kitSelection.selectedBundle).name}`
   }
   if (kitSelection.aLaCarteItems.length > 0) {
     return 'Prep Kit — Custom'
@@ -55,11 +68,6 @@ export function buildPaymentData(
     if (serviceSelection.led_package) {
       serviceTypes.push('LED Package')
     }
-    if (serviceSelection.supply_kit !== 'none') {
-      serviceTypes.push(
-        `Supply Kit — ${SUPPLY_KITS[serviceSelection.supply_kit].name}`
-      )
-    }
   }
 
   const kitLabel = kitServiceTypeLabel(kitSelection)
@@ -77,6 +85,8 @@ export function buildPaymentData(
       })),
     totalAmount: pricing.total,
     depositAmount: pricing.deposit,
+    serviceValue: calculateServiceValue(serviceSelection, kitSelection),
+    membershipVisit: pricing.isMemberVisit,
     customerName: formatCustomerFullName(customerValues),
     customerEmail: customerValues.email,
     customerPhone: customerValues.phone,
@@ -112,7 +122,7 @@ export function buildQuoteBookingPayload(
   const quoteNote = 'X-Large shelter — custom quote requested. Team will contact customer to confirm pricing.'
   const kitNote =
     kitSelection && kitSelection.kitTotal > 0
-      ? `Prep kit interest: ${kitServiceTypeLabel(kitSelection) ?? 'Custom kit'} ($${kitSelection.kitTotal})`
+      ? `Prep kit interest: ${kitServiceTypeLabel(kitSelection) ?? 'Custom kit'} (${formatCurrency(kitSelection.kitTotal)})`
       : null
   const notes = [customerValues.notes, kitNote, quoteNote].filter(Boolean).join('\n\n')
 
@@ -134,7 +144,8 @@ export function buildQuoteBookingPayload(
     serviceTypes: quoteServiceTypes,
     notes,
     referralSource,
-    totalAmount: 1,
+    totalAmount: 0, // quoted later by admin
+    membershipVisit: false,
     membershipPlan: 'none',
     photoGrade: photoResult?.grade,
     photoUrls: photoResult?.storage_path ? [photoResult.storage_path] : [],

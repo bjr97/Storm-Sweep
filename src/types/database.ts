@@ -59,6 +59,8 @@ export interface Database {
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           membership_renews_at: string | null
+          visits_used: number
+          membership_commitment_ends_at: string | null
           created_at: string
         }
         Insert: {
@@ -72,6 +74,8 @@ export interface Database {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           membership_renews_at?: string | null
+          visits_used?: number
+          membership_commitment_ends_at?: string | null
           created_at?: string
         }
         Update: {
@@ -85,6 +89,8 @@ export interface Database {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           membership_renews_at?: string | null
+          visits_used?: number
+          membership_commitment_ends_at?: string | null
           created_at?: string
         }
         Relationships: []
@@ -166,6 +172,8 @@ export interface Database {
           referral_source: string | null
           partner_id: string | null
           completed_at: string | null
+          membership_visit: boolean
+          service_value: number | null
           created_at: string
         }
         Insert: {
@@ -196,6 +204,8 @@ export interface Database {
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
+          membership_visit?: boolean
+          service_value?: number | null
           created_at?: string
         }
         Update: {
@@ -226,6 +236,8 @@ export interface Database {
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
+          membership_visit?: boolean
+          service_value?: number | null
           created_at?: string
         }
         Relationships: [

@@ -2,9 +2,11 @@ import { z } from 'zod'
 
 import type { ShelterSize } from '@/types/database'
 
+// All amounts are integer cents. Item prices may be negative (kit credits);
+// items are an order summary — payment providers only see the deposit.
 export const bookingItemSchema = z.object({
   name: z.string().min(1),
-  price: z.number().positive(),
+  price: z.number().int(),
   quantity: z.number().int().positive().default(1),
 })
 
@@ -18,7 +20,12 @@ export const bookingPayloadSchema = z.object({
   serviceTypes: z.array(z.string()).min(1),
   notes: z.string().optional(),
   referralSource: z.string().optional(),
-  totalAmount: z.number().positive(),
+  /** What the customer pays for this visit. Excludes the membership; can be 0 for a member clean. */
+  totalAmount: z.number().int().nonnegative(),
+  /** List value of the services delivered, before membership coverage — basis for sweeper pay. */
+  serviceValue: z.number().int().nonnegative().optional(),
+  /** Clean is covered by Storm Ready (counts toward visits_used). */
+  membershipVisit: z.boolean().default(false),
   membershipPlan: z.enum(['none', 'annual', 'monthly']).default('none'),
   photoGrade: z.string().optional(),
   photoUrls: z.array(z.string()).optional(),

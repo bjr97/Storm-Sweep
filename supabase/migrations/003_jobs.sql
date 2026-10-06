@@ -1,4 +1,5 @@
 -- Migration 003 — jobs
+-- All money columns (total_amount, deposit_amount, photo_surcharge) are integer cents.
 
 create table if not exists public.jobs (
   id uuid default gen_random_uuid() primary key,

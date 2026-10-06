@@ -1,5 +1,5 @@
 import { sendBookingConfirmationEmail } from '@/lib/resend'
-import { PRICING } from '@/lib/utils'
+import { calculateDeposit } from '@/lib/utils'
 import { createServiceClient } from '@/lib/supabase/server'
 import {
   formatJobDate,
@@ -114,7 +114,7 @@ export async function createJobFromBooking(
 
   const customerId = await resolveCustomerId(payload)
   const partnerId = await resolvePartnerId(payload.referralSource)
-  const depositAmount = Math.round(payload.totalAmount * PRICING.deposit_pct)
+  const depositAmount = calculateDeposit(payload.totalAmount)
 
   const photoApproved =
     !payload.photoGrade || ['A', 'B'].includes(payload.photoGrade.toUpperCase())
@@ -140,12 +140,28 @@ export async function createJobFromBooking(
       photo_approved: photoApproved,
       referral_source: payload.referralSource ?? null,
       partner_id: partnerId,
+      membership_visit: payload.membershipVisit,
+      service_value: payload.serviceValue ?? payload.totalAmount,
     })
     .select()
     .single()
 
   if (error || !job) {
     throw error ?? new Error('Failed to create job')
+  }
+
+  if (payload.membershipVisit && paymentStatus !== 'unpaid') {
+    // Count this clean toward the member's 2 included visits. Callers dedupe
+    // on the Stripe session, so this runs once per booking.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('visits_used')
+      .eq('id', customerId)
+      .single()
+    await supabase
+      .from('profiles')
+      .update({ visits_used: (profile?.visits_used ?? 0) + 1 })
+      .eq('id', customerId)
   }
 
   if (paymentStatus !== 'unpaid') {

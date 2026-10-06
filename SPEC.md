@@ -1,5 +1,5 @@
 # STORM SWEEP — PROJECT SPECIFICATION
-# Version: 1.0 | Last Updated: May 2026
+# Version: 1.0 | Last Updated: October 2026
 # For use with: Claude Code + Cursor + Vercel + Supabase
 # ================================================================
 
@@ -13,7 +13,7 @@ in-ground garage storm shelters.
 ### Business Model
 - One-time service visits ($129–$299+ depending on shelter size + services)
 - Annual Storm Ready membership ($249/yr or $24/mo — customer chooses at checkout)
-- Upgrade add-ons: LED lighting ($89), supply kits ($29–$149 in 5 tiers), 
+- Upgrade add-ons: LED lighting ($89), prep kits ($24 à la carte, $79–$149 bundles), 
   door/hardware upgrades (quoted on-site)
 - Independent contractor Sweepers paid 60–68% of job revenue based on 
   accept speed + turnaround bonuses
@@ -25,7 +25,7 @@ in-ground garage storm shelters.
 - Expand to Moore, Midwest City, OKC metro in year 2
 
 ### Soft Launch Target
-June 16, 2026
+November 15, 2026 — opens booking ahead of New Year scheduling
 
 ---
 
@@ -564,7 +564,7 @@ storm-sweep/
 ---
 
 ### PHASE 1 — Foundation & Public Site
-**Target: June 1–8, 2026**
+**Target: finish by Oct 19, 2026 (Phase 1 code built; services still to connect)**
 **Goal: Working website + booking + sweeper onboarding + payment**
 
 #### 1.1 — Project Initialization
@@ -617,7 +617,10 @@ variants or alternate placements.
 **Step 1 — Service Selection**
 - Shelter size selector (small $129 / standard $149 / large $179)
 - Service type checkboxes: Deep Clean, LED Package (+$89), Full Package
-- Membership option: One-time visit OR Storm Ready annual ($249) OR monthly ($24/mo)
+- Membership option: One-time visit OR Storm Ready annual ($249) OR monthly ($24/mo,
+  12-month commitment). Joining covers this visit's clean (visit 1 of 2, up to standard
+  size). The membership is billed only as the Stripe subscription — never added to the
+  visit total or deposit.
 - Dynamic price calculation as selections change
 - No Back button (first step); Continue only
 
@@ -737,11 +740,11 @@ Build React Email templates for:
 ---
 
 ### PHASE 2 — Sweeper App + Admin Core
-**Target: June 8–14, 2026**
+**Target: Oct 20 – Nov 2, 2026**
 **Goal: Sweepers can manage jobs. Admin can see everything.**
 
 #### 2.1 — Sweeper Dashboard (`/sweeper`)
-Mobile-first dark theme. Reference: `planning-docs/admin-app.html`
+Mobile-first dark theme. No design doc yet — follow `planning-docs/super-admin-dash.html` styling.
 
 Components:
 - Online/Offline toggle (updates sweeper availability in profiles table)
@@ -808,10 +811,10 @@ Main dashboard widgets:
 ---
 
 ### PHASE 3 — Customer Portal + Memberships
-**Target: June 14–21, 2026**
+**Target: Nov 3 – Nov 14, 2026**
 
 #### 3.1 — Customer Dashboard (`/dashboard`)
-Light cream theme. Reference: `planning-docs/customer-portal.html`
+Light cream theme. No design doc yet — follow `planning-docs/website-dark.html` styling.
 - Welcome band with membership status pill
 - Quick stats: total visits, upcoming, discount %
 - Next service card with reschedule/add-upgrade actions
@@ -842,7 +845,7 @@ Stripe Subscriptions setup:
 ---
 
 ### PHASE 4 — Polish, Analytics & Growth
-**Target: June 21+, Post-Launch**
+**Target: Nov 15+, Post-Launch**
 
 #### 4.1 — Admin Revenue Charts
 Supabase aggregation queries for revenue by week/month/service type
@@ -956,57 +959,22 @@ const SMS_TEMPLATES = {
 
 ## PRICING CONSTANTS
 
-```typescript
-// src/lib/utils.ts
-export const PRICING = {
-  shelter: {
-    small: 129,
-    standard: 149,
-    large: 179,
-    xlarge: null, // quoted
-  },
-  addons: {
-    led_package: 89,
-    supply_kit_starter: 29,
-    supply_kit_essential: 49,
-    supply_kit_family: 79,
-    supply_kit_pro: 109,
-    supply_kit_elite: 149,
-    interior_handle: 45,
-    hinge_service: 35,
-    lock_replacement: 65,
-    extension_cord: 15,
-  },
-  membership: {
-    annual: 249,
-    monthly: 24,
-  },
-  bundles: {
-    clean_plus_led: 219,        // standard clean + LED
-    clean_plus_kit_basic: 179,  // standard + essential kit
-    full_package: 299,           // clean + LED + standard kit
-  },
-  sweeper: {
-    base_pct: 0.60,
-    accept_1hr_pct: 0.68,
-    accept_4hr_pct: 0.64,
-    accept_24hr_pct: 0.62,
-    turnaround_same_day: 25,
-    turnaround_day_1: 20,
-    turnaround_day_2: 10,
-    turnaround_day_3: 5,
-    upgrade_commission: 15,
-    video_bonus: 10,
-  },
-  referral: {
-    customer_credit: 25,
-    partner_roofing: 20,
-    partner_realtor: 25,
-    partner_lawn: 15,
-  },
-  deposit_pct: 0.50, // 50% deposit at booking
-}
-```
+Source of truth: `PRICING` in `src/lib/utils.ts`. **All amounts are integer cents**
+(DB columns, booking totals, API payloads). Display via `formatCurrency(cents)`.
+
+| Item | Price |
+|---|---|
+| Deep clean — small / standard / large | $129 / $149 / $179 (x-large quoted) |
+| LED package | $89 |
+| Clean + LED bundle | $219 |
+| Full Package (standard clean + LED + Storm Starter kit) | $299, size-adjusted |
+| Storm Ready membership | $249/yr or $24/mo |
+| Door/hardware: interior handle / hinge / lock / extension cord | $45 / $35 / $65 / $15 |
+| Member discount on upgrades | 10% |
+| Deposit at booking | 50% (balance = total − deposit) |
+
+Sweeper pay (60–68% by accept speed, turnaround/upgrade/video bonuses) and referral
+payouts are also in `PRICING` — see CLAUDE.md business rules.
 
 ---
 
@@ -1057,32 +1025,21 @@ export const CHECKLIST_ITEMS = [
 
 ---
 
-## SUPPLY KIT TIERS
+## PREP KITS (Booking Step 2)
 
-```typescript
-export const SUPPLY_KITS = {
-  starter: {
-    name: 'Starter Kit', price: 29,
-    items: ['1L water (2-pack)', 'Mini first aid kit', 'Emergency whistle', 'LED keychain flashlight', 'Storm Sweep checklist card']
-  },
-  essential: {
-    name: 'Essential Kit', price: 49,
-    items: ['2L water (3-pack)', 'Standard first aid kit', 'Hand-crank weather radio', 'Emergency mylar blankets (2)', 'USB power bank 5000mAh', 'Universal phone cable']
-  },
-  family: {
-    name: 'Family Kit', price: 79,
-    items: ['Everything in Essential', 'Extra water (6-pack total)', '3-day food bars (2 person)', 'Baby/toddler comfort items', 'Extra mylar blankets (4)', 'Dust masks (4-pack)', 'Glow sticks (6-pack)']
-  },
-  pro: {
-    name: 'Pro Kit', price: 109,
-    items: ['Everything in Family', '72-hr water supply (family of 4)', 'Full first aid with trauma items', 'Hand-crank + solar radio/flashlight', '20,000mAh power bank', 'Multi-tool', 'Waterproof document pouch', 'N95 masks (4-pack)']
-  },
-  elite: {
-    name: 'Storm Ready Elite', price: 149,
-    items: ['Everything in Pro', '7-day water supply', '72-hr emergency food (4 person)', 'Portable toilet kit', 'Cash envelope ($20 small bills)', 'Extra medication organizer', 'Kids activity/comfort pack', 'Laminated family emergency card', 'Storm Sweep branded storage bin']
-  }
-}
-```
+Source of truth: `PRICING.kits`, `PREP_KIT_BUNDLES`, `PREP_KIT_ITEMS` in
+`src/lib/utils.ts`; pricing math in `src/lib/booking/prepKits.ts`.
+(Supersedes the original 5-tier Starter→Elite kits.)
+
+| Bundle | Price | Contents |
+|---|---|---|
+| Storm Starter | $79 | Shelter Ready + Hygiene |
+| Family Ready | $89 | + age-matched kids pack |
+| Pet Ready | $89 | + pet supplies |
+| Full House | $149 | kids + pets |
+
+À la carte: Shelter Ready $59 · Little Ones $49 · Pets $39 · Hygiene $24.
+Full Package includes Storm Starter; upgrading charges only the difference.
 
 ---
 
@@ -1098,7 +1055,7 @@ export const SUPPLY_KITS = {
 8. **Off-platform solicitation:** Sweeper soliciting customers outside the app = immediate IC termination
 9. **Turnaround timing:** Measured from booking creation timestamp to job completed_at timestamp
 10. **Partner referral:** referral_code in booking URL param auto-populates referral_source and sets partner_id on job record
-11. **Membership deposit:** Members use 1 of their 2 annual visits per booking; tracked via visits_used counter on profiles
+11. **Membership visits:** The fee includes 2 cleanings/yr (up to standard size; large pays the difference). Each member booking uses 1 visit (`visits_used` on profiles); the signup booking is visit #1. Upgrades 10% off. Sweeper pay uses `jobs.service_value` (list price), not `total_amount`.
 
 ---
 
@@ -1121,7 +1078,7 @@ The `ref` param auto-populates referral_source in the booking form and links to 
 
 ## LAUNCH CHECKLIST
 
-Before going live on June 16:
+Before going live on November 15:
 
 ### Legal
 - [ ] File Storm Sweep LLC — Oklahoma Secretary of State (sos.ok.gov) — $100

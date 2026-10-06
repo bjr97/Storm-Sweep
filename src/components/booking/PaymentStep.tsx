@@ -34,6 +34,8 @@ function toBookingPayload(booking: BookingPaymentData): BookingPayload {
     notes,
     referralSource,
     totalAmount,
+    serviceValue,
+    membershipVisit,
     membershipPlan,
     photoGrade,
     photoUrls,
@@ -51,6 +53,8 @@ function toBookingPayload(booking: BookingPaymentData): BookingPayload {
     notes,
     referralSource,
     totalAmount,
+    serviceValue,
+    membershipVisit,
     membershipPlan,
     photoGrade,
     photoUrls,
@@ -68,6 +72,13 @@ export function PaymentStep({
 
   const balanceDue = booking.totalAmount - booking.depositAmount
   const isMembership = booking.membershipPlan !== 'none'
+  const membershipPrice =
+    booking.membershipPlan === 'annual'
+      ? PRICING.membership.annual
+      : booking.membershipPlan === 'monthly'
+        ? PRICING.membership.monthly
+        : 0
+  const dueToday = membershipPrice + booking.depositAmount
 
   async function handleStripeCheckout(): Promise<void> {
     setError(null)
@@ -161,8 +172,9 @@ export function PaymentStep({
           PAYMENT
         </h2>
         <p className="mt-1 font-['Barlow'] text-muted-foreground">
-          Pay your {Math.round(PRICING.deposit_pct * 100)}% deposit now. Balance
-          of {formatCurrency(balanceDue)} is due after your visit.
+          {booking.totalAmount === 0
+            ? `${formatCurrency(dueToday)} today for your membership — this visit is covered.`
+            : `${formatCurrency(dueToday)} due today. Balance of ${formatCurrency(balanceDue)} is due after your visit.`}
         </p>
       </div>
 
@@ -195,18 +207,34 @@ export function PaymentStep({
 
           <div className="space-y-2 border-t pt-4 text-sm">
             <div className="flex justify-between">
-              <span>Total</span>
+              <span>Visit total</span>
               <span className="font-semibold">
                 {formatCurrency(booking.totalAmount)}
               </span>
             </div>
+            {isMembership ? (
+              <div className="flex justify-between">
+                <span>
+                  {booking.membershipPlan === 'annual'
+                    ? 'Storm Ready Annual (billed yearly)'
+                    : 'Storm Ready Monthly (first month)'}
+                </span>
+                <span className="font-semibold">{formatCurrency(membershipPrice)}</span>
+              </div>
+            ) : null}
+            {booking.depositAmount > 0 ? (
+              <div className="flex justify-between">
+                <span>
+                  Visit deposit ({Math.round(PRICING.deposit_pct * 100)}%)
+                </span>
+                <span className="font-semibold">
+                  {formatCurrency(booking.depositAmount)}
+                </span>
+              </div>
+            ) : null}
             <div className="flex justify-between text-sky">
-              <span>
-                Deposit due today ({Math.round(PRICING.deposit_pct * 100)}%)
-              </span>
-              <span className="font-semibold">
-                {formatCurrency(booking.depositAmount)}
-              </span>
+              <span className="font-semibold">Due today</span>
+              <span className="font-semibold">{formatCurrency(dueToday)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Balance after service</span>
@@ -217,12 +245,14 @@ export function PaymentStep({
           {isMembership ? (
             <div className="rounded-lg border border-wheat/40 bg-wheat-pale px-4 py-3 text-sm text-shelter">
               <p className="font-semibold text-wheat">
-                Storm Ready membership included
+                Storm Ready membership
               </p>
               <p className="mt-1 text-muted-foreground">
-                Your {booking.membershipPlan === 'annual' ? 'annual' : 'monthly'}{' '}
-                Storm Ready plan will be activated with this booking. Members get
-                2 visits per year and 10% off upgrades.
+                Includes {PRICING.membership.visits_per_year} cleanings a year —
+                today&apos;s visit is #1 — plus 10% off upgrades.
+                {booking.membershipPlan === 'monthly'
+                  ? ` Monthly is a ${PRICING.membership.monthly_commitment_months}-month commitment (${formatCurrency(PRICING.membership.monthly)}/mo).`
+                  : ''}
               </p>
             </div>
           ) : null}

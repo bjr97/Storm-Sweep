@@ -1,4 +1,5 @@
 import { getAppUrl } from '@/lib/stripe'
+import { centsToDollarString } from '@/lib/utils'
 
 type PayPalAccessTokenResponse = {
   access_token: string
@@ -55,6 +56,7 @@ export async function getPayPalAccessToken(): Promise<string> {
   return data.access_token
 }
 
+/** Amounts are integer cents; converted to dollar strings for the PayPal API. */
 export type PayPalOrderItem = {
   name: string
   unit_amount: number
@@ -81,11 +83,11 @@ export async function createPayPalOrder(params: {
         {
           amount: {
             currency_code: 'USD',
-            value: params.amount.toFixed(2),
+            value: centsToDollarString(params.amount),
             breakdown: {
               item_total: {
                 currency_code: 'USD',
-                value: params.amount.toFixed(2),
+                value: centsToDollarString(params.amount),
               },
             },
           },
@@ -94,7 +96,7 @@ export async function createPayPalOrder(params: {
             quantity: String(item.quantity),
             unit_amount: {
               currency_code: 'USD',
-              value: item.unit_amount.toFixed(2),
+              value: centsToDollarString(item.unit_amount),
             },
             category: 'DIGITAL_GOODS',
           })),

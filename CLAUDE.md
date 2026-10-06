@@ -47,6 +47,12 @@ Planning documents: see /planning-docs/*.html (open in browser)
 - Never use `any` — use `unknown` and narrow
 - Use Zod schemas for all form validation and API input validation
 
+### Money
+- ALL money is integer **cents**: `PRICING`, DB columns, booking totals, API payloads
+- Display with `formatCurrency(cents)` → "$149" / "$80.10"; PayPal needs `centsToDollarString()`; Stripe takes cents directly
+- Apply percentages (deposit, member discount) then round to a whole cent; deposit = `calculateDeposit(total)`, balance = total − deposit
+- Prep kit prices/catalog: `PRICING.kits` + `PREP_KIT_BUNDLES` / `PREP_KIT_ITEMS`; kit math via `priceKitSelection()` in `src/lib/booking/prepKits.ts`
+
 ### Components
 - Use Server Components by default
 - Add `'use client'` only when needed (event handlers, hooks, browser APIs)
@@ -137,8 +143,8 @@ Font UI: font-['Barlow_Condensed'] or font-['Barlow']
 
 ### Design references (open in browser to see exact designs)
 - Public website: `planning-docs/website-dark.html`
-- Customer portal: `planning-docs/customer-portal.html`
-- Sweeper app: `planning-docs/admin-app.html`
+- Customer portal: no design doc yet — follow website-dark.html styling in the light theme
+- Sweeper app: no design doc yet — follow super-admin-dash.html styling, mobile-first
 - Admin dashboard: `planning-docs/super-admin-dash.html`
 
 ### Theme rules
@@ -214,8 +220,16 @@ Customer Details (Step 3) specifics:
 7. **Partner referrals:** When `?ref=CODE` param present at booking,
    look up partner by referral_code, set partner_id on job record.
 
-8. **Membership visits:** Storm Ready = 2 visits/yr. Track visits_used 
-   on profiles. Members always get 10% off upgrades (apply at checkout).
+8. **Membership visits:** Storm Ready = 2 cleanings/yr INCLUDED in the fee.
+   The visit booked at signup is #1 (clean = $0; covers up to standard size,
+   large pays the $30 difference). Track `visits_used` on profiles.
+   Members get 10% off upgrades (LED, Full Package upgrades, prep kits).
+   The membership is billed ONLY as the Stripe subscription — never add it to
+   the booking total or the 50% deposit (that double-charged members before).
+   Monthly = 12-month commitment (`membership_commitment_ends_at`); never
+   advertise "cancel anytime" for monthly.
+   Sweeper pay on member visits uses `jobs.service_value` (list price), not
+   `total_amount` (what the customer paid).
 
 ---
 

@@ -14,139 +14,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { cn, formatCurrency } from '@/lib/utils'
+import {
+  getPrepKitBundle,
+  priceKitSelection,
+  type KitMembershipPlan,
+  type KitSelection,
+} from '@/lib/booking/prepKits'
+import {
+  cn,
+  formatCurrency,
+  PREP_KIT_BUNDLES,
+  PREP_KIT_ITEMS,
+  prepKitBundleSavings,
+  type PrepKitBundleId,
+  type PrepKitItemId,
+} from '@/lib/utils'
 import { toast } from 'sonner'
 
-export interface KitSelection {
-  selectedBundle: 'storm_starter' | 'family_ready' | 'pet_ready' | 'full_house' | null
-  aLaCarteItems: string[]
-  ageSelector: 'infant' | 'toddler' | 'big_kid' | null
-  petSizeSelector: 'small_breed' | 'large_breed' | 'cat' | null
-  kitTotal: number
-}
+export type { KitSelection } from '@/lib/booking/prepKits'
 
 export interface KitSelectorProps {
   shelterSize: 'small' | 'standard' | 'large' | 'xlarge'
-  membershipPlan: 'none' | 'annual' | 'monthly' | 'annual_2yr'
+  membershipPlan: KitMembershipPlan
+  /** Bundle already included (Full Package). Pre-selected and credited. */
+  includedBundle?: PrepKitBundleId | null
   onSelect: (selection: KitSelection) => void
   onSkip: () => void
 }
 
-const SHELTER_READY_KIT_DISCOUNT = 59
-
-const BUNDLES = [
-  {
-    id: 'storm_starter',
-    name: 'Storm Starter',
-    emoji: '🌪️',
-    price: 79,
-    savings: 4,
-    tagline: 'The essentials. No fluff.',
-    popular: false,
-    includes: ['shelter_ready', 'hygiene'],
-    items: [
-      'Hand-crank power bank',
-      'Basic first aid kit',
-      'Waterproof document pouch',
-      'Laminated emergency card',
-      'Mylar blankets (2)',
-      'Whistle + glow sticks',
-      'Toothbrush + travel toothpaste',
-      'Wet wipes + hand sanitizer',
-    ],
-  },
-  {
-    id: 'family_ready',
-    name: 'Family Ready',
-    emoji: '👨‍👩‍👧',
-    price: 89,
-    savings: 23,
-    tagline: 'For the household that actually has a lot going on.',
-    popular: true,
-    includes: ['shelter_ready', 'little_ones', 'hygiene'],
-    requiresSelector: ['age'],
-    items: [
-      'Everything in Storm Starter',
-      'Age-matched kids pack (select below)',
-      'Snacks, comfort item, activity kit or infant supplies',
-    ],
-  },
-  {
-    id: 'pet_ready',
-    name: 'Pet Ready',
-    emoji: '🐾',
-    price: 89,
-    savings: 13,
-    tagline: "You already know they're coming down there with you.",
-    popular: false,
-    includes: ['shelter_ready', 'pets', 'hygiene'],
-    requiresSelector: ['pet_size'],
-    items: [
-      'Everything in Storm Starter',
-      '2-day pet food supply',
-      'Collapsible bowl + backup leash',
-      'Waste bags (6-pack)',
-    ],
-  },
-  {
-    id: 'full_house',
-    name: 'Full House',
-    emoji: '🏠',
-    price: 149,
-    savings: 22,
-    tagline: 'Kids, pets, adults. Every scenario. One box.',
-    popular: false,
-    includes: ['shelter_ready', 'little_ones', 'pets', 'hygiene'],
-    requiresSelector: ['age', 'pet_size'],
-    items: [
-      'Everything in Storm Starter',
-      'Age-matched kids pack',
-      'Pet food, bowl, leash, waste bags',
-    ],
-  },
-] as const
-
-const A_LA_CARTE_ITEMS = [
-  {
-    id: 'shelter_ready',
-    name: 'Shelter Ready Kit',
-    emoji: '🌪️',
-    price: 59,
-    desc: 'Power bank, first aid, docs pouch, mylar blankets, whistle, glow sticks, wipes',
-  },
-  {
-    id: 'little_ones',
-    name: 'Little Ones',
-    emoji: '🧒',
-    price: 49,
-    desc: 'Age-matched comfort pack — infant, toddler, or big kid',
-  },
-  {
-    id: 'pets',
-    name: 'Pets Add-on',
-    emoji: '🐾',
-    price: 39,
-    desc: '2-day food supply, collapsible bowl, backup leash, waste bags',
-  },
-  {
-    id: 'hygiene',
-    name: 'Hygiene Pack',
-    emoji: '🧼',
-    price: 24,
-    desc: 'Toothbrush, toothpaste, wipes, hand sanitizer, tissues, waste bags',
-  },
-]
+const BUNDLES = PREP_KIT_BUNDLES
+const A_LA_CARTE_ITEMS = PREP_KIT_ITEMS
 
 type BundleId = (typeof BUNDLES)[number]['id']
 type AgeSelector = NonNullable<KitSelection['ageSelector']>
 type PetSizeSelector = NonNullable<KitSelection['petSizeSelector']>
-
-function getDisplayPrice(
-  price: number,
-  membershipPlan: KitSelectorProps['membershipPlan']
-): number {
-  return membershipPlan === 'annual_2yr' ? price - SHELTER_READY_KIT_DISCOUNT : price
-}
 
 function bundleIncludes(
   bundle: (typeof BUNDLES)[number] | null | undefined,
@@ -161,9 +62,7 @@ function bundleRequiresSelector(
   selector: 'age' | 'pet_size'
 ): boolean {
   if (!bundleId) return false
-  const bundle = BUNDLES.find((b) => b.id === bundleId)
-  if (!bundle || !('requiresSelector' in bundle)) return false
-  return (bundle.requiresSelector as readonly string[]).includes(selector)
+  return (getPrepKitBundle(bundleId).requiresSelector as readonly string[]).includes(selector)
 }
 
 export function canProceedWithKit(kitSelection: KitSelection): boolean {
@@ -191,11 +90,13 @@ export function canProceedWithKit(kitSelection: KitSelection): boolean {
 export function KitSelector({
   shelterSize,
   membershipPlan,
+  includedBundle = null,
   onSelect,
   onSkip,
 }: KitSelectorProps): React.ReactElement {
-  const [selectedBundle, setSelectedBundle] = useState<KitSelection['selectedBundle']>(null)
-  const [aLaCarteItems, setALaCarteItems] = useState<string[]>([])
+  const [selectedBundle, setSelectedBundle] =
+    useState<KitSelection['selectedBundle']>(includedBundle)
+  const [aLaCarteItems, setALaCarteItems] = useState<PrepKitItemId[]>([])
   const [showALaCarte, setShowALaCarte] = useState(false)
   const [ageSelector, setAgeSelector] = useState<KitSelection['ageSelector']>(null)
   const [petSizeSelector, setPetSizeSelector] = useState<KitSelection['petSizeSelector']>(null)
@@ -205,20 +106,18 @@ export function KitSelector({
 
   const activeBundle = selectedBundle ? BUNDLES.find((b) => b.id === selectedBundle) : null
 
-  function calculateALaCarteTotal(items: string[]): number {
-    let total = items.reduce((sum, id) => {
-      const item = A_LA_CARTE_ITEMS.find((i) => i.id === id)
-      return sum + (item?.price ?? 0)
-    }, 0)
-    if (has2yrPlan && items.includes('shelter_ready')) {
-      total -= SHELTER_READY_KIT_DISCOUNT
-    }
-    return total
+  const pricingOptions = { membershipPlan, includedBundle }
+
+  function calculateALaCarteTotal(items: PrepKitItemId[]): number {
+    return priceKitSelection({ selectedBundle: null, aLaCarteItems: items }, pricingOptions).total
   }
 
-  const kitTotal = selectedBundle
-    ? (activeBundle?.price ?? 0)
-    : calculateALaCarteTotal(aLaCarteItems)
+  function bundleDisplayPrice(bundleId: PrepKitBundleId): number {
+    return priceKitSelection({ selectedBundle: bundleId, aLaCarteItems: [] }, pricingOptions)
+      .total
+  }
+
+  const kitTotal = priceKitSelection({ selectedBundle, aLaCarteItems }, pricingOptions).total
 
   const showAgeSelector =
     bundleIncludes(activeBundle, 'little_ones') || aLaCarteItems.includes('little_ones')
@@ -247,7 +146,7 @@ export function KitSelector({
     })
   }, [selectedBundle, aLaCarteItems, ageSelector, petSizeSelector, kitTotal, onSelect])
 
-  function tryAutoBundle(items: string[]): boolean {
+  function tryAutoBundle(items: PrepKitItemId[]): boolean {
     const sorted = [...items].sort()
     const matchedBundle = BUNDLES.find((bundle) => {
       const includes = [...bundle.includes].sort()
@@ -262,7 +161,7 @@ export function KitSelector({
     setALaCarteItems([])
     setShowALaCarte(false)
     toast.success(
-      `Nice — we switched you to ${matchedBundle.name} and saved you $${matchedBundle.savings}! 🎉`
+      `Nice — we switched you to ${matchedBundle.name} and saved you ${formatCurrency(prepKitBundleSavings(matchedBundle))}! 🎉`
     )
     return true
   }
@@ -280,7 +179,7 @@ export function KitSelector({
     }
   }
 
-  function handleALaCarteToggle(itemId: string): void {
+  function handleALaCarteToggle(itemId: PrepKitItemId): void {
     if (has2yrPlan && itemId === 'shelter_ready') return
 
     const next = aLaCarteItems.includes(itemId)
@@ -293,7 +192,14 @@ export function KitSelector({
   }
 
   function handleBundleSelect(bundleId: BundleId): void {
-    setSelectedBundle(selectedBundle === bundleId ? null : bundleId)
+    if (selectedBundle === bundleId) {
+      // The Full Package kit can be swapped for an upgrade, but not removed.
+      if (bundleId !== includedBundle) {
+        setSelectedBundle(includedBundle)
+      }
+      return
+    }
+    setSelectedBundle(bundleId)
   }
 
   function handleAgeChange(value: AgeSelector): void {
@@ -321,6 +227,13 @@ export function KitSelector({
           Your Sweeper can install your kit same visit. No extra trip.
         </p>
       </section>
+
+      {includedBundle ? (
+        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          Your Full Package already includes the {getPrepKitBundle(includedBundle).name} kit.
+          Want more? Upgrade below and pay only the difference.
+        </div>
+      ) : null}
 
       {has2yrPlan ? (
         <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
@@ -366,11 +279,19 @@ export function KitSelector({
 
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-['Barlow_Condensed'] text-3xl font-bold text-shelter">
-                    {formatCurrency(getDisplayPrice(bundle.price, membershipPlan))}
+                    {bundle.id === includedBundle
+                      ? 'Included'
+                      : `${includedBundle ? '+' : ''}${formatCurrency(bundleDisplayPrice(bundle.id))}`}
                   </span>
-                  <Badge className="rounded bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 hover:bg-green-100">
-                    save ${bundle.savings}
-                  </Badge>
+                  {bundle.id === includedBundle ? (
+                    <Badge className="rounded bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 hover:bg-green-100">
+                      with Full Package
+                    </Badge>
+                  ) : includedBundle ? null : (
+                    <Badge className="rounded bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 hover:bg-green-100">
+                      save {formatCurrency(prepKitBundleSavings(bundle))}
+                    </Badge>
+                  )}
                 </div>
 
                 <p className="text-sm text-muted-foreground">{bundle.tagline}</p>

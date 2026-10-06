@@ -74,7 +74,8 @@ export function MembershipReceiptEmail({
 
           <Text style={paragraph}>
             Your membership renews automatically via Stripe. Manage billing,
-            update payment methods, or cancel anytime from your portal.
+            update payment methods, or manage your plan from your portal.
+            Monthly plans carry a 12-month commitment.
           </Text>
 
           <Button style={button} href={portalUrl}>

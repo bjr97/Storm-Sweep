@@ -7,6 +7,7 @@ import {
 import { parseBookingMetadata } from '@/lib/bookings/types'
 import { getStripe } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase/server'
+import { PRICING } from '@/lib/utils'
 
 export const runtime = 'nodejs'
 
@@ -28,9 +29,20 @@ async function handleCheckoutCompleted(
 
   await createJobFromBooking({
     payload: booking,
-    paymentStatus: 'deposit_paid',
+    // A covered member clean with no add-ons has nothing left to collect.
+    paymentStatus: booking.totalAmount === 0 ? 'paid' : 'deposit_paid',
     stripePaymentIntentId: session.id,
   })
+
+  // customer.subscription.created can arrive BEFORE this event, when the
+  // customer's account doesn't exist yet (createJobFromBooking creates it).
+  // Re-sync here so the membership is activated either way. Idempotent.
+  if (session.subscription) {
+    const subscriptionId =
+      typeof session.subscription === 'string' ? session.subscription : session.subscription.id
+    const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
+    await handleSubscriptionCreated(subscription)
+  }
 }
 
 async function handleSubscriptionCreated(
@@ -114,6 +126,15 @@ async function handleSubscriptionCreated(
           ? new Date(periodEnd * 1000).toISOString()
           : null
       })(),
+      // Monthly = 12-month term starting when the subscription starts.
+      membership_commitment_ends_at:
+        plan === 'monthly'
+          ? (() => {
+              const end = new Date(subscription.start_date * 1000)
+              end.setMonth(end.getMonth() + PRICING.membership.monthly_commitment_months)
+              return end.toISOString()
+            })()
+          : null,
     })
     .eq('id', userId)
 }

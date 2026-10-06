@@ -5,7 +5,7 @@ import {
   serializeBookingMetadata,
 } from '@/lib/bookings/types'
 import { getAppUrl, getStripe } from '@/lib/stripe'
-import { PRICING } from '@/lib/utils'
+import { calculateDeposit, formatCurrency, PRICING } from '@/lib/utils'
 
 function buildDepositLineItem(
   depositAmount: number,
@@ -22,7 +22,7 @@ function buildDepositLineItem(
   return {
     price_data: {
       currency: 'usd',
-      unit_amount: Math.round(depositAmount * 100),
+      unit_amount: depositAmount, // already cents
       product_data: {
         name: `Service deposit (${depositPct}%)`,
         description: description.slice(0, 500),
@@ -33,11 +33,11 @@ function buildDepositLineItem(
 }
 
 const checkoutSchema = z.object({
-  amount: z.number().positive(),
+  amount: z.number().int().nonnegative(), // visit deposit, cents (0 for a covered member clean)
   items: z.array(
     z.object({
       name: z.string().min(1),
-      price: z.number().positive(),
+      price: z.number().int(), // cents; negative for credits
       quantity: z.number().int().positive().default(1),
     })
   ),
@@ -73,9 +73,9 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     const booking = bookingResult.data
-    const depositAmount = Math.round(booking.totalAmount * PRICING.deposit_pct)
+    const depositAmount = calculateDeposit(booking.totalAmount)
 
-    if (Math.abs(amount - depositAmount) > 0.01) {
+    if (amount !== depositAmount) {
       return Response.json(
         {
           error: `Deposit must be ${PRICING.deposit_pct * 100}% of total (${depositAmount})`,
@@ -93,7 +93,9 @@ export async function POST(req: Request): Promise<Response> {
         item.quantity > 1 ? `${item.name} × ${item.quantity}` : item.name
       )
       .join(' · ')
-    const depositLineItem = buildDepositLineItem(depositAmount, orderSummary)
+    // A member clean with no add-ons has no visit deposit — only the subscription.
+    const depositLineItems =
+      depositAmount > 0 ? [buildDepositLineItem(depositAmount, orderSummary)] : []
 
     const sessionMetadata = {
       ...serializeBookingMetadata(booking),
@@ -102,50 +104,63 @@ export async function POST(req: Request): Promise<Response> {
       ...metadata,
     }
 
-    const sessionParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
+    const baseParams = {
       customer_email: customerEmail,
-      line_items: [depositLineItem],
-      mode: 'payment',
       success_url: `${appUrl}/book/confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/book`,
       metadata: sessionMetadata,
-      payment_intent_data: {
-        metadata: sessionMetadata,
-      },
     }
 
-    if (membershipPlan === 'annual' && process.env.STRIPE_ANNUAL_PLAN_PRICE_ID) {
-      sessionParams.mode = 'subscription'
-      sessionParams.line_items = [
-        {
-          price: process.env.STRIPE_ANNUAL_PLAN_PRICE_ID,
-          quantity: 1,
-        },
-        depositLineItem,
-      ]
-      sessionParams.subscription_data = {
-        metadata: {
-          ...sessionMetadata,
-          membership_plan: membershipPlan,
-        },
+    let sessionParams: Parameters<typeof stripe.checkout.sessions.create>[0]
+
+    if (membershipPlan === 'none') {
+      if (depositLineItems.length === 0) {
+        return Response.json(
+          { error: 'Nothing to charge for this booking', code: 'EMPTY_CHECKOUT' },
+          { status: 400 }
+        )
       }
-    } else if (
-      membershipPlan === 'monthly' &&
-      process.env.STRIPE_MONTHLY_PLAN_PRICE_ID
-    ) {
-      sessionParams.mode = 'subscription'
-      sessionParams.line_items = [
-        {
-          price: process.env.STRIPE_MONTHLY_PLAN_PRICE_ID,
-          quantity: 1,
+      sessionParams = {
+        ...baseParams,
+        mode: 'payment',
+        line_items: depositLineItems,
+        payment_intent_data: { metadata: sessionMetadata },
+      }
+    } else {
+      // The membership is billed ONLY here, as a subscription. It is not part of
+      // booking.totalAmount, so the visit deposit never includes it.
+      const priceId =
+        membershipPlan === 'annual'
+          ? process.env.STRIPE_ANNUAL_PLAN_PRICE_ID
+          : process.env.STRIPE_MONTHLY_PLAN_PRICE_ID
+
+      if (!priceId) {
+        // Never fall back to a plain payment: the clean is membership-covered,
+        // so that would give it away without starting the subscription.
+        console.error(`[stripe/checkout] Missing Stripe price ID for ${membershipPlan} plan`)
+        return Response.json(
+          { error: 'Memberships are temporarily unavailable', code: 'MEMBERSHIP_NOT_CONFIGURED' },
+          { status: 503 }
+        )
+      }
+
+      const isMonthly = membershipPlan === 'monthly'
+      const commitmentMessage = `Storm Ready Monthly is a ${PRICING.membership.monthly_commitment_months}-month commitment at ${formatCurrency(PRICING.membership.monthly)}/month.`
+
+      sessionParams = {
+        ...baseParams,
+        mode: 'subscription',
+        line_items: [{ price: priceId, quantity: 1 }, ...depositLineItems],
+        subscription_data: {
+          metadata: {
+            ...sessionMetadata,
+            membership_plan: membershipPlan,
+            ...(isMonthly
+              ? { commitment_months: String(PRICING.membership.monthly_commitment_months) }
+              : {}),
+          },
         },
-        depositLineItem,
-      ]
-      sessionParams.subscription_data = {
-        metadata: {
-          ...sessionMetadata,
-          membership_plan: membershipPlan,
-        },
+        ...(isMonthly ? { custom_text: { submit: { message: commitmentMessage } } } : {}),
       }
     }
 

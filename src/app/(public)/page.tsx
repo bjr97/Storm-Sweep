@@ -45,16 +45,16 @@ const SERVICES = [
     price: PRICING.addons.led_package,
   },
   {
-    title: 'Supply Kits',
+    title: 'Prep Kits',
     description:
-      'Curated emergency kits from starter to Storm Ready Elite — stocked and organized.',
+      'Storm Starter, Family Ready, Pet Ready, or Full House — stocked in your shelter same visit.',
     icon: Package,
-    price: PRICING.addons.supply_kit_essential,
+    price: Math.min(...Object.values(PRICING.kits)),
   },
   {
     title: 'Full Package',
     description:
-      'Deep clean + LED lighting + essential supply kit — the complete storm-ready upgrade.',
+      'Deep clean + LED lighting + Storm Starter prep kit — the complete storm-ready upgrade.',
     icon: ShieldCheck,
     price: PRICING.bundles.full_package,
   },

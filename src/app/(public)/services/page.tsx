@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { cn, formatCurrency, PRICING, SUPPLY_KITS } from '@/lib/utils'
+import { cn, formatCurrency, PREP_KIT_BUNDLES, PRICING } from '@/lib/utils'
 
 const SERVICE_TYPES = [
   {
@@ -51,15 +51,15 @@ const SERVICE_TYPES = [
     ],
   },
   {
-    title: 'Emergency Supply Kits',
+    title: 'Shelter Prep Kits',
     icon: Package,
-    priceLabel: `from ${formatCurrency(PRICING.addons.supply_kit_starter)}`,
+    priceLabel: `from ${formatCurrency(PRICING.kits.storm_starter)}`,
     description:
-      'Curated emergency kits stocked and organized inside your shelter — from basic starter supplies to full Storm Ready Elite packages for families.',
+      'Prep kits stocked and organized inside your shelter the same visit — bundles for adults, kids, and pets, or build your own.',
     includes: [
-      'Five tiers: Starter through Storm Ready Elite',
-      'Water, first aid, lighting, and communication essentials',
-      'Family and baby/toddler comfort items in upper tiers',
+      'Bundles: Storm Starter, Family Ready, Pet Ready, Full House',
+      'Power bank, first aid, documents pouch, and mylar blankets',
+      'Age-matched kids packs and pet supplies in family bundles',
       'Organized placement inside your shelter',
       'Inventory logged in your Storm Sweep photo report',
     ],
@@ -69,11 +69,11 @@ const SERVICE_TYPES = [
     icon: ShieldCheck,
     priceLabel: formatCurrency(PRICING.bundles.full_package),
     description:
-      'The complete storm-ready upgrade: standard-size deep clean, LED lighting package, and Essential supply kit — bundled for maximum value.',
+      'The complete storm-ready upgrade: standard-size deep clean, LED lighting package, and Storm Starter prep kit — bundled for maximum value.',
     includes: [
       'Standard shelter deep clean (up to typical 6-person size)',
       'LED Lighting Package included',
-      'Essential Supply Kit included',
+      'Storm Starter prep kit included (upgrade anytime)',
       'Full inspection and photo report',
       'Best value for first-time customers getting fully storm ready',
     ],
@@ -215,18 +215,18 @@ export default function ServicesPage(): React.ReactElement {
             <div className="mb-6 flex items-center gap-3">
               <Package className="size-5 text-[var(--color-primary)]" />
               <h3 className="font-display text-2xl tracking-wide text-[var(--color-text)]">
-                SUPPLY KIT TIERS
+                PREP KIT BUNDLES
               </h3>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Object.entries(SUPPLY_KITS).map(([key, kit]) => (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {PREP_KIT_BUNDLES.map((kit) => (
                 <Card
-                  key={key}
+                  key={kit.id}
                   className="border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)] ring-[color-mix(in_srgb,var(--color-border)_40%,transparent)]"
                 >
                   <CardHeader>
                     <CardTitle className="font-display text-xl tracking-wide">
-                      {kit.name}
+                      {kit.emoji} {kit.name}
                     </CardTitle>
                     <p className="font-display text-2xl tracking-wide text-[var(--color-accent)]">
                       {formatCurrency(kit.price)}

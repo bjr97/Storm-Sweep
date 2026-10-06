@@ -74,7 +74,8 @@ export function MembershipPricingCard(): React.ReactElement {
 
         {plan === 'monthly' ? (
           <p className="font-body text-xs text-[var(--color-text-muted)]">
-            Billed monthly. Cancel anytime from your customer portal.
+            Billed monthly on a {PRICING.membership.monthly_commitment_months}-month
+            commitment. Renews month-to-month after that.
           </p>
         ) : (
           <p className="font-body text-xs text-[var(--color-text-muted)]">
@@ -83,7 +84,7 @@ export function MembershipPricingCard(): React.ReactElement {
         )}
 
         <ul className="space-y-2 font-body text-sm text-[var(--color-text-muted)]">
-          <li>· 2 scheduled visits per year</li>
+          <li>· 2 cleanings per year included — your first is booked at signup</li>
           <li>· Priority booking before storm season</li>
           <li>· 10% off all upgrades &amp; add-ons</li>
           <li>· Photo report after every visit</li>

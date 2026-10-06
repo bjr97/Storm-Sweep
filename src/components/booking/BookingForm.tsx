@@ -17,6 +17,7 @@ import { ServiceSelector } from '@/components/booking/ServiceSelector'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { buildPaymentData, buildQuoteBookingPayload } from '@/lib/booking/payment'
+import { priceKitSelection } from '@/lib/booking/prepKits'
 import { calculateBookingPrice } from '@/lib/booking/pricing'
 import {
   BOOKING_STEPS,
@@ -27,7 +28,7 @@ import {
   type CustomerDetailsValues,
   type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
-import { PRICING } from '@/lib/utils'
+import { calculateDeposit, PRICING } from '@/lib/utils'
 
 export type BookingInitialCustomer = {
   full_name: string
@@ -55,28 +56,8 @@ const DEFAULT_SERVICE: ServiceSelectionValues = {
   shelter_size: 'standard',
   deep_clean: true,
   led_package: false,
-  supply_kit: 'none',
   full_package: false,
   membership: 'one_time',
-}
-
-const SHELTER_READY_KIT_DISCOUNT = 59
-
-const KIT_BUNDLE_CATALOG: Record<
-  NonNullable<KitSelection['selectedBundle']>,
-  { name: string; price: number }
-> = {
-  storm_starter: { name: 'Storm Starter', price: 79 },
-  family_ready: { name: 'Family Ready', price: 89 },
-  pet_ready: { name: 'Pet Ready', price: 89 },
-  full_house: { name: 'Full House', price: 149 },
-}
-
-const A_LA_CARTE_CATALOG: Record<string, { name: string; price: number }> = {
-  shelter_ready: { name: 'Shelter Ready Kit', price: 59 },
-  little_ones: { name: 'Little Ones', price: 49 },
-  pets: { name: 'Pets Add-on', price: 39 },
-  hygiene: { name: 'Hygiene Pack', price: 24 },
 }
 
 function mapMembershipPlan(
@@ -86,52 +67,6 @@ function mapMembershipPlan(
     return 'none'
   }
   return membership
-}
-
-function kitIncludesShelterReady(kitSelection: KitSelection): boolean {
-  if (kitSelection.selectedBundle) {
-    return true
-  }
-  return kitSelection.aLaCarteItems.includes('shelter_ready')
-}
-
-function buildKitLineItems(
-  kitSelection: KitSelection,
-  membershipPlan: BookingMembershipPlan
-): { label: string; amount: number }[] {
-  if (
-    !kitSelection.selectedBundle &&
-    kitSelection.aLaCarteItems.length === 0
-  ) {
-    return []
-  }
-
-  const lines: { label: string; amount: number }[] = []
-
-  if (kitSelection.selectedBundle) {
-    const bundle = KIT_BUNDLE_CATALOG[kitSelection.selectedBundle]
-    lines.push({ label: bundle.name, amount: bundle.price })
-  } else {
-    for (const itemId of kitSelection.aLaCarteItems) {
-      const item = A_LA_CARTE_CATALOG[itemId]
-      if (item) {
-        lines.push({ label: item.name, amount: item.price })
-      }
-    }
-  }
-
-  if (
-    membershipPlan === 'annual_2yr' &&
-    kitIncludesShelterReady(kitSelection) &&
-    kitSelection.kitTotal > 0
-  ) {
-    lines.push({
-      label: '2yr Member Kit Credit',
-      amount: -SHELTER_READY_KIT_DISCOUNT,
-    })
-  }
-
-  return lines
 }
 
 const STEP_TITLES: Record<number, { title: string; description: string }> = {
@@ -220,7 +155,6 @@ export function BookingForm({
   const bookingState = useMemo<BookingState>(() => {
     const basePricing = calculateBookingPrice({
       ...serviceSelection,
-      supply_kit: 'none',
     })
 
     return {
@@ -231,31 +165,30 @@ export function BookingForm({
     }
   }, [serviceSelection, kitSelection])
 
+  const includedKitBundle = serviceSelection.full_package ? PRICING.full_package_kit : null
+
   const pricing = useMemo(() => {
-    const base = calculateBookingPrice({
-      ...serviceSelection,
-      supply_kit: 'none',
+    const base = calculateBookingPrice(serviceSelection)
+    const kit = priceKitSelection(kitSelection, {
+      membershipPlan: bookingState.membershipPlan,
+      includedBundle: includedKitBundle,
     })
 
-    if (base.isQuoteRequired || base.total === null || kitSelection.kitTotal <= 0) {
+    if (base.isQuoteRequired || base.total === null || kit.total <= 0) {
       return base
     }
 
-    const kitLines = buildKitLineItems(
-      kitSelection,
-      bookingState.membershipPlan
-    )
-    const total = base.total + kitSelection.kitTotal
+    const total = base.total + kit.total
 
     return {
       ...base,
-      addonsPrice: base.addonsPrice + kitSelection.kitTotal,
-      serviceSubtotal: (base.serviceSubtotal ?? 0) + kitSelection.kitTotal,
+      addonsPrice: base.addonsPrice + kit.total,
+      serviceSubtotal: (base.serviceSubtotal ?? 0) + kit.total,
       total,
-      deposit: Math.round(total * PRICING.deposit_pct),
-      lineItems: [...base.lineItems, ...kitLines],
+      deposit: calculateDeposit(total),
+      lineItems: [...base.lineItems, ...kit.lines],
     }
-  }, [serviceSelection, kitSelection, bookingState.membershipPlan])
+  }, [serviceSelection, kitSelection, bookingState.membershipPlan, includedKitBundle])
 
   const paymentData = useMemo(
     () =>
@@ -369,7 +302,8 @@ export function BookingForm({
           <KitSelector
             shelterSize={bookingState.shelterSize}
             membershipPlan={bookingState.membershipPlan}
-            onSelect={(selection) => setKitSelection(selection)}
+            includedBundle={includedKitBundle}
+            onSelect={setKitSelection}
             onSkip={() => setCurrentStep(3)}
           />
         )

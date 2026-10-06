@@ -4,14 +4,14 @@ import { createJobFromBooking } from '@/lib/bookings/createJob'
 import { bookingPayloadSchema } from '@/lib/bookings/types'
 import { createPayPalOrder } from '@/lib/paypal'
 import { createServiceClient } from '@/lib/supabase/server'
-import { PRICING } from '@/lib/utils'
+import { calculateDeposit, PRICING } from '@/lib/utils'
 
 const createOrderSchema = z.object({
-  amount: z.number().positive(),
+  amount: z.number().int().positive(), // deposit, cents
   items: z.array(
     z.object({
       name: z.string().min(1),
-      price: z.number().positive(),
+      price: z.number().int(), // cents; negative for credits
       quantity: z.number().int().positive().default(1),
     })
   ),
@@ -44,9 +44,9 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     const booking = bookingResult.data
-    const depositAmount = Math.round(booking.totalAmount * PRICING.deposit_pct)
+    const depositAmount = calculateDeposit(booking.totalAmount)
 
-    if (Math.abs(amount - depositAmount) > 0.01) {
+    if (amount !== depositAmount) {
       return Response.json(
         {
           error: `Deposit must be ${PRICING.deposit_pct * 100}% of total (${depositAmount})`,

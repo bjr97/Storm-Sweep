@@ -77,7 +77,7 @@ const FAQ_ITEMS = [
   {
     question: 'How does Storm Ready membership work?',
     getAnswer: (): string =>
-      `Storm Ready members receive two scheduled visits per year — typically before and during tornado season. You get priority booking, 10% off all upgrades and add-ons, and a photo report after every visit. Choose annual billing at ${formatCurrency(PRICING.membership.annual)}/yr or monthly at ${formatCurrency(PRICING.membership.monthly)}/mo at checkout.`,
+      `Storm Ready members receive two scheduled visits per year — typically before and during tornado season. You get priority booking, 10% off all upgrades and add-ons, and a photo report after every visit. Both cleanings are included in the membership (standard-size shelters; large shelters pay the size difference), and the visit you book at signup counts as the first. Choose annual billing at ${formatCurrency(PRICING.membership.annual)}/yr or monthly at ${formatCurrency(PRICING.membership.monthly)}/mo on a ${PRICING.membership.monthly_commitment_months}-month commitment.`,
   },
   {
     question: 'Do you service areas outside Norman?',
