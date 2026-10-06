@@ -483,3 +483,35 @@ export function buildTemplateDataFromContext(
     }
   }
 }
+
+/** Customer-facing job texts from the Sweeper app. Null when the customer has no phone. */
+export async function sendJobSms(
+  trigger: Extract<SmsTrigger, 'on_the_way' | 'job_started' | 'job_complete'>,
+  jobId: string,
+  customData: Record<string, unknown> = {}
+): Promise<SendSmsResult | null> {
+  const { job, profile, sweeper } = await resolveSmsContext(jobId)
+  if (!profile?.phone) return null
+  const data = buildTemplateDataFromContext(trigger, job, profile, sweeper, {
+    sweeperName: sweeper?.full_name?.split(/\s+/)[0],
+    ...customData,
+  })
+  const body = renderSmsTemplate(trigger, data as SmsTemplateData[typeof trigger])
+  return sendSms({ to: profile.phone, body, trigger, profileId: profile.id, jobId })
+}
+
+/** Alerts the owner when a Sweeper reports a hazard and pauses a job. */
+export async function sendAdminJobIssueSms(params: {
+  jobId: string
+  address: string
+  issue: string
+  sweeperName: string
+}): Promise<SendSmsResult | null> {
+  const adminPhone = process.env.ADMIN_PHONE_NUMBER
+  if (!adminPhone) {
+    console.warn('[twilio] ADMIN_PHONE_NUMBER not set — skipping job issue alert')
+    return null
+  }
+  const body = `⚠️ Job paused — ${params.sweeperName} reported: ${params.issue} at ${params.address}. Review: ${getAppUrl()}/admin/jobs/${params.jobId} — Storm Sweep Admin`
+  return sendSms({ to: adminPhone, body, trigger: 'admin_job_issue', jobId: params.jobId })
+}

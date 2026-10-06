@@ -1,4 +1,5 @@
 import { CalendarDays, Clock, Lock, MapPin, Medal, Ruler } from 'lucide-react'
+import Link from 'next/link'
 
 import { BoardAutoRefresh } from '@/components/sweeper/BoardAutoRefresh'
 import { ClaimButton } from '@/components/sweeper/ClaimButton'
@@ -110,9 +111,13 @@ export default async function SweeperBoardPage(): Promise<React.ReactElement> {
                   Base pay <span className="font-semibold text-white">{formatCurrency(pay.base)}</span> ({Math.round(job.pct * 100)}% locked in)
                   {' '}+ up to {formatCurrency(PRICING.sweeper.turnaround_same_day)} for a same-day report
                 </p>
-                {job.status === 'confirmed' ? <DropButton jobId={job.id} late={job.lateDropIfDroppedNow} /> : (
-                  <p className="text-xs font-semibold text-sky-light">In progress</p>
-                )}
+                <Link
+                  href={`/sweeper/jobs/${job.id}`}
+                  className="flex h-12 w-full items-center justify-center rounded-lg bg-sky font-[family-name:var(--font-barlow-condensed)] text-base font-bold uppercase tracking-wider text-white hover:bg-sky-light"
+                >
+                  {job.status === 'in_progress' ? 'Continue job' : 'Open job'}
+                </Link>
+                {job.status === 'confirmed' ? <DropButton jobId={job.id} late={job.lateDropIfDroppedNow} /> : null}
               </article>
             )
           })

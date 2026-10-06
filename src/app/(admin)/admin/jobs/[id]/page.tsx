@@ -1,16 +1,18 @@
-import { ArrowLeft, Check, ExternalLink, Mail, Phone, Star } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Check, ExternalLink, Mail, Phone, Star } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { AssignSweeperSelect } from '@/components/admin/AssignSweeperSelect'
+import { IssueDecision } from '@/components/admin/IssueDecision'
 import { JobActions } from '@/components/admin/JobActions'
 import { EmptyState, Panel } from '@/components/admin/Panel'
 import { StatusPill } from '@/components/admin/StatusPill'
 import { getJobDetail, listSweepers } from '@/lib/admin/jobs'
-import { formatBusinessDate } from '@/lib/admin/time'
+import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
 import { jobTimeLabel } from '@/lib/booking/timeWindows'
+import { ISSUE_KINDS } from '@/lib/sweepers/jobRun'
 import { cn, formatCurrency, PRICING } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -29,9 +31,13 @@ const PHOTO_TYPE_LABEL: Record<string, string> = {
   after: 'After',
   upgrade: 'Upgrade',
   signature: 'Signature',
+  inspection: 'Inspection',
+  issue: 'Problem report',
+  video_before: 'Before video',
+  video_after: 'After video',
 }
 
-const PHASE_LABEL: Record<number, string> = { 1: 'Arrival', 2: 'Deep clean', 3: 'Inspection', 4: 'Wrap-up' }
+const PHASE_LABEL: Record<number, string> = { 1: 'Arrival', 2: 'Deep clean', 3: 'Inspect & install', 4: 'Wrap-up' }
 
 function Row({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement {
   return (
@@ -51,7 +57,8 @@ export default async function AdminJobDetailPage({
   const [detail, sweepers] = await Promise.all([getJobDetail(params.id), listSweepers()])
   if (!detail) notFound()
 
-  const { job, customer, checklist, photos } = detail
+  const { job, customer, checklist, photos, issues, upgrades, blockers } = detail
+  const openIssue = issues.find((i) => i.status === 'open')
   const locked = job.status === 'in_progress' || job.status === 'complete'
   const required = checklist.filter((c) => c.required)
   const doneCount = checklist.filter((c) => c.done).length
@@ -71,8 +78,93 @@ export default async function AdminJobDetailPage({
           <ArrowLeft className="size-3.5" aria-hidden="true" /> All jobs
         </Link>
 
+        {openIssue ? (
+          <div role="alert" className="flex gap-3 rounded-xl border border-tornado/60 bg-tornado/15 p-4 text-sm text-[#F0F0F0]">
+            <AlertTriangle className="size-5 shrink-0 text-[#F1948A]" aria-hidden="true" />
+            <div className="min-w-0 flex-1 space-y-3">
+              <p>
+                <b>Job paused.</b> {detail.sweeperName ?? 'The Sweeper'} reported{' '}
+                <b>{ISSUE_KINDS.find((k) => k.value === openIssue.kind)?.label}</b>
+                {openIssue.note ? ` — “${openIssue.note}”` : ''} at {formatBusinessTime(openIssue.created_at)}. They&apos;re waiting on you.
+              </p>
+              <IssueDecision jobId={job.id} issueId={openIssue.id} />
+            </div>
+          </div>
+        ) : null}
+
         <div className="grid gap-4 xl:grid-cols-3">
           <div className="space-y-4 xl:col-span-2">
+            {job.en_route_at || job.arrived_at || job.status === 'in_progress' || job.status === 'complete' ? (
+              <Panel title="On site">
+                <dl>
+                  {job.en_route_at ? <Row label="On the way">{formatBusinessTime(job.en_route_at)}</Row> : null}
+                  {job.arrived_at ? (
+                    <Row label="Arrived">
+                      {formatBusinessTime(job.arrived_at)} ·{' '}
+                      {job.arrival_verified === true ? (
+                        <span className="text-[#2ECC71]">GPS confirmed{job.arrival_distance_m !== null ? ` (${job.arrival_distance_m} m)` : ''}</span>
+                      ) : job.arrival_verified === false ? (
+                        <span className="text-[#F0B27A]">
+                          {job.arrival_lat === null ? 'no location shared' : `GPS ${job.arrival_distance_m ?? '?'} m from address`}
+                        </span>
+                      ) : (
+                        <span className="text-[#9A9A9F]">address couldn&apos;t be mapped</span>
+                      )}
+                      {job.arrival_lat !== null && job.arrival_lng !== null ? (
+                        <>
+                          {' · '}
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${job.arrival_lat},${job.arrival_lng}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-sky-light hover:underline"
+                          >
+                            map
+                          </a>
+                        </>
+                      ) : null}
+                    </Row>
+                  ) : null}
+                  {job.customer_signed_at ? (
+                    <Row label="Signed">
+                      {job.customer_signature_name} · {formatBusinessTime(job.customer_signed_at)}
+                    </Row>
+                  ) : null}
+                  {job.completed_at ? <Row label="Completed">{formatBusinessTime(job.completed_at)}</Row> : null}
+                  {blockers.length > 0 ? <Row label="Still to do">{blockers.join(' · ')}</Row> : null}
+                </dl>
+              </Panel>
+            ) : null}
+
+            {upgrades.length > 0 ? (
+              <Panel title="Upgrades sold on site" subtitle="Added to the balance due">
+                <dl>
+                  {upgrades.map((u) => (
+                    <Row key={u.id} label={u.name}>
+                      {formatCurrency(u.price)}
+                      {u.discount ? <span className="text-[#8A8A8F]"> (member {formatCurrency(u.discount)})</span> : null}
+                      <span className="text-[#8A8A8F]"> · approved {u.customer_initials}</span>
+                    </Row>
+                  ))}
+                </dl>
+              </Panel>
+            ) : null}
+
+            {issues.filter((i) => i.status !== 'open').length > 0 ? (
+              <Panel title="Problem reports">
+                <dl>
+                  {issues
+                    .filter((i) => i.status !== 'open')
+                    .map((i) => (
+                      <Row key={i.id} label={ISSUE_KINDS.find((k) => k.value === i.kind)?.label ?? i.kind}>
+                        {i.status === 'continue' ? 'Continued' : 'Visit ended'}
+                        {i.resolution_note ? ` — ${i.resolution_note}` : ''}
+                      </Row>
+                    ))}
+                </dl>
+              </Panel>
+            ) : null}
+
             <Panel title="Booking">
               <dl>
                 <Row label="Scheduled">
@@ -108,7 +200,9 @@ export default async function AdminJobDetailPage({
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                   {photos.map((p) => (
                     <figure key={p.id} className="overflow-hidden rounded-lg border border-white/[0.07] bg-[#141416]">
-                      {p.url ? (
+                      {p.url && p.type.startsWith('video_') ? (
+                        <video src={p.url} controls preload="metadata" className="aspect-[4/3] w-full bg-black object-cover" />
+                      ) : p.url ? (
                         <a href={p.url} target="_blank" rel="noreferrer">
                           <Image src={p.url} alt={`${PHOTO_TYPE_LABEL[p.type] ?? p.type} photo`} width={320} height={240} unoptimized className="aspect-[4/3] w-full object-cover" />
                         </a>

@@ -186,6 +186,15 @@ Customer Details (Step 3) specifics:
    - All `required: true` checklist items checked
    - Customer digital signature captured
    - Sweeper must be on-site (status must be 'in_progress')
+   - Enforced in `completionBlockers()` (`src/lib/sweepers/jobRun.ts`); all Sweeper
+     actions go through `POST /api/jobs/[id]/run` (service role, ownership checked).
+   - Arrival is GPS-checked against the address (free US Census geocoder),
+     300 m radius; no location = allowed but flagged `arrival_verified=false`.
+   - Hazard report (`job_issues`) pauses the job until an admin picks
+     "continue" or "end visit" (end visit = cancelled; refunds are manual).
+   - On-site upgrade sales need customer initials on the Sweeper's phone;
+     they add to `total_amount` (customer) and `service_value` (list price).
+   - Media uploads use one-time signed upload URLs; never public bucket reads.
 
 2. **Photo consent:**
    - Service documentation: auto-opted-in (disclosed in T&Cs)
@@ -377,8 +386,8 @@ Track progress here as phases complete:
 - [ ] Phase 1.6 — AI photo screening API
 - [ ] Phase 1.7 — SMS automation (Twilio)
 - [ ] Phase 1.8 — Email (Resend)
-- [ ] Phase 2.1 — Sweeper dashboard
-- [ ] Phase 2.2 — Job detail + checklist
+- [x] Phase 2.1 — Sweeper dashboard (job board)
+- [x] Phase 2.2 — Job detail + checklist
 - [ ] Phase 2.3 — Sweeper schedule
 - [ ] Phase 2.4 — Sweeper earnings
 - [x] Phase 2.5 — Admin dashboard

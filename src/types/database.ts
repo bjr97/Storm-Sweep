@@ -37,6 +37,14 @@ export type PhotoType =
   | 'upgrade'
   | 'signature'
   | 'booking_screen'
+  | 'inspection'
+  | 'issue'
+  | 'video_before'
+  | 'video_after'
+
+export type JobIssueKind = 'standing_water' | 'structural' | 'mold' | 'pests' | 'access' | 'other'
+
+export type JobIssueStatus = 'open' | 'continue' | 'end_visit'
 
 export type SweeperAvailability = 'weekdays' | 'weekends' | 'both'
 
@@ -180,6 +188,14 @@ export interface Database {
           photo_admin_note: string | null
           admin_reviewed_at: string | null
           customer_signed_at: string | null
+          en_route_at: string | null
+          arrived_at: string | null
+          arrival_lat: number | null
+          arrival_lng: number | null
+          arrival_accuracy_m: number | null
+          arrival_distance_m: number | null
+          arrival_verified: boolean | null
+          customer_signature_name: string | null
           referral_source: string | null
           partner_id: string | null
           completed_at: string | null
@@ -218,6 +234,14 @@ export interface Database {
           photo_admin_note?: string | null
           admin_reviewed_at?: string | null
           customer_signed_at?: string | null
+          en_route_at?: string | null
+          arrived_at?: string | null
+          arrival_lat?: number | null
+          arrival_lng?: number | null
+          arrival_accuracy_m?: number | null
+          arrival_distance_m?: number | null
+          arrival_verified?: boolean | null
+          customer_signature_name?: string | null
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -256,6 +280,14 @@ export interface Database {
           photo_admin_note?: string | null
           admin_reviewed_at?: string | null
           customer_signed_at?: string | null
+          en_route_at?: string | null
+          arrived_at?: string | null
+          arrival_lat?: number | null
+          arrival_lng?: number | null
+          arrival_accuracy_m?: number | null
+          arrival_distance_m?: number | null
+          arrival_verified?: boolean | null
+          customer_signature_name?: string | null
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -300,6 +332,7 @@ export interface Database {
           photo_type: PhotoType
           storage_path: string
           uploaded_by: string | null
+          checklist_item: string | null
           customer_consent: boolean
           created_at: string
         }
@@ -309,6 +342,7 @@ export interface Database {
           photo_type: PhotoType
           storage_path: string
           uploaded_by?: string | null
+          checklist_item?: string | null
           customer_consent?: boolean
           created_at?: string
         }
@@ -318,6 +352,7 @@ export interface Database {
           photo_type?: PhotoType
           storage_path?: string
           uploaded_by?: string | null
+          checklist_item?: string | null
           customer_consent?: boolean
           created_at?: string
         }
@@ -337,6 +372,87 @@ export interface Database {
             referencedColumns: ['id']
           },
         ]
+      }
+      job_issues: {
+        Row: {
+          id: string
+          job_id: string
+          reported_by: string | null
+          kind: JobIssueKind
+          note: string | null
+          photo_path: string | null
+          status: JobIssueStatus
+          resolution_note: string | null
+          resolved_by: string | null
+          resolved_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          reported_by?: string | null
+          kind: JobIssueKind
+          note?: string | null
+          photo_path?: string | null
+          status?: JobIssueStatus
+          resolution_note?: string | null
+          resolved_by?: string | null
+          resolved_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          job_id?: string
+          reported_by?: string | null
+          kind?: JobIssueKind
+          note?: string | null
+          photo_path?: string | null
+          status?: JobIssueStatus
+          resolution_note?: string | null
+          resolved_by?: string | null
+          resolved_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      job_upgrades: {
+        Row: {
+          id: string
+          job_id: string
+          addon_id: string
+          name: string
+          list_price: number
+          discount: number
+          price: number
+          sold_by: string | null
+          customer_initials: string
+          approved_at: string
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          addon_id: string
+          name: string
+          list_price: number
+          discount?: number
+          price: number
+          sold_by?: string | null
+          customer_initials: string
+          approved_at?: string
+        }
+        Update: {
+          id?: string
+          job_id?: string
+          addon_id?: string
+          name?: string
+          list_price?: number
+          discount?: number
+          price?: number
+          sold_by?: string | null
+          customer_initials?: string
+          approved_at?: string
+        }
+        Relationships: []
       }
       job_claim_events: {
         Row: {
@@ -598,6 +714,9 @@ export type JobUpdate = Database['public']['Tables']['jobs']['Update']
 
 export type JobClaimEvent = Database['public']['Tables']['job_claim_events']['Row']
 export type JobClaimEventInsert = Database['public']['Tables']['job_claim_events']['Insert']
+
+export type JobIssue = Database['public']['Tables']['job_issues']['Row']
+export type JobUpgrade = Database['public']['Tables']['job_upgrades']['Row']
 
 export type JobPhoto = Database['public']['Tables']['job_photos']['Row']
 export type JobPhotoInsert = Database['public']['Tables']['job_photos']['Insert']

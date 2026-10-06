@@ -286,3 +286,24 @@ export async function getDashboardData(now: Date = new Date()): Promise<Dashboar
 
   return { kpis, todaysJobs, activity, revenueWeeks, crew }
 }
+
+export type PausedJob = { jobId: string; kind: string; note: string | null; reportedAt: string; address: string }
+
+/** Jobs a Sweeper paused with a problem report — waiting on an admin decision. */
+export async function getPausedJobs(): Promise<PausedJob[]> {
+  const supabase = createClient()
+  const { data: issues, error } = await supabase
+    .from('job_issues')
+    .select('job_id, kind, note, created_at')
+    .eq('status', 'open')
+    .order('created_at')
+  if (error) fail('paused jobs', error)
+  if (issues.length === 0) return []
+  const { data: jobs, error: jobsError } = await supabase
+    .from('jobs')
+    .select('id, address')
+    .in('id', Array.from(new Set(issues.map((i) => i.job_id))))
+  if (jobsError) fail('paused job addresses', jobsError)
+  const address = new Map(jobs.map((j) => [j.id, j.address]))
+  return issues.map((i) => ({ jobId: i.job_id, kind: i.kind, note: i.note, reportedAt: i.created_at, address: address.get(i.job_id) ?? '' }))
+}

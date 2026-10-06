@@ -1,8 +1,8 @@
 import { JOB_LIST_LIMIT, type JobStatusFilter, type JobWhenFilter } from '@/lib/admin/jobConstants'
 import { dayRange, localDate, localMidnight } from '@/lib/admin/time'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { CHECKLIST_ITEMS } from '@/lib/utils'
-import type { Job, JobPhoto, PhotoType } from '@/types/database'
+import { buildChecklist, completionBlockers, isItemDone, type RunState } from '@/lib/sweepers/jobRun'
+import type { Job, JobIssue, JobPhoto, JobUpgrade, PhotoType } from '@/types/database'
 
 /**
  * Admin job queries. Run as the signed-in admin (RLS is_admin()). The service
@@ -204,6 +204,9 @@ export type JobDetail = {
   partnerName: string | null
   checklist: { id: string; phase: number; label: string; required: boolean; done: boolean }[]
   photos: JobPhotoView[]
+  issues: JobIssue[]
+  upgrades: JobUpgrade[]
+  blockers: string[]
 }
 
 export async function getJobDetail(id: string): Promise<JobDetail | null> {
@@ -215,7 +218,7 @@ export async function getJobDetail(id: string): Promise<JobDetail | null> {
   }
   if (!job) return null
 
-  const [profileRes, sweeperRes, partnerRes, photosRes] = await Promise.all([
+  const [profileRes, sweeperRes, partnerRes, photosRes, issuesRes, upgradesRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('id, full_name, phone, address, membership_status, visits_used')
@@ -228,6 +231,9 @@ export async function getJobDetail(id: string): Promise<JobDetail | null> {
       ? supabase.from('partners').select('name').eq('id', job.partner_id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     supabase.from('job_photos').select('*').eq('job_id', id).order('created_at'),
+    supabase.from('job_issues').select('*').eq('job_id', id).order('created_at', { ascending: false }),
+    // Service client: reads don't depend on the job_upgrades RLS policy (page is admin-gated).
+    createServiceClient().from('job_upgrades').select('*').eq('job_id', id).order('approved_at'),
   ])
 
   const service = createServiceClient()
@@ -235,14 +241,34 @@ export async function getJobDetail(id: string): Promise<JobDetail | null> {
 
   // Signed URLs (1 hour) for job photos + the booking-screen photo(s).
   const photoRows: JobPhoto[] = photosRes.data ?? []
-  const paths = [...photoRows.map((p) => p.storage_path), ...job.photo_urls]
+  const isVideo = (p: JobPhoto): boolean => p.photo_type.startsWith('video_')
   const signed = new Map<string, string>()
-  if (paths.length > 0) {
-    const { data: urls } = await service.storage.from('job-photos').createSignedUrls(paths, 3600)
+  for (const [bucket, paths] of [
+    ['job-photos', [...photoRows.filter((p) => !isVideo(p)).map((p) => p.storage_path), ...job.photo_urls]],
+    ['job-videos', photoRows.filter(isVideo).map((p) => p.storage_path)],
+  ] as const) {
+    if (paths.length === 0) continue
+    const { data: urls } = await service.storage.from(bucket).createSignedUrls([...paths], 3600)
     for (const u of urls ?? []) if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl)
   }
 
-  const progress = (job.checklist_progress ?? {}) as Record<string, unknown>
+  const issues: JobIssue[] = issuesRes.data ?? []
+  const runState: RunState = {
+    status: job.status,
+    serviceTypes: job.service_type,
+    progress:
+      job.checklist_progress && typeof job.checklist_progress === 'object' && !Array.isArray(job.checklist_progress)
+        ? (job.checklist_progress as Record<string, string>)
+        : {},
+    enRouteAt: job.en_route_at,
+    signedAt: job.customer_signed_at,
+    photoItems: new Set(photoRows.map((p) => p.checklist_item).filter((x): x is string => Boolean(x))),
+    photoCounts: {
+      before: photoRows.filter((p) => p.photo_type === 'before').length,
+      after: photoRows.filter((p) => p.photo_type === 'after').length,
+    },
+    openIssues: issues.filter((i) => i.status === 'open').length,
+  }
   const profile = profileRes.data
 
   return {
@@ -258,7 +284,7 @@ export async function getJobDetail(id: string): Promise<JobDetail | null> {
     },
     sweeperName: sweeperRes.data?.full_name ?? (job.sweeper_id ? 'Sweeper' : null),
     partnerName: partnerRes.data?.name ?? null,
-    checklist: CHECKLIST_ITEMS.map((item) => ({ ...item, done: progress[item.id] === true })),
+    checklist: buildChecklist(job.service_type).map((item) => ({ ...item, done: isItemDone(item, runState) })),
     photos: [
       ...job.photo_urls.map((path, i) => ({
         id: `booking-${i}`,
@@ -275,6 +301,9 @@ export async function getJobDetail(id: string): Promise<JobDetail | null> {
         createdAt: p.created_at,
       })),
     ],
+    issues,
+    upgrades: upgradesRes.data ?? [],
+    blockers: job.status === 'in_progress' ? completionBlockers(runState) : [],
   }
 }
 
