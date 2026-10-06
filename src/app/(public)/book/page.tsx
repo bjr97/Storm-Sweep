@@ -69,7 +69,7 @@ export default async function BookPage({
             BOOK YOUR STORM SHELTER CLEAN
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Four quick steps to a clean, storm-ready shelter. Most bookings confirmed within minutes.
+            Six quick steps to a clean, storm-ready shelter. Most bookings confirmed within minutes.
           </p>
         </div>
 
