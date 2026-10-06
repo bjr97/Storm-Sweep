@@ -114,8 +114,8 @@ export function PaymentStep({
       }
 
       window.location.href = checkoutUrl
-    } catch {
-      setError('Unable to connect to payment service')
+    } catch (err) {
+      setError(err instanceof Error && err.message.includes('too long') ? err.message : 'Unable to connect to payment service')
     } finally {
       setLoadingMethod(null)
     }
@@ -158,8 +158,8 @@ export function PaymentStep({
       }
 
       window.location.href = approvalUrl
-    } catch {
-      setError('Unable to connect to PayPal')
+    } catch (err) {
+      setError(err instanceof Error && err.message.includes('too long') ? err.message : 'Unable to connect to PayPal')
     } finally {
       setLoadingMethod(null)
     }

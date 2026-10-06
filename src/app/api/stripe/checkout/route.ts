@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import {
   bookingPayloadSchema,
+  readBookingMetadataJson,
   serializeBookingMetadata,
 } from '@/lib/bookings/types'
 import { getAppUrl, getStripe } from '@/lib/stripe'
@@ -62,7 +63,7 @@ export async function POST(req: Request): Promise<Response> {
       parsed.data
 
     const bookingResult = bookingPayloadSchema.safeParse(
-      JSON.parse(metadata.booking_data ?? '{}')
+      readBookingMetadataJson(metadata)
     )
 
     if (!bookingResult.success) {
@@ -97,11 +98,12 @@ export async function POST(req: Request): Promise<Response> {
     const depositLineItems =
       depositAmount > 0 ? [buildDepositLineItem(depositAmount, orderSummary)] : []
 
+    // Built only from the validated booking — never spread the raw client
+    // metadata back in (it could carry oversized or extra keys).
     const sessionMetadata = {
       ...serializeBookingMetadata(booking),
-      customer_name: customerName,
+      customer_name: customerName.slice(0, 500),
       customer_email: customerEmail,
-      ...metadata,
     }
 
     const baseParams = {

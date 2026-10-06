@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { createJobFromBooking } from '@/lib/bookings/createJob'
-import { bookingPayloadSchema } from '@/lib/bookings/types'
+import { bookingPayloadSchema, readBookingMetadataJson } from '@/lib/bookings/types'
 import { createPayPalOrder } from '@/lib/paypal'
 import { createServiceClient } from '@/lib/supabase/server'
 import { calculateDeposit, PRICING } from '@/lib/utils'
@@ -33,7 +33,7 @@ export async function POST(req: Request): Promise<Response> {
     const { amount, metadata } = parsed.data
 
     const bookingResult = bookingPayloadSchema.safeParse(
-      JSON.parse(metadata.booking_data ?? '{}')
+      readBookingMetadataJson(metadata)
     )
 
     if (!bookingResult.success) {
