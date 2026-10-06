@@ -122,7 +122,7 @@ export function RetroHero(): React.ReactElement {
                 <div className="mt-2 aspect-square bg-[color-mix(in_srgb,var(--color-primary)_25%,var(--color-paper))]" />
               </div>
               <span className="absolute right-3 top-3 bg-[var(--color-danger)] px-2 py-1 font-display text-[8px] text-[var(--color-paper)]">
-                FREE KIT
+                PHOTO REPORT
               </span>
             </div>
           </div>

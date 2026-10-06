@@ -55,7 +55,7 @@ function DarkFooter(): React.ReactElement {
               Moore, Noble, and surrounding communities across tornado alley.
             </p>
             <p className="mt-4 font-body text-sm text-[var(--color-text-muted)]/70">
-              Licensed &amp; Insured · stormsweep.com
+              Locally owned · Norman, OK
             </p>
           </div>
         </div>
@@ -111,7 +111,7 @@ function RetroFooter(): React.ReactElement {
               and tornado alley.
             </p>
             <p className="mt-4 font-body text-lg text-[var(--color-text-muted)]">
-              Licensed &amp; Insured · stormsweep.com
+              Locally owned · Norman, OK
             </p>
           </div>
         </div>

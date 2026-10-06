@@ -26,7 +26,7 @@ const TRUST_ITEMS = [
   'Norman-owned',
   'Arrives within 48hrs',
   'Photo report every visit',
-  'Licensed & Insured',
+  'Checklist-based service',
 ] as const
 
 const SERVICES = [
@@ -84,29 +84,11 @@ const STEPS = [
   },
 ] as const
 
-const TESTIMONIALS = [
-  {
-    name: 'Sarah M.',
-    location: 'Norman, OK',
-    quote:
-      'Our shelter had not been touched in years. Storm Sweep made it feel brand new — and the photo report was incredible.',
-    rating: 5,
-  },
-  {
-    name: 'James & Linda T.',
-    location: 'Moore, OK',
-    quote:
-      'We joined Storm Ready and got our first visit before tornado season. Worth every penny for peace of mind.',
-    rating: 5,
-  },
-  {
-    name: 'Mike R.',
-    location: 'Noble, OK',
-    quote:
-      'Professional, fast, and local. They found a hinge issue we never noticed and fixed it on the spot.',
-    rating: 5,
-  },
-] as const
+type Testimonial = { name: string; location: string; quote: string; rating: number }
+
+// Real customer reviews only (FTC: no invented testimonials). The section is
+// hidden until this has entries — add reviews here as they come in.
+const TESTIMONIALS: Testimonial[] = []
 
 export default function HomePage(): React.ReactElement {
   return (
@@ -288,42 +270,46 @@ export default function HomePage(): React.ReactElement {
       </section>
       <SectionDivider />
 
-      <section className="border-t border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
-            WHAT NORMAN FAMILIES SAY
-          </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {TESTIMONIALS.map((testimonial) => (
-              <Card
-                key={testimonial.name}
-                className="pixel-card border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)]"
-              >
-                <CardContent className="pt-6">
-                  <div className="flex gap-1">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className="size-4 fill-[var(--color-accent)] text-[var(--color-accent)]"
-                      />
-                    ))}
-                  </div>
-                  <p className="mt-4 font-body text-sm leading-relaxed text-[var(--color-text-muted)]">
-                    &ldquo;{testimonial.quote}&rdquo;
-                  </p>
-                  <p className="mt-4 font-body text-sm font-semibold text-[var(--color-text)]">
-                    {testimonial.name}
-                  </p>
-                  <p className="font-body text-xs text-[var(--color-text-muted)]">
-                    {testimonial.location}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-      <SectionDivider />
+      {TESTIMONIALS.length > 0 ? (
+        <>
+          <section className="border-t border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] py-20">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+              <h2 className="text-center font-display text-4xl tracking-wide text-[var(--color-text)] sm:text-5xl">
+                WHAT NORMAN FAMILIES SAY
+              </h2>
+              <div className="mt-12 grid gap-6 md:grid-cols-3">
+                {TESTIMONIALS.map((testimonial) => (
+                  <Card
+                    key={testimonial.name}
+                    className="pixel-card border-[color-mix(in_srgb,var(--color-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-text)]"
+                  >
+                    <CardContent className="pt-6">
+                      <div className="flex gap-1">
+                        {Array.from({ length: testimonial.rating }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className="size-4 fill-[var(--color-accent)] text-[var(--color-accent)]"
+                          />
+                        ))}
+                      </div>
+                      <p className="mt-4 font-body text-sm leading-relaxed text-[var(--color-text-muted)]">
+                        &ldquo;{testimonial.quote}&rdquo;
+                      </p>
+                      <p className="mt-4 font-body text-sm font-semibold text-[var(--color-text)]">
+                        {testimonial.name}
+                      </p>
+                      <p className="font-body text-xs text-[var(--color-text-muted)]">
+                        {testimonial.location}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+          <SectionDivider />
+        </>
+      ) : null}
 
       <section className="bg-[var(--color-danger)] py-16">
         <div className="mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">
