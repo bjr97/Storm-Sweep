@@ -70,6 +70,15 @@ export async function POST(req: Request): Promise<Response> {
 
     if (createError || !authUser.user) {
       console.error('[sweepers/approve]', createError)
+      if (createError?.code === 'email_exists' || /already (been )?registered/i.test(createError?.message ?? '')) {
+        return Response.json(
+          {
+            error: `An account already exists for ${applicant.email}. Change that account's role to sweeper instead.`,
+            code: 'EMAIL_IN_USE',
+          },
+          { status: 409 }
+        )
+      }
       return Response.json({ error: 'Failed to create user account' }, { status: 500 })
     }
 
@@ -109,22 +118,32 @@ export async function POST(req: Request): Promise<Response> {
       tempPassword,
     })
 
-    await sendSms({
-      to: applicant.phone,
-      body: smsBody,
-      trigger: 'sweeper_welcome',
-      profileId: authUser.user.id,
-    }).catch((err: unknown) => {
+    let smsSent = true
+    try {
+      await sendSms({
+        to: applicant.phone,
+        body: smsBody,
+        trigger: 'sweeper_welcome',
+        profileId: authUser.user.id,
+      })
+    } catch (err) {
+      smsSent = false
       console.error('[sweepers/approve] welcome SMS failed', err)
-    })
+    }
 
     return Response.json({
       data: {
         profileId: authUser.user.id,
         applicantId,
         loginUrl,
+        smsSent,
+        // Only when the SMS failed: the admin must relay the login manually,
+        // otherwise the new Sweeper has no way to sign in. Shown once, never stored.
+        ...(smsSent ? {} : { tempPassword }),
       },
-      message: 'Sweeper approved and welcome SMS sent',
+      message: smsSent
+        ? 'Sweeper approved and welcome SMS sent'
+        : 'Sweeper approved — welcome SMS could not be sent; share the temporary password manually',
     })
   } catch (error) {
     console.error('[sweepers/approve]', error)

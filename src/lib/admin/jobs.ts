@@ -1,5 +1,5 @@
 import { JOB_LIST_LIMIT, type JobStatusFilter, type JobWhenFilter } from '@/lib/admin/jobConstants'
-import { dayRange, localDate, localMidnight, weekRange, type Range } from '@/lib/admin/time'
+import { dayRange, localDate, localMidnight } from '@/lib/admin/time'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { CHECKLIST_ITEMS } from '@/lib/utils'
 import type { Job, JobPhoto, PhotoType } from '@/types/database'
@@ -124,32 +124,62 @@ export async function listSweepers(): Promise<SweeperOption[]> {
 
 // ---------- Schedule ----------
 
-export type ScheduleDay = { date: Date; isToday: boolean; jobs: JobListItem[] }
+export type ScheduleDay = {
+  /** Local midnight (America/Chicago) as a UTC instant. */
+  date: Date
+  /** YYYY-MM-DD in business time — stable key / URL value. */
+  key: string
+  inMonth: boolean
+  isToday: boolean
+  jobs: JobListItem[]
+}
 
-export async function getScheduleWeek(weekOffset: number, now: Date = new Date()): Promise<{ range: Range; days: ScheduleDay[] }> {
-  const range = weekRange(now, -weekOffset)
+export type ScheduleMonth = {
+  /** First of the displayed month (local midnight). */
+  month: Date
+  /** Calendar rows, Monday-first, padded with days from adjacent months. */
+  weeks: ScheduleDay[][]
+}
+
+function dayKey(year: number, month: number, day: number): string {
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+/** Month grid for /admin/schedule. `monthOffset` 0 = current month, -1 = last month. */
+export async function getScheduleMonth(monthOffset: number, now: Date = new Date()): Promise<ScheduleMonth> {
+  const today = localDate(now)
+  const first = localMidnight(today.year, today.month + monthOffset, 1)
+  const f = localDate(first)
+  const daysInMonth = localDate(localMidnight(f.year, f.month + 1, 0)).day
+  const leading = (f.weekday + 6) % 7 // days before the 1st to reach Monday
+  const cells = Math.ceil((leading + daysInMonth) / 7) * 7
+
+  const gridStart = localMidnight(f.year, f.month, 1 - leading)
+  const gridEnd = localMidnight(f.year, f.month, 1 - leading + cells)
+
   const supabase = createClient()
   const { data, error } = await supabase
     .from('jobs')
     .select(LIST_COLUMNS)
-    .gte('scheduled_at', range.start.toISOString())
-    .lt('scheduled_at', range.end.toISOString())
+    .gte('scheduled_at', gridStart.toISOString())
+    .lt('scheduled_at', gridEnd.toISOString())
     .order('scheduled_at', { ascending: true })
   if (error) {
-    console.error('[admin/jobs] getScheduleWeek', error)
+    console.error('[admin/jobs] getScheduleMonth', error)
     throw new Error('Failed to load schedule')
   }
-
   const jobs = await withPeople(data)
-  const first = localDate(range.start)
-  const today = dayRange(now)
+  const todayStart = dayRange(now).start.getTime()
 
-  const days: ScheduleDay[] = Array.from({ length: 7 }, (_, i) => {
-    const start = localMidnight(first.year, first.month, first.day + i)
-    const end = localMidnight(first.year, first.month, first.day + i + 1)
+  const days: ScheduleDay[] = Array.from({ length: cells }, (_, i) => {
+    const start = localMidnight(f.year, f.month, 1 - leading + i)
+    const end = localMidnight(f.year, f.month, 2 - leading + i)
+    const ld = localDate(start)
     return {
       date: start,
-      isToday: start.getTime() === today.start.getTime(),
+      key: dayKey(ld.year, ld.month, ld.day),
+      inMonth: ld.month === f.month,
+      isToday: start.getTime() === todayStart,
       jobs: jobs.filter((j) => {
         const t = j.scheduled_at ? new Date(j.scheduled_at).getTime() : NaN
         return t >= start.getTime() && t < end.getTime()
@@ -157,7 +187,10 @@ export async function getScheduleWeek(weekOffset: number, now: Date = new Date()
     }
   })
 
-  return { range, days }
+  return {
+    month: first,
+    weeks: Array.from({ length: cells / 7 }, (_, w) => days.slice(w * 7, w * 7 + 7)),
+  }
 }
 
 // ---------- Detail ----------
