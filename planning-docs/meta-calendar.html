@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storm Sweep · Meta Content Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #2E86C1;
+  --sky-light: #5DADE2;
+  --sky-dark: #1A5276;
+  --sky-pale: #EBF5FB;
+  --wheat: #D4A843;
+  --wheat-light: #F0C96B;
+  --wheat-pale: #FDF6E3;
+  --red: #C0392B;
+  --red-pale: #FDEDEC;
+  --green: #27AE60;
+  --green-light: #2ECC71;
+  --green-pale: #EAFAF1;
+  --orange: #E67E22;
+  --orange-pale: #FEF9E7;
+  --purple: #8E44AD;
+  --purple-pale: #F5EEF8;
+  --charcoal: #141416;
+  --slate: #2C2C30;
+  --border: #E4E4E0;
+  --light: #F7F7F4;
+  --mid: #8A8A8F;
+  --soft: #5A5A5F;
+  --white: #FFFFFF;
+  --text: #1C1C1F;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--light);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── NAV ── */
+.top-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--charcoal);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 56px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: white; }
+.nav-logo span { color: var(--sky-light); }
+.nav-doc-title { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--mid); }
+.nav-tabs { display: flex; gap: 0; }
+.nav-tab-btn {
+  padding: 0 18px; height: 56px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); border: none; background: none; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all 0.2s;
+}
+.nav-tab-btn:hover { color: white; }
+.nav-tab-btn.active { color: var(--sky-light); border-bottom-color: var(--sky-light); }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── COVER ── */
+.cover {
+  background: var(--charcoal);
+  padding: 64px 64px 48px;
+  position: relative; overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 15% 60%, rgba(46,134,193,0.13) 0%, transparent 55%),
+              radial-gradient(ellipse at 85% 20%, rgba(212,168,67,0.07) 0%, transparent 50%);
+}
+.cover-inner { max-width: 960px; margin: 0 auto; position: relative; }
+.cover-eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.cover-line { width: 32px; height: 2px; background: var(--wheat); }
+.cover-eyebrow-text { font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--wheat); }
+.cover-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px, 7vw, 88px); letter-spacing: 2px; line-height: 0.95; color: white; margin-bottom: 20px; }
+.cover-title span { color: var(--sky-light); }
+.cover-desc { font-size: 15px; font-weight: 300; color: rgba(255,255,255,0.5); max-width: 540px; line-height: 1.7; margin-bottom: 32px; }
+.cover-meta { display: flex; gap: 32px; flex-wrap: wrap; }
+.cover-meta-item { display: flex; flex-direction: column; gap: 3px; }
+.cover-meta-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--mid); }
+.cover-meta-val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: white; }
+
+/* ── PAGE WRAP ── */
+.page { max-width: 960px; margin: 0 auto; padding: 48px 40px; }
+
+/* ── SECTION ── */
+.sec-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 3vw, 44px); letter-spacing: 1px; color: var(--charcoal);
+  margin-bottom: 6px;
+}
+.sec-sub { font-size: 14px; font-weight: 300; color: var(--mid); margin-bottom: 28px; max-width: 520px; }
+
+.sub-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--charcoal); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.sub-title::before { content: ''; width: 3px; height: 16px; background: var(--sky); border-radius: 2px; flex-shrink: 0; }
+
+/* ── STRATEGY PILLARS ── */
+.pillars-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+.pillar-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px 16px; position: relative; overflow: hidden;
+}
+.pillar-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.pillar-card.p1::before { background: var(--sky); }
+.pillar-card.p2::before { background: var(--wheat); }
+.pillar-card.p3::before { background: var(--green); }
+.pillar-card.p4::before { background: var(--purple); }
+.pillar-icon { font-size: 26px; margin-bottom: 10px; }
+.pillar-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--charcoal); margin-bottom: 6px; }
+.pillar-pct { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.5px; color: var(--sky); margin-bottom: 6px; }
+.pillar-card.p2 .pillar-pct { color: var(--wheat); }
+.pillar-card.p3 .pillar-pct { color: var(--green); }
+.pillar-card.p4 .pillar-pct { color: var(--purple); }
+.pillar-desc { font-size: 12px; color: var(--soft); line-height: 1.5; }
+
+/* ── PROMO CARDS ── */
+.promo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+.promo-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+  padding: 24px; position: relative; overflow: hidden;
+}
+.promo-card.hero-promo {
+  background: var(--charcoal); border-color: transparent;
+  grid-column: 1 / -1;
+}
+.promo-badge {
+  display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 12px;
+}
+.promo-badge.launch { background: var(--wheat-pale); color: var(--wheat); }
+.promo-badge.referral { background: var(--green-pale); color: var(--green); }
+.promo-badge.hero-badge { background: rgba(212,168,67,0.15); color: var(--wheat-light); }
+.promo-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; color: var(--text); line-height: 1; margin-bottom: 8px; }
+.promo-card.hero-promo .promo-name { color: white; font-size: 36px; }
+.promo-value { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--sky); margin-bottom: 10px; }
+.promo-card.hero-promo .promo-value { color: var(--wheat-light); }
+.promo-desc { font-size: 13px; color: var(--soft); line-height: 1.6; }
+.promo-card.hero-promo .promo-desc { color: rgba(255,255,255,0.5); }
+.promo-copy {
+  margin-top: 12px; background: rgba(0,0,0,0.03); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--text); font-style: italic; line-height: 1.6;
+}
+.promo-card.hero-promo .promo-copy { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+.promo-copy-label { font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--sky); display: block; margin-bottom: 5px; }
+.promo-card.hero-promo .promo-copy-label { color: var(--wheat-light); }
+
+/* ── CALENDAR ── */
+.calendar-phase {
+  background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 20px;
+}
+.phase-header {
+  padding: 16px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.phase-header.launch { background: var(--charcoal); }
+.phase-header.offseason { background: var(--sky-dark); }
+.phase-header.ramp { background: linear-gradient(135deg, var(--sky-dark), #1A3A5C); }
+
+.phase-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: white; }
+.phase-dates { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+.phase-tag { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; }
+.phase-tag.launch-tag { background: rgba(212,168,67,0.2); color: var(--wheat-light); }
+.phase-tag.off-tag { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+.phase-tag.ramp-tag { background: rgba(39,174,96,0.2); color: #82e0aa; }
+
+.week-block { border-bottom: 1px solid var(--border); }
+.week-block:last-child { border-bottom: none; }
+
+.week-label {
+  padding: 10px 22px 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--mid); background: var(--light);
+  border-bottom: 1px solid var(--border);
+}
+
+.post-row {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 14px 22px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.15s;
+}
+.post-row:last-child { border-bottom: none; }
+.post-row:hover { background: var(--light); }
+
+.post-day {
+  min-width: 52px; text-align: center;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+.post-day-name { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); }
+.post-day-num { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.5px; color: var(--text); line-height: 1; }
+
+.post-type-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+}
+.dot-ba { background: var(--sky); }
+.dot-edu { background: var(--wheat); }
+.dot-promo { background: var(--red); }
+.dot-social { background: var(--green); }
+.dot-ad { background: var(--purple); }
+
+.post-content { flex: 1; }
+.post-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; color: var(--charcoal); letter-spacing: 0.3px; margin-bottom: 3px; }
+.post-caption { font-size: 13px; color: var(--soft); line-height: 1.5; margin-bottom: 8px; font-style: italic; }
+.post-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.post-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 5px;
+}
+.badge-organic { background: var(--green-pale); color: var(--green); }
+.badge-paid { background: var(--purple-pale); color: var(--purple); }
+.badge-story { background: var(--sky-pale); color: var(--sky-dark); }
+.badge-reel { background: rgba(230,126,34,0.1); color: var(--orange); }
+.badge-both { background: var(--charcoal); color: rgba(255,255,255,0.7); }
+.badge-promo { background: var(--wheat-pale); color: var(--wheat); }
+
+.post-platforms { display: flex; gap: 5px; }
+.platform-chip {
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+  background: rgba(0,0,0,0.05); color: var(--mid);
+}
+
+.post-copy-block {
+  margin-top: 10px; background: var(--light); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; color: var(--text); line-height: 1.6; font-style: italic;
+  display: none;
+}
+.post-row.expanded .post-copy-block { display: block; }
+.expand-hint { font-size: 10px; color: var(--sky); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+
+/* ── AD SPECS ── */
+.ad-spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+.ad-spec-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden;
+}
+.ad-spec-header { padding: 14px 18px; background: var(--charcoal); }
+.ad-spec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: white; }
+.ad-spec-platform { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); margin-top: 2px; }
+.ad-spec-body { padding: 16px 18px; }
+.ad-field { margin-bottom: 12px; }
+.ad-field:last-child { margin-bottom: 0; }
+.ad-field-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); margin-bottom: 4px; }
+.ad-field-val { font-size: 13px; color: var(--text); line-height: 1.5; }
+.ad-field-val.copy { font-style: italic; background: var(--light); border-radius: 6px; padding: 8px 10px; border: 1px solid var(--border); }
+
+/* ── BUDGET TABLE ── */
+.budget-table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 20px; }
+.budget-table th { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); text-align: left; padding: 12px 18px; background: var(--light); border-bottom: 1px solid var(--border); }
+.budget-table td { padding: 13px 18px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); vertical-align: middle; }
+.budget-table tr:last-child td { border-bottom: none; font-weight: 700; color: var(--charcoal); background: var(--light); }
+.budget-val { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; }
+.budget-val.sky { color: var(--sky); }
+.budget-val.green { color: var(--green); }
+.budget-val.wheat { color: var(--wheat); }
+
+/* ── CONTENT PRODUCTION ── */
+.production-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; background: var(--border); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 28px; }
+.prod-step { background: var(--white); padding: 20px 16px; position: relative; }
+.prod-step-num { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: rgba(0,0,0,0.04); position: absolute; top: 8px; right: 12px; line-height: 1; }
+.prod-step-icon { font-size: 24px; margin-bottom: 10px; }
+.prod-step-title { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--charcoal); margin-bottom: 6px; }
+.prod-step-body { font-size: 12px; color: var(--soft); line-height: 1.5; }
+
+/* ── LEGEND ── */
+.legend-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 28px; }
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--soft); font-weight: 500; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── TOOLS ── */
+.tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.tool-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+.tool-icon { font-size: 24px; margin-bottom: 8px; }
+.tool-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--charcoal); margin-bottom: 4px; }
+.tool-role { font-size: 12px; color: var(--sky); font-weight: 600; margin-bottom: 6px; }
+.tool-desc { font-size: 12px; color: var(--soft); line-height: 1.5; }
+
+/* ── KPI ROW ── */
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+.kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 18px; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.kpi-card.sky::before { background: var(--sky); }
+.kpi-card.wheat::before { background: var(--wheat); }
+.kpi-card.green::before { background: var(--green); }
+.kpi-card.purple::before { background: var(--purple); }
+.kpi-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); margin-bottom: 8px; }
+.kpi-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 0.5px; color: var(--charcoal); line-height: 1; margin-bottom: 4px; }
+.kpi-note { font-size: 11px; color: var(--mid); }
+
+.alert { border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-start; }
+.alert.info { background: var(--sky-pale); border: 1px solid rgba(46,134,193,0.2); }
+.alert.warn { background: var(--wheat-pale); border: 1px solid rgba(212,168,67,0.25); }
+.alert.success { background: var(--green-pale); border: 1px solid rgba(39,174,96,0.2); }
+.alert-icon { font-size: 18px; flex-shrink: 0; }
+.alert-text { font-size: 13px; line-height: 1.6; }
+.alert.info .alert-text { color: var(--sky-dark); }
+.alert.warn .alert-text { color: #784212; }
+.alert.success .alert-text { color: #1D6A3A; }
+.alert-text strong { font-weight: 700; }
+
+@media (max-width: 640px) {
+  .top-nav { padding: 0 20px; }
+  .nav-doc-title { display: none; }
+  .cover { padding: 40px 24px 36px; }
+  .page { padding: 32px 20px; }
+  .pillars-grid { grid-template-columns: 1fr 1fr; }
+  .promo-grid { grid-template-columns: 1fr; }
+  .ad-spec-grid { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .production-flow { grid-template-columns: 1fr 1fr; }
+  .tools-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <div class="nav-logo">Storm<span>Sweep</span></div>
+  <div class="nav-doc-title">Meta Content Strategy</div>
+  <div class="nav-tabs">
+    <button class="nav-tab-btn active" onclick="switchTab('strategy')">Strategy</button>
+    <button class="nav-tab-btn" onclick="switchTab('calendar')">Calendar</button>
+    <button class="nav-tab-btn" onclick="switchTab('ads')">Ad Specs</button>
+    <button class="nav-tab-btn" onclick="switchTab('production')">Production</button>
+  </div>
+</nav>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-eyebrow"><div class="cover-line"></div><div class="cover-eyebrow-text">Meta Social Strategy · FB + IG</div></div>
+    <div class="cover-title">Content<br><span>Calendar</span></div>
+    <p class="cover-desc">Launch strategy, weekly post schedule, paid ad specs, and content production workflow for Storm Sweep's Meta presence. Soft launch mid-June 2026 with off-season promo positioning.</p>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="cover-meta-label">Soft Launch</div><div class="cover-meta-val">Mid-June 2026</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Platforms</div><div class="cover-meta-val">FB + IG Equal</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Monthly Budget</div><div class="cover-meta-val">$200–$400</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Posting Cadence</div><div class="cover-meta-val">3–4x / Week</div></div>
+      <div class="cover-meta-item"><div class="cover-meta-label">Launch Promos</div><div class="cover-meta-val">Free Kit + Referral</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!--  TAB 1: STRATEGY               -->
+<!-- ════════════════════════════════ -->
+<div class="view active" id="view-strategy">
+<div class="page">
+
+  <div class="sec-title">Content Strategy</div>
+  <p class="sec-sub">Four pillars drive every post. Every piece of content belongs to one of these buckets.</p>
+
+  <div class="pillars-grid">
+    <div class="pillar-card p1">
+      <div class="pillar-icon">📸</div>
+      <div class="pillar-name">Before & After</div>
+      <div class="pillar-pct">35%</div>
+      <div class="pillar-desc">The highest-performing content type. Raw job photos polished with branded overlays. Norman neighbors share these.</div>
+    </div>
+    <div class="pillar-card p2">
+      <div class="pillar-icon">🌪️</div>
+      <div class="pillar-name">Education & Tips</div>
+      <div class="pillar-pct">25%</div>
+      <div class="pillar-desc">Seasonal tips, shelter safety facts, "did you know" posts. Builds trust and authority without selling.</div>
+    </div>
+    <div class="pillar-card p3">
+      <div class="pillar-icon">⭐</div>
+      <div class="pillar-name">Social Proof</div>
+      <div class="pillar-pct">25%</div>
+      <div class="pillar-desc">Customer reviews, testimonials, member spotlights. Real Norman people = real credibility.</div>
+    </div>
+    <div class="pillar-card p4">
+      <div class="pillar-icon">🎯</div>
+      <div class="pillar-name">Promos & CTAs</div>
+      <div class="pillar-pct">15%</div>
+      <div class="pillar-desc">Direct offers, booking pushes, membership drives. Paid-boosted. Don't over-post — keep it special.</div>
+    </div>
+  </div>
+
+  <div class="sub-title">Off-Season Positioning (June–August)</div>
+  <div class="alert warn">
+    <div class="alert-icon">☀️</div>
+    <div class="alert-text"><strong>Mid-Summer Strategy:</strong> Tornado season peaks April–May. June–August is the off-season — fewer people are thinking about shelters. Your job is to make them think about it anyway. Lead with "get it done before next season" framing + the free kit incentive. This is your brand-building window. Don't chase urgency — build trust instead.</div>
+  </div>
+
+  <div class="sub-title" style="margin-top:28px;">Launch Promos</div>
+  <div class="promo-grid">
+    <div class="promo-card hero-promo">
+      <div class="promo-badge hero-badge">🚀 Launch Offer · June–July</div>
+      <div class="promo-name">Free Emergency Kit<br>with First Booking</div>
+      <div class="promo-value">$49 value · Free with Single Sweep ($149)</div>
+      <div class="promo-desc">Tangible, easy to visualize, and genuinely useful. Works as both a paid ad hook and an organic social post. "Book your first clean, we stock your shelter for free."</div>
+      <div class="promo-copy">
+        <span class="promo-copy-label">Ad Headline</span>
+        "Norman — Your shelter cleaned AND stocked. Free emergency kit with every first booking this summer. Limited spots. ☑️ Book at stormsweep.com"
+      </div>
+    </div>
+    <div class="promo-card">
+      <div class="promo-badge referral">★ Ongoing · All Season</div>
+      <div class="promo-name">Refer a Neighbor</div>
+      <div class="promo-value">$25 credit per successful referral</div>
+      <div class="promo-desc">Norman is a tight neighborhood market — word of mouth compounds fast. Give members and customers a referral link via the portal. Post about it monthly, not weekly.</div>
+      <div class="promo-copy">
+        <span class="promo-copy-label">Organic Post Copy</span>
+        "Know a neighbor whose shelter hasn't been opened in years? Send them our way — you'll get $25 off your next visit. Link in bio 👇"
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-title">Target Audience · Meta Settings</div>
+  <div class="ad-spec-grid">
+    <div class="ad-spec-card">
+      <div class="ad-spec-header"><div class="ad-spec-title">Primary Audience</div><div class="ad-spec-platform">Facebook + Instagram</div></div>
+      <div class="ad-spec-body">
+        <div class="ad-field"><div class="ad-field-label">Location</div><div class="ad-field-val">Norman, OK + 10-mile radius · Moore, Midwest City, South OKC</div></div>
+        <div class="ad-field"><div class="ad-field-label">Age</div><div class="ad-field-val">30–65 · Homeowners skew 35–55</div></div>
+        <div class="ad-field"><div class="ad-field-label">Interests</div><div class="ad-field-val">Home improvement, emergency preparedness, Oklahoma weather, homeownership, Nextdoor users</div></div>
+        <div class="ad-field"><div class="ad-field-label">Behaviors</div><div class="ad-field-val">Homeowners, recently moved, DIY home improvement purchasers</div></div>
+      </div>
+    </div>
+    <div class="ad-spec-card">
+      <div class="ad-spec-header"><div class="ad-spec-title">Retargeting Audience</div><div class="ad-spec-platform">Facebook Pixel · Phase 2</div></div>
+      <div class="ad-spec-body">
+        <div class="ad-field"><div class="ad-field-label">Website Visitors</div><div class="ad-field-val">Anyone who visited stormsweep.com but didn't book — retarget with promo ad within 7 days</div></div>
+        <div class="ad-field"><div class="ad-field-label">Video Viewers</div><div class="ad-field-val">People who watched 50%+ of a before/after Reel — warm audience, serve membership ad</div></div>
+        <div class="ad-field"><div class="ad-field-label">Engagers</div><div class="ad-field-val">Anyone who liked, commented, or saved a post — retarget with free kit offer</div></div>
+        <div class="ad-field"><div class="ad-field-label">Setup</div><div class="ad-field-val">Install Meta Pixel on website at launch. Retargeting activates once audience reaches 100+ people (~3–4 weeks in)</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-title">Success Metrics · 90-Day Goals</div>
+  <div class="kpi-row">
+    <div class="kpi-card sky"><div class="kpi-label">Page Followers</div><div class="kpi-val">500+</div><div class="kpi-note">By end of August</div></div>
+    <div class="kpi-card wheat"><div class="kpi-label">Bookings from Meta</div><div class="kpi-val">15+</div><div class="kpi-note">June–August</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Cost Per Booking</div><div class="kpi-val">&lt;$60</div><div class="kpi-note">Target ROAS 2.5×+</div></div>
+    <div class="kpi-card purple"><div class="kpi-label">Avg Post Reach</div><div class="kpi-val">400+</div><div class="kpi-note">Organic per post</div></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!--  TAB 2: CALENDAR               -->
+<!-- ════════════════════════════════ -->
+<div class="view" id="view-calendar">
+<div class="page">
+
+  <div class="sec-title">Content Calendar</div>
+  <p class="sec-sub">June–September. 3–4 posts per week. Click any post to expand the caption copy.</p>
+
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-dot dot-ba"></div> Before & After</div>
+    <div class="legend-item"><div class="legend-dot dot-edu"></div> Education / Tips</div>
+    <div class="legend-item"><div class="legend-dot dot-promo"></div> Promo / CTA</div>
+    <div class="legend-item"><div class="legend-dot dot-social"></div> Social Proof</div>
+    <div class="legend-item"><div class="legend-dot dot-ad"></div> Paid Ad</div>
+  </div>
+
+  <!-- PHASE 1: LAUNCH -->
+  <div class="calendar-phase">
+    <div class="phase-header launch">
+      <div><div class="phase-name">Phase 1 · Soft Launch</div><div class="phase-dates">June 16 – June 30</div></div>
+      <div class="phase-tag launch-tag">🚀 Launch Window</div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-label">Week of June 16 · Launch Week</div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Mon</div><div class="post-day-num">16</div></div>
+        <div class="post-type-dot dot-promo"></div>
+        <div class="post-content">
+          <div class="post-headline">🚀 Storm Sweep Is Open — Norman, We're Here</div>
+          <div class="post-caption">"We're officially open for business. Here's what we do and why it matters in Oklahoma..."</div>
+          <div class="post-meta">
+            <span class="post-badge badge-both">FB + IG</span>
+            <span class="post-badge badge-paid">Paid · $30</span>
+            <span class="post-badge badge-promo">Launch Promo</span>
+          </div>
+          <div class="post-copy-block">Storm Sweep is officially open in Norman, OK. 🌪️ We clean, inspect, and upgrade underground storm shelters for homeowners — so when sirens sound, your family steps into a safe, ready space. Not a dirty, forgotten hole in the ground.<br><br>🎁 Launch Special: Book your first clean and we'll stock your shelter with a FREE emergency kit ($49 value). Limited spots this summer.<br><br>Book at stormsweep.com or DM us. Norman-based, locally owned.<br><br>#StormSweep #NormanOK #StormShelter #TornadoReady #NormanOklahoma</div>
+          <div class="expand-hint">Tap to see caption ↓</div>
+        </div>
+      </div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Wed</div><div class="post-day-num">18</div></div>
+        <div class="post-type-dot dot-edu"></div>
+        <div class="post-content">
+          <div class="post-headline">5 Things Hiding in Your Storm Shelter Right Now</div>
+          <div class="post-caption">"Mold, spiders, dead batteries, mystery odors... summer is the perfect time to deal with it."</div>
+          <div class="post-meta">
+            <span class="post-badge badge-organic">Organic</span>
+            <span class="post-badge badge-both">FB + IG</span>
+          </div>
+          <div class="post-copy-block">If you haven't opened your storm shelter since last tornado season, here's what's probably waiting for you: 🕷️ Spiders and pest nests, 💧 Moisture and mold buildup, 🦨 That smell (you know the one), 🔦 Dead flashlight batteries, 🗑️ Old, expired supplies.<br><br>Summer is actually the BEST time to get it cleaned — no rush, no competition for appointments, and we'll have it ready before next season hits.<br><br>Book now → stormsweep.com 🌪️<br><br>#StormShelter #NormanOK #TornadoSeason #HomePreparedness</div>
+          <div class="expand-hint">Tap to see caption ↓</div>
+        </div>
+      </div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Fri</div><div class="post-day-num">20</div></div>
+        <div class="post-type-dot dot-ba"></div>
+        <div class="post-content">
+          <div class="post-headline">Before & After #1 — First Official Job 🎉</div>
+          <div class="post-caption">"This is why we started Storm Sweep. Two hours. Total transformation."</div>
+          <div class="post-meta">
+            <span class="post-badge badge-organic">Organic</span>
+            <span class="post-badge badge-reel">Reel</span>
+            <span class="post-badge badge-both">FB + IG</span>
+          </div>
+          <div class="post-copy-block">First official Storm Sweep job — Norman, OK. 🌪️ This shelter hadn't been touched in 3 years. Mold on the walls, spiders everywhere, dead supplies from 2021.<br><br>Two hours later: scrubbed clean, deodorized, and stocked with a fresh emergency kit.<br><br>This is what we do. If your shelter looks anything like the before photo — give us a call. Summer slots are open.<br><br>📸 Customer shared with permission.<br>#StormSweep #NormanOK #BeforeAndAfter #StormShelter #TornadoReady</div>
+          <div class="expand-hint">Tap to see caption ↓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-label">Week of June 23</div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Tue</div><div class="post-day-num">24</div></div>
+        <div class="post-type-dot dot-edu"></div>
+        <div class="post-content">
+          <div class="post-headline">What's Actually IN a Storm Ready Shelter?</div>
+          <div class="post-caption">"We lay out every item in a properly stocked shelter. Most people are missing 4 of these."</div>
+          <div class="post-meta">
+            <span class="post-badge badge-organic">Organic</span>
+            <span class="post-badge badge-story">Story Series</span>
+          </div>
+          <div class="post-copy-block">Most Oklahoma homeowners have a storm shelter. Very few have one that's actually ready. Here's what should be down there: ✅ 3-day water supply, ✅ First aid kit (checked annually), ✅ Weather radio (battery or hand-crank), ✅ Phone charger / power bank, ✅ Flashlight or LED lighting, ✅ Emergency mylar blankets, ✅ Medications (if needed), ✅ Copy of important docs.<br><br>We stock all of this as part of our service. Our Storm Ready members get a free refresh every year.<br><br>What's missing from your shelter? 👇<br>#TornadoReady #NormanOK #EmergencyPreparedness #StormSweep</div>
+          <div class="expand-hint">Tap to see caption ↓</div>
+        </div>
+      </div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Thu</div><div class="post-day-num">26</div></div>
+        <div class="post-type-dot dot-ad"></div>
+        <div class="post-content">
+          <div class="post-headline">📣 Paid Ad — Free Kit with First Booking</div>
+          <div class="post-caption">Lead generation ad. Free kit offer. Targeting Norman homeowners 30–60.</div>
+          <div class="post-meta">
+            <span class="post-badge badge-paid">Paid · $40</span>
+            <span class="post-badge badge-both">FB + IG</span>
+          </div>
+          <div class="post-copy-block">HEADLINE: Norman — Free Emergency Kit with Your First Shelter Cleaning<br><br>BODY: Storm Sweep cleans, inspects, and upgrades underground storm shelters in Norman, OK. Book your first visit and we'll stock your shelter with a FREE emergency kit — water, first aid, weather radio, and more.<br><br>✅ Flat $149 · No surprises<br>✅ Before & after photos included<br>✅ Same-week scheduling<br>✅ Norman-based, locally owned<br><br>CTA BUTTON: Book Now → stormsweep.com</div>
+          <div class="expand-hint">Tap to see ad copy ↓</div>
+        </div>
+      </div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Sat</div><div class="post-day-num">28</div></div>
+        <div class="post-type-dot dot-ba"></div>
+        <div class="post-content">
+          <div class="post-headline">Before & After #2 — LED Upgrade Install</div>
+          <div class="post-caption">"No lighting in a shelter is a safety issue. This install took 25 minutes."</div>
+          <div class="post-meta">
+            <span class="post-badge badge-organic">Organic</span>
+            <span class="post-badge badge-reel">Reel</span>
+            <span class="post-badge badge-both">FB + IG</span>
+          </div>
+          <div class="post-copy-block">Going into a dark storm shelter during a tornado is terrifying. Most in-ground shelters have zero lighting. We installed a battery-powered LED panel + emergency backup light in 25 minutes. Total cost: $89. Now the whole family knows exactly what to do when they drop in.<br><br>Add-on available with any cleaning visit. Book at stormsweep.com 💡<br><br>#StormSweep #LEDLighting #NormanOK #StormShelter</div>
+          <div class="expand-hint">Tap to see caption ↓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2: OFF-SEASON -->
+  <div class="calendar-phase">
+    <div class="phase-header offseason">
+      <div><div class="phase-name">Phase 2 · Off-Season Build</div><div class="phase-dates">July 1 – August 31</div></div>
+      <div class="phase-tag off-tag">☀️ Brand Building</div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-label">July · Weekly Rhythm (Repeating Pattern)</div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Mon</div><div class="post-day-num">—</div></div>
+        <div class="post-type-dot dot-ba"></div>
+        <div class="post-content">
+          <div class="post-headline">Weekly Before & After</div>
+          <div class="post-caption">New job from the previous week. Reel format performs best. Sweeper captures raw footage, AI polishes with branded text overlay.</div>
+          <div class="post-meta">
+            <span class="post-badge badge-organic">Organic</span>
+            <span class="post-badge badge-reel">Reel</span>
+            <span class="post-badge badge-both">FB + IG</span>
+          </div>
+          <div class="post-copy-block">TEMPLATE CAPTION: Another shelter swept in Norman 🌪️ [Short description of condition — "hadn't been opened in X years", "mold on walls", etc.] → [Result after: clean, lit, stocked].<br><br>Summer is the best time to get yours done — no waiting, no rush. Book at stormsweep.com<br><br>#StormSweep #NormanOK #BeforeAndAfter #StormShelter</div>
+          <div class="expand-hint">Tap to see template ↓</div>
+        </div>
+      </div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Wed</div><div class="post-day-num">—</div></div>
+        <div class="post-type-dot dot-edu"></div>
+        <div class="post-content">
+          <div class="post-headline">Mid-Week Education / Tip Post</div>
+          <div class="post-caption">Rotating topics: shelter maintenance, Oklahoma weather facts, family preparedness, upgrade spotlights.</div>
+          <div class="post-meta">
+            <span class="post-badge badge-organic">Organic</span>
+            <span class="post-badge badge-both">FB + IG</span>
+          </div>
+          <div class="post-copy-block">TOPIC ROTATION (8-week cycle):<br>Wk 1: "How often should you clean a storm shelter?"<br>Wk 2: "The #1 thing people forget in their shelter"<br>Wk 3: "What makes a safe room different from a shelter?"<br>Wk 4: "Storm Sweep membership — what's included"<br>Wk 5: "LED lighting — why it matters underground"<br>Wk 6: "Oklahoma tornado stats — what every homeowner should know"<br>Wk 7: "Customer Q&A — your shelter questions answered"<br>Wk 8: "Refer a neighbor — here's how it works"</div>
+          <div class="expand-hint">Tap to see topic rotation ↓</div>
+        </div>
+      </div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Fri</div><div class="post-day-num">—</div></div>
+        <div class="post-type-dot dot-social"></div>
+        <div class="post-content">
+          <div class="post-headline">Friday Customer Spotlight / Review Share</div>
+          <div class="post-caption">"Here's what [Name] in Norman had to say after their first sweep..." Real reviews, real people.</div>
+          <div class="post-meta">
+            <span class="post-badge badge-organic">Organic</span>
+            <span class="post-badge badge-both">FB + IG</span>
+          </div>
+          <div class="post-copy-block">TEMPLATE: "[Customer first name] in Norman gave us 5 stars ⭐⭐⭐⭐⭐ — '[Quote from review]'.<br><br>This is exactly why we started Storm Sweep. Norman deserves a shelter service that actually shows up, does the work, and leaves it better than they found it.<br><br>Book your sweep → stormsweep.com<br>#StormSweep #NormanOK #CustomerReview #LocalBusiness"</div>
+          <div class="expand-hint">Tap to see template ↓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-label">July · Paid Ad Rotation (Bi-Weekly)</div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Bi-Wk</div><div class="post-day-num">A</div></div>
+        <div class="post-type-dot dot-ad"></div>
+        <div class="post-content">
+          <div class="post-headline">📣 Ad A — Free Kit Offer (Leads)</div>
+          <div class="post-caption">Run weeks 1–2, pause, run again weeks 5–6. Fresh creative, same offer.</div>
+          <div class="post-meta"><span class="post-badge badge-paid">Paid · $50/wk</span><span class="post-badge badge-both">FB + IG</span></div>
+          <div class="post-copy-block">HEADLINE: Free Emergency Kit with Your First Shelter Clean — Norman, OK<br>VISUAL: Bold before/after split image or 15-sec Reel<br>BODY: Storm Sweep cleans underground storm shelters in Norman. Book now and get a FREE emergency supply kit stocked in your shelter — $49 value, included with your first visit.<br>CTA: Book Now → $149 flat rate · stormsweep.com</div>
+          <div class="expand-hint">Tap to see ad copy ↓</div>
+        </div>
+      </div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Bi-Wk</div><div class="post-day-num">B</div></div>
+        <div class="post-type-dot dot-ad"></div>
+        <div class="post-content">
+          <div class="post-headline">📣 Ad B — Storm Ready Membership</div>
+          <div class="post-caption">Run weeks 3–4, pause, run weeks 7–8. Target people who already engaged with Ad A.</div>
+          <div class="post-meta"><span class="post-badge badge-paid">Paid · $50/wk</span><span class="post-badge badge-both">FB + IG</span></div>
+          <div class="post-copy-block">HEADLINE: $249/Year. Two Visits. Always Ready.<br>VISUAL: Split — messy shelter (before) vs. clean lit stocked shelter (after) with Storm Ready badge overlay<br>BODY: Storm Ready members get 2 cleanings a year, priority scheduling before tornado season, a free supply kit refresh, and 10% off all upgrades. Set it and forget it — we remind you when it's time.<br>CTA: Join Storm Ready → stormsweep.com/membership</div>
+          <div class="expand-hint">Tap to see ad copy ↓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3: PRE-SEASON RAMP -->
+  <div class="calendar-phase">
+    <div class="phase-header ramp">
+      <div><div class="phase-name">Phase 3 · Pre-Season Ramp</div><div class="phase-dates">September – October</div></div>
+      <div class="phase-tag ramp-tag">📈 Ramp Up</div>
+    </div>
+
+    <div class="week-block">
+      <div class="week-label">September — Urgency Begins to Build</div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Early</div><div class="post-day-num">Sep</div></div>
+        <div class="post-type-dot dot-promo"></div>
+        <div class="post-content">
+          <div class="post-headline">"Tornado Season is 6 Months Away. Book Now."</div>
+          <div class="post-caption">Shift from brand-building to booking urgency. Paid boost. Referral program reminder.</div>
+          <div class="post-meta"><span class="post-badge badge-paid">Paid · $60</span><span class="post-badge badge-both">FB + IG</span></div>
+          <div class="post-copy-block">Tornado season is still 6 months out — which means NOW is the best time to get your shelter cleaned. No rush. No competing for slots. Just a clean, ready shelter waiting for you when May comes back around. 🌪️<br><br>Book now and lock in your spot. Storm Ready members get first pick of spring scheduling.<br><br>👉 stormsweep.com | Norman, OK<br>#StormSweep #NormanOK #TornadoReady #StormShelter</div>
+          <div class="expand-hint">Tap to see caption ↓</div>
+        </div>
+      </div>
+      <div class="post-row" onclick="togglePost(this)">
+        <div class="post-day"><div class="post-day-name">Late</div><div class="post-day-num">Sep</div></div>
+        <div class="post-type-dot dot-social"></div>
+        <div class="post-content">
+          <div class="post-headline">Referral Program Spotlight Post</div>
+          <div class="post-caption">"Know a neighbor? You both win." Re-introduce the referral program heading into fall.</div>
+          <div class="post-meta"><span class="post-badge badge-organic">Organic</span><span class="post-badge badge-both">FB + IG</span></div>
+          <div class="post-copy-block">Quick reminder — our refer-a-neighbor program is running all year. 🏠 Send a friend or neighbor our way, they book a service, you get $25 off your next visit. That's it.<br><br>Norman neighborhoods talk. Storm Sweep is built on word of mouth. Share the link in your portal or just send them to stormsweep.com.<br><br>#StormSweep #NormanOK #ReferAFriend #LocalBusiness</div>
+          <div class="expand-hint">Tap to see caption ↓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!--  TAB 3: AD SPECS               -->
+<!-- ════════════════════════════════ -->
+<div class="view" id="view-ads">
+<div class="page">
+
+  <div class="sec-title">Paid Ad Specs</div>
+  <p class="sec-sub">Ready-to-run ad briefs for each campaign. Hand these directly to Meta Ads Manager or an ad manager.</p>
+
+  <div class="sub-title">Budget Allocation</div>
+  <table class="budget-table">
+    <thead>
+      <tr><th>Line Item</th><th>Monthly Budget</th><th>Weekly</th><th>Goal</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Ad A — Free Kit (Lead Gen)</td><td><div class="budget-val sky">$100</div></td><td>$25/wk</td><td>Bookings — new customers</td></tr>
+      <tr><td>Ad B — Storm Ready Membership</td><td><div class="budget-val wheat">$80</div></td><td>$20/wk</td><td>Membership signups</td></tr>
+      <tr><td>Boosted organic posts (B&A, reviews)</td><td><div class="budget-val green">$80</div></td><td>~$20/wk</td><td>Reach + followers</td></tr>
+      <tr><td>Retargeting (Phase 2 — after pixel warms)</td><td><div class="budget-val">$40</div></td><td>$10/wk</td><td>Re-engage warm visitors</td></tr>
+      <tr><td><strong>Total</strong></td><td><div class="budget-val">$300/mo</div></td><td>$75/wk</td><td>Mid-range of $200–$400 budget</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert info">
+    <div class="alert-icon">ℹ️</div>
+    <div class="alert-text"><strong>Budget note:</strong> Start at $200/mo in June, scale to $300–$400 once you identify which ad is performing. A $300/mo budget in Norman targeting homeowners can realistically reach 8,000–15,000 people per month. At a 2% conversion to click and 10% booking rate, that's 16–30 potential leads monthly.</div>
+  </div>
+
+  <div class="sub-title" style="margin-top:32px;">Ad Creative Briefs</div>
+  <div class="ad-spec-grid">
+    <div class="ad-spec-card">
+      <div class="ad-spec-header"><div class="ad-spec-title">Ad A · Free Kit Offer</div><div class="ad-spec-platform">Facebook + Instagram · Lead Gen</div></div>
+      <div class="ad-spec-body">
+        <div class="ad-field"><div class="ad-field-label">Objective</div><div class="ad-field-val">Conversions → Book a service</div></div>
+        <div class="ad-field"><div class="ad-field-label">Format</div><div class="ad-field-val">Single image (1:1 square) OR 15-sec Reel. B&A split image performs best.</div></div>
+        <div class="ad-field"><div class="ad-field-label">Headline</div><div class="ad-field-val copy">Free Emergency Kit with Your First Shelter Cleaning — Norman, OK</div></div>
+        <div class="ad-field"><div class="ad-field-label">Primary Text</div><div class="ad-field-val copy">Storm Sweep cleans underground storm shelters in Norman. Book your first visit and we'll stock it with a FREE emergency kit — water, first aid, weather radio & more. Flat $149 · Before & after photos included · Same-week scheduling.</div></div>
+        <div class="ad-field"><div class="ad-field-label">CTA Button</div><div class="ad-field-val">Book Now</div></div>
+        <div class="ad-field"><div class="ad-field-label">Landing Page</div><div class="ad-field-val">stormsweep.com → booking form (scroll directly to form)</div></div>
+        <div class="ad-field"><div class="ad-field-label">Audience</div><div class="ad-field-val">Norman OK + 10mi · 30–60 · Homeowners · Home improvement interests</div></div>
+      </div>
+    </div>
+    <div class="ad-spec-card">
+      <div class="ad-spec-header"><div class="ad-spec-title">Ad B · Storm Ready Membership</div><div class="ad-spec-platform">Facebook + Instagram · Awareness + Sign-Up</div></div>
+      <div class="ad-spec-body">
+        <div class="ad-field"><div class="ad-field-label">Objective</div><div class="ad-field-val">Conversions → Membership signup page</div></div>
+        <div class="ad-field"><div class="ad-field-label">Format</div><div class="ad-field-val">Carousel (before → after → supplies → membership card visual) OR single bold graphic</div></div>
+        <div class="ad-field"><div class="ad-field-label">Headline</div><div class="ad-field-val copy">$249/Year. Two Visits. Always Ready.</div></div>
+        <div class="ad-field"><div class="ad-field-label">Primary Text</div><div class="ad-field-val copy">Storm Ready members get 2 cleanings a year, priority spring scheduling, a free supply kit refresh, and 10% off all upgrades. We remind you when it's time — you just open the door. Norman, OK homeowners only.</div></div>
+        <div class="ad-field"><div class="ad-field-label">CTA Button</div><div class="ad-field-val">Learn More</div></div>
+        <div class="ad-field"><div class="ad-field-label">Landing Page</div><div class="ad-field-val">stormsweep.com → pricing section (Storm Ready card)</div></div>
+        <div class="ad-field"><div class="ad-field-label">Audience</div><div class="ad-field-val">Custom: Engaged with Ad A or visited website (retarget) + lookalike of website visitors</div></div>
+      </div>
+    </div>
+    <div class="ad-spec-card">
+      <div class="ad-spec-header"><div class="ad-spec-title">Ad C · Boosted B&A Reel</div><div class="ad-spec-platform">Instagram Reels Primary · FB Feed</div></div>
+      <div class="ad-spec-body">
+        <div class="ad-field"><div class="ad-field-label">Objective</div><div class="ad-field-val">Reach + Video Views (brand awareness)</div></div>
+        <div class="ad-field"><div class="ad-field-label">Format</div><div class="ad-field-val">9:16 vertical video · 15–30 seconds · Before clip → cleaning action → after reveal</div></div>
+        <div class="ad-field"><div class="ad-field-label">On-Screen Text</div><div class="ad-field-val copy">THIS IS YOUR STORM SHELTER → [before] → 2 HOURS LATER → [after] → STORM SWEEP · NORMAN OK · stormsweep.com</div></div>
+        <div class="ad-field"><div class="ad-field-label">Audio</div><div class="ad-field-val">Trending audio OR upbeat royalty-free track. No voiceover needed — text overlay does the work.</div></div>
+        <div class="ad-field"><div class="ad-field-label">Boost Budget</div><div class="ad-field-val">$20–$30 per best-performing B&A post · Boost after 24hrs of organic performance</div></div>
+        <div class="ad-field"><div class="ad-field-label">Audience</div><div class="ad-field-val">Broad · Norman + 15mi · 25–65 · Let Meta optimize</div></div>
+      </div>
+    </div>
+    <div class="ad-spec-card">
+      <div class="ad-spec-header"><div class="ad-spec-title">Ad D · Retargeting</div><div class="ad-spec-platform">Facebook + Instagram · Warm Audience Only</div></div>
+      <div class="ad-spec-body">
+        <div class="ad-field"><div class="ad-field-label">Objective</div><div class="ad-field-val">Conversions — re-engage people who visited site or engaged with content</div></div>
+        <div class="ad-field"><div class="ad-field-label">Trigger</div><div class="ad-field-val">Activate once Meta Pixel audience reaches 100+ (est. 3–4 weeks post-launch)</div></div>
+        <div class="ad-field"><div class="ad-field-label">Headline</div><div class="ad-field-val copy">Still thinking about it? Book this week — free kit included.</div></div>
+        <div class="ad-field"><div class="ad-field-label">Primary Text</div><div class="ad-field-val copy">You checked us out — now's a great time to book. Summer slots are open, no waiting, and we're still running the free emergency kit offer with every first visit. $149 flat. stormsweep.com</div></div>
+        <div class="ad-field"><div class="ad-field-label">Audience</div><div class="ad-field-val">Website visitors (7-day) + Post engagers (30-day) · Exclude existing customers</div></div>
+        <div class="ad-field"><div class="ad-field-label">Budget</div><div class="ad-field-val">$10/day capped · Turn off after booking, retrigger monthly</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!--  TAB 4: PRODUCTION             -->
+<!-- ════════════════════════════════ -->
+<div class="view" id="view-production">
+<div class="page">
+
+  <div class="sec-title">Content Production System</div>
+  <p class="sec-sub">How raw job footage becomes polished, scheduled social content — with minimal time from you each week.</p>
+
+  <div class="sub-title">Weekly Production Flow</div>
+  <div class="production-flow">
+    <div class="prod-step">
+      <div class="prod-step-num">1</div>
+      <div class="prod-step-icon">📱</div>
+      <div class="prod-step-title">Sweeper Captures</div>
+      <div class="prod-step-body">On every job: before photo, after photo, 10-sec before video clip, 10-sec after video clip. Uploaded to app before leaving. Takes 3 minutes.</div>
+    </div>
+    <div class="prod-step">
+      <div class="prod-step-num">2</div>
+      <div class="prod-step-icon">🤖</div>
+      <div class="prod-step-title">AI Production</div>
+      <div class="prod-step-body">Raw photos → branded before/after graphic via Canva template or AI tool (Adobe Firefly, CapCut). Caption drafted using Claude with job notes as input.</div>
+    </div>
+    <div class="prod-step">
+      <div class="prod-step-num">3</div>
+      <div class="prod-step-icon">✅</div>
+      <div class="prod-step-title">Your Weekly Review</div>
+      <div class="prod-step-body">Every Sunday or Monday — review the week's scheduled posts in Buffer. Approve, edit, or swap. Takes 15–20 minutes max. Paid ads reviewed separately before launch.</div>
+    </div>
+    <div class="prod-step">
+      <div class="prod-step-num">4</div>
+      <div class="prod-step-icon">📅</div>
+      <div class="prod-step-title">Auto-Schedule</div>
+      <div class="prod-step-body">Buffer publishes to FB + IG automatically at optimal times. You get a weekly performance summary. Boost top posts via Meta Ads Manager manually.</div>
+    </div>
+  </div>
+
+  <div class="alert success">
+    <div class="alert-icon">⏱️</div>
+    <div class="alert-text"><strong>Time commitment:</strong> Once the system is running, your weekly time investment is roughly 20 min Sunday review + 15 min ad check bi-weekly. Sweepers handle raw capture. AI handles production. Buffer handles scheduling. You stay in control without running it daily.</div>
+  </div>
+
+  <div class="sub-title" style="margin-top:28px;">Recommended Tool Stack</div>
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="tool-icon">📅</div>
+      <div class="tool-name">Buffer</div>
+      <div class="tool-role">Scheduling & Publishing</div>
+      <div class="tool-desc">Schedule FB + IG posts in advance. Free plan covers basics; $15/mo Essentials plan adds analytics. Connects directly to both platforms.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🎨</div>
+      <div class="tool-name">Canva Pro</div>
+      <div class="tool-role">Graphics & Templates</div>
+      <div class="tool-desc">Build Storm Sweep branded templates once — before/after layouts, quote graphics, promo cards. Sweeper photos drop straight in. ~$13/mo.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🎬</div>
+      <div class="tool-name">CapCut</div>
+      <div class="tool-role">Reel Editing</div>
+      <div class="tool-desc">Free app. Auto-edit before/after video clips into a polished Reel with text overlays and trending audio. AI features speed this up significantly.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🤖</div>
+      <div class="tool-name">Claude</div>
+      <div class="tool-role">Caption & Ad Copy</div>
+      <div class="tool-desc">Paste job notes → get a ready-to-post caption in your brand voice. Use for weekly caption drafts, ad copy variations, and promo text. Already in your workflow.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">📊</div>
+      <div class="tool-name">Meta Ads Manager</div>
+      <div class="tool-role">Paid Ad Management</div>
+      <div class="tool-desc">Free. Run and monitor all paid campaigns. Install the Meta Pixel on your website at launch — essential for retargeting and conversion tracking.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">📍</div>
+      <div class="tool-name">Nextdoor</div>
+      <div class="tool-role">Hyper-Local Organic</div>
+      <div class="tool-desc">Free. Create a Storm Sweep business profile. Post neighborhood-specific content ("Cleaned 3 shelters in Brookhaven this week"). Complements Meta perfectly for Norman hyperlocal reach.</div>
+    </div>
+  </div>
+
+  <div class="sub-title" style="margin-top:32px;">Sweeper Photo Brief</div>
+  <div class="ad-spec-card" style="border-radius:12px;overflow:hidden;">
+    <div class="ad-spec-header" style="background:var(--charcoal);"><div class="ad-spec-title">What Sweepers Capture on Every Job</div><div class="ad-spec-platform">Shared with all Sweepers · Required</div></div>
+    <div class="ad-spec-body">
+      <div class="ad-field"><div class="ad-field-label">Photo 1 — Before Wide</div><div class="ad-field-val">Stand in doorway or on steps looking down into the shelter. Capture the full interior. Natural light or phone flashlight. Do NOT clean anything first.</div></div>
+      <div class="ad-field"><div class="ad-field-label">Photo 2 — Before Detail</div><div class="ad-field-val">One close-up of the worst area — mold, debris, rust, whatever tells the story. This is the "gross" shot that drives engagement.</div></div>
+      <div class="ad-field"><div class="ad-field-label">Video — Before Clip</div><div class="ad-field-val">10-second slow pan around the interior before work begins. Phone steady, no talking needed. Portrait/vertical orientation.</div></div>
+      <div class="ad-field"><div class="ad-field-label">Photo 3 — After Wide</div><div class="ad-field-val">Same angle as Photo 1. Clean, lit if LED installed, supplies visible if stocked. Make it look great.</div></div>
+      <div class="ad-field"><div class="ad-field-label">Video — After Clip</div><div class="ad-field-val">10-second pan matching before clip angle. Slow, steady. Let the clean space speak for itself.</div></div>
+      <div class="ad-field"><div class="ad-field-label">Customer Permission</div><div class="ad-field-val">Ask at wrap-up: "Mind if we share before/after photos on our social media? No personal info, just the shelter." Most say yes. Log yes/no in app.</div></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function togglePost(row) {
+  row.classList.toggle('expanded');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storm Sweep — Norman, OK Underground Shelter Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #2E86C1;
+  --sky-light: #5DADE2;
+  --sky-dark: #1A5276;
+  --wheat: #D4A843;
+  --wheat-light: #F0C96B;
+  --wheat-pale: #FDF6E3;
+  --red: #C0392B;
+  --charcoal: #141416;
+  --slate: #2C2C2E;
+  --mid: #6B6B6B;
+  --border: #E8E8E4;
+  --light: #F7F7F4;
+  --white: #FFFFFF;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--white);
+  color: var(--charcoal);
+  overflow-x: hidden;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 68px;
+  background: rgba(20,20,22,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--white);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo-dot { color: var(--sky-light); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--white); }
+
+.nav-cta {
+  background: var(--sky) !important;
+  color: white !important;
+  padding: 10px 22px;
+  border-radius: 4px;
+  font-size: 11px !important;
+  letter-spacing: 2px !important;
+}
+
+.nav-cta:hover { background: var(--sky-light) !important; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  background: var(--charcoal);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 120px 48px 80px;
+}
+
+.hero-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(46,134,193,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46,134,193,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.hero-glow {
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(46,134,193,0.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.hero-glow-2 {
+  position: absolute;
+  bottom: -100px;
+  left: 30%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(212,168,67,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  animation: fadeUp 0.8s ease both;
+}
+
+.hero-eyebrow-line {
+  width: 40px;
+  height: 2px;
+  background: var(--wheat);
+}
+
+.hero-eyebrow-text {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--wheat);
+}
+
+.hero-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(72px, 10vw, 140px);
+  line-height: 0.9;
+  color: var(--white);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+
+.hero-headline-accent { color: var(--sky-light); }
+
+.hero-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(20px, 3vw, 32px);
+  font-weight: 400;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  animation: fadeUp 0.8s 0.2s ease both;
+}
+
+.hero-body {
+  font-size: 17px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.6);
+  max-width: 520px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s 0.3s ease both;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.8s 0.4s ease both;
+}
+
+.btn-primary {
+  background: var(--sky);
+  color: white;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 16px 36px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-primary:hover { background: var(--sky-light); transform: translateY(-1px); }
+
+.btn-secondary {
+  color: rgba(255,255,255,0.7);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+
+.btn-secondary:hover { color: white; }
+.btn-secondary::after { content: '→'; }
+
+.hero-trust {
+  position: absolute;
+  bottom: 48px;
+  left: 48px;
+  right: 48px;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 32px;
+  animation: fadeUp 0.8s 0.5s ease both;
+}
+
+.hero-trust-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-trust-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 1px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.hero-trust-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+}
+
+.hero-trust-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255,255,255,0.1);
+}
+
+/* ─── SECTION BASE ─── */
+section { padding: 96px 48px; }
+
+.section-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--sky);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 2px;
+  background: var(--sky);
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 5vw, 64px);
+  letter-spacing: 1px;
+  color: var(--charcoal);
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.section-title-light { color: var(--white); }
+
+.section-body {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--mid);
+  max-width: 540px;
+  line-height: 1.8;
+}
+
+/* ─── TRUST STRIP ─── */
+.trust-strip {
+  background: var(--wheat-pale);
+  border-top: 1px solid rgba(212,168,67,0.2);
+  border-bottom: 1px solid rgba(212,168,67,0.2);
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate);
+  letter-spacing: 0.5px;
+}
+
+.trust-icon { font-size: 16px; }
+
+/* ─── SERVICES ─── */
+.services { background: var(--light); }
+
+.services-inner { max-width: 1100px; margin: 0 auto; }
+
+.services-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 64px;
+  align-items: end;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.service-card {
+  background: var(--white);
+  padding: 40px 36px;
+  transition: background 0.2s;
+  cursor: default;
+}
+
+.service-card:hover { background: #FAFAF8; }
+
+.service-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--sky);
+  margin-bottom: 20px;
+}
+
+.service-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.service-card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--charcoal);
+  margin-bottom: 12px;
+}
+
+.service-card-body {
+  font-size: 14px;
+  color: var(--mid);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.service-card-price {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--sky-dark);
+  text-transform: uppercase;
+}
+
+/* ─── HOW IT WORKS ─── */
+.how { background: var(--charcoal); }
+
+.how-inner { max-width: 1100px; margin: 0 auto; }
+
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 64px;
+}
+
+.how-step {
+  background: var(--slate);
+  padding: 40px 32px;
+  position: relative;
+}
+
+.how-step-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 72px;
+  color: rgba(255,255,255,0.06);
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  line-height: 1;
+}
+
+.how-step-icon { font-size: 28px; margin-bottom: 20px; }
+
+.how-step-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+
+.how-step-body {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.7;
+}
+
+/* ─── PRICING ─── */
+.pricing { background: var(--white); }
+
+.pricing-inner { max-width: 900px; margin: 0 auto; }
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 64px;
+}
+
+.pricing-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 44px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card.featured {
+  background: var(--charcoal);
+  border-color: transparent;
+}
+
+.pricing-card.featured::after {
+  content: 'MOST POPULAR';
+  position: absolute;
+  top: 22px; right: -30px;
+  background: var(--wheat);
+  color: var(--charcoal);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 5px 44px;
+  transform: rotate(45deg);
+}
+
+.pricing-plan {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--sky);
+  margin-bottom: 10px;
+}
+
+.pricing-card.featured .pricing-plan { color: var(--wheat-light); }
+
+.pricing-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 38px;
+  letter-spacing: 1px;
+  color: var(--charcoal);
+  margin-bottom: 6px;
+}
+
+.pricing-card.featured .pricing-name { color: var(--white); }
+
+.pricing-desc {
+  font-size: 14px;
+  color: var(--mid);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.pricing-card.featured .pricing-desc { color: rgba(255,255,255,0.45); }
+
+.pricing-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pricing-card.featured .pricing-amount { border-bottom-color: rgba(255,255,255,0.1); }
+
+.pricing-dollar {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--mid);
+}
+
+.pricing-card.featured .pricing-dollar { color: rgba(255,255,255,0.4); }
+
+.pricing-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 64px;
+  letter-spacing: 0;
+  color: var(--sky);
+  line-height: 1;
+}
+
+.pricing-card.featured .pricing-num { color: var(--wheat-light); }
+
+.pricing-per {
+  font-size: 13px;
+  color: var(--mid);
+}
+
+.pricing-card.featured .pricing-per { color: rgba(255,255,255,0.35); }
+
+.pricing-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.pricing-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--slate);
+  line-height: 1.5;
+}
+
+.pricing-card.featured .pricing-features li { color: rgba(255,255,255,0.75); }
+
+.pricing-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(46,134,193,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 10px;
+  color: var(--sky);
+}
+
+.pricing-card.featured .pricing-check {
+  background: rgba(212,168,67,0.15);
+  color: var(--wheat-light);
+}
+
+.btn-book {
+  width: 100%;
+  padding: 16px;
+  border-radius: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 2px solid var(--sky);
+  background: transparent;
+  color: var(--sky);
+  transition: all 0.2s;
+}
+
+.btn-book:hover { background: var(--sky); color: white; }
+
+.btn-book.featured-btn {
+  background: var(--sky);
+  color: white;
+  border-color: var(--sky);
+}
+
+.btn-book.featured-btn:hover { background: var(--sky-light); border-color: var(--sky-light); }
+
+/* ─── BOOKING FORM ─── */
+.booking { background: var(--light); }
+
+.booking-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.booking-form {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 44px 40px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.form-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 1px;
+  color: var(--charcoal);
+  margin-bottom: 28px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 7px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  color: var(--charcoal);
+  background: var(--light);
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.form-input:focus { border-color: var(--sky); background: white; }
+
+.form-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  color: var(--charcoal);
+  background: var(--light);
+  outline: none;
+  cursor: pointer;
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.form-submit {
+  width: 100%;
+  padding: 16px;
+  background: var(--sky);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+
+.form-submit:hover { background: var(--sky-light); }
+
+.form-note {
+  font-size: 12px;
+  color: var(--mid);
+  text-align: center;
+  margin-top: 12px;
+}
+
+.booking-info { padding-top: 12px; }
+
+.booking-info-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  letter-spacing: 1px;
+  color: var(--charcoal);
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.booking-info-body {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--mid);
+  line-height: 1.8;
+  margin-bottom: 36px;
+}
+
+.booking-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.booking-perk {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.booking-perk-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(46,134,193,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.booking-perk-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--charcoal);
+  margin-bottom: 3px;
+}
+
+.booking-perk-body {
+  font-size: 13px;
+  color: var(--mid);
+  line-height: 1.5;
+}
+
+/* ─── MEMBERSHIP CTA ─── */
+.membership-cta {
+  background: var(--sky-dark);
+  padding: 80px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.membership-cta::before {
+  content: 'STORM READY';
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 120px;
+  color: rgba(255,255,255,0.03);
+  letter-spacing: 8px;
+  white-space: nowrap;
+}
+
+.membership-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+.membership-text {}
+
+.membership-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--wheat-light);
+  margin-bottom: 14px;
+}
+
+.membership-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: 1px;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.membership-body {
+  font-size: 15px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.7;
+  max-width: 420px;
+}
+
+.membership-action { flex-shrink: 0; text-align: center; }
+
+.membership-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 72px;
+  color: var(--wheat-light);
+  line-height: 1;
+}
+
+.membership-price-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 20px;
+}
+
+.btn-wheat {
+  background: var(--wheat);
+  color: var(--charcoal);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-wheat:hover { background: var(--wheat-light); }
+
+/* ─── TESTIMONIALS ─── */
+.testimonials { background: var(--white); }
+
+.testimonials-inner { max-width: 1000px; margin: 0 auto; }
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 60px;
+}
+
+.testimonial-card {
+  background: var(--light);
+  border-radius: 12px;
+  padding: 32px 28px;
+  border: 1px solid var(--border);
+}
+
+.testimonial-stars {
+  color: var(--wheat);
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.testimonial-quote {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--slate);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.testimonial-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--sky);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.testimonial-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.testimonial-loc {
+  font-size: 12px;
+  color: var(--mid);
+}
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--charcoal);
+  padding: 64px 48px 32px;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 32px;
+}
+
+.footer-brand-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 2px;
+  color: var(--white);
+  margin-bottom: 14px;
+}
+
+.footer-brand-logo span { color: var(--sky-light); }
+
+.footer-brand-body {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.7;
+  max-width: 260px;
+  margin-bottom: 24px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-social-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.footer-social-btn:hover { background: var(--sky); }
+
+.footer-col-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 18px;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links a {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: var(--white); }
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: rgba(255,255,255,0.2);
+}
+
+.footer-ok {
+  font-size: 12px;
+  color: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 24px 80px; }
+  .hero-trust { flex-wrap: wrap; gap: 20px; left: 24px; right: 24px; }
+  section { padding: 64px 24px; }
+  .services-header { grid-template-columns: 1fr; gap: 24px; }
+  .services-grid { grid-template-columns: 1fr; }
+  .how-steps { grid-template-columns: 1fr 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .booking-inner { grid-template-columns: 1fr; gap: 40px; }
+  .membership-inner { flex-direction: column; text-align: center; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .trust-strip { gap: 24px; padding: 16px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Storm<span class="nav-logo-dot">Sweep</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#membership">Membership</a></li>
+    <li><a href="#book" class="nav-cta">Book Now</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="home">
+  <div class="hero-grid-overlay"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+
+  <div class="hero-eyebrow">
+    <div class="hero-eyebrow-line"></div>
+    <div class="hero-eyebrow-text">Norman, Oklahoma · Underground Shelter Services</div>
+  </div>
+
+  <h1 class="hero-headline">
+    Storm<br><span class="hero-headline-accent">Sweep</span>
+  </h1>
+
+  <div class="hero-sub">Clean · Safe · Ready</div>
+
+  <p class="hero-body">
+    We clean, inspect, light, and stock underground storm shelters for Norman-area homeowners. So when the sirens sound, your family steps into a safe, ready space — not a forgotten hole in the ground.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#book" class="btn-primary">Book a Sweep</a>
+    <a href="#services" class="btn-secondary">See Services</a>
+  </div>
+
+  <div class="hero-trust">
+    <div class="hero-trust-item">
+      <span class="hero-trust-num">Norman</span>
+      <span class="hero-trust-label">Oklahoma Based</span>
+    </div>
+    <div class="hero-trust-divider"></div>
+    <div class="hero-trust-item">
+      <span class="hero-trust-num">$149</span>
+      <span class="hero-trust-label">Starting Price</span>
+    </div>
+    <div class="hero-trust-divider"></div>
+    <div class="hero-trust-item">
+      <span class="hero-trust-num">Same Week</span>
+      <span class="hero-trust-label">Scheduling</span>
+    </div>
+    <div class="hero-trust-divider"></div>
+    <div class="hero-trust-item">
+      <span class="hero-trust-num">Before & After</span>
+      <span class="hero-trust-label">Photo Report</span>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="trust-item"><span class="trust-icon">🌪️</span> Tornado Season Specialists</div>
+  <div class="trust-item"><span class="trust-icon">📸</span> Before & After Photos Every Visit</div>
+  <div class="trust-item"><span class="trust-icon">✅</span> Checklist-Based Service</div>
+  <div class="trust-item"><span class="trust-icon">🔒</span> Licensed & Insured</div>
+  <div class="trust-item"><span class="trust-icon">📍</span> Norman, OK Locals</div>
+</div>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="services-inner">
+    <div class="services-header">
+      <div>
+        <div class="section-eyebrow">What We Do</div>
+        <h2 class="section-title">Four Ways We<br>Protect Your Family</h2>
+      </div>
+      <p class="section-body">Every visit starts with a deep clean. From there, we upgrade your shelter from an afterthought into a genuine safe room — lit, stocked, and structurally sound.</p>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-num">01</div>
+        <div class="service-icon-wrap" style="background:rgba(46,134,193,0.1);">🧹</div>
+        <div class="service-card-title">Deep Clean & Deodorize</div>
+        <p class="service-card-body">Full scrub of walls, floors, ceiling. Mold treatment, odor elimination, pest removal, and moisture assessment. The foundation of every visit — one-time or membership.</p>
+        <div class="service-card-price">Included in all visits</div>
+      </div>
+      <div class="service-card">
+        <div class="service-num">02</div>
+        <div class="service-icon-wrap" style="background:rgba(212,168,67,0.12);">💡</div>
+        <div class="service-card-title">LED & Emergency Lighting</div>
+        <p class="service-card-body">LED panel install, battery backup lighting, and motion-triggered emergency lights. No more fumbling in pitch black when it matters most. Add-on or bundled.</p>
+        <div class="service-card-price">From $89 installed</div>
+      </div>
+      <div class="service-card">
+        <div class="service-num">03</div>
+        <div class="service-icon-wrap" style="background:rgba(192,57,43,0.1);">🎒</div>
+        <div class="service-card-title">Emergency Supply Kits</div>
+        <p class="service-card-body">Custom stocked kits — water, first aid, weather radio, comfort items, phone chargers. Refreshed annually for Storm Ready members. Peace of mind in a bag.</p>
+        <div class="service-card-price">From $49 · Free refresh for members</div>
+      </div>
+      <div class="service-card">
+        <div class="service-num">04</div>
+        <div class="service-icon-wrap" style="background:rgba(26,82,118,0.1);">🔩</div>
+        <div class="service-card-title">Structural & Door Upgrades</div>
+        <p class="service-card-body">Hatch door inspection and replacement, hinge reinforcement, interior handle installs, locking mechanism upgrades. We make sure you can actually get in — and out.</p>
+        <div class="service-card-price">Quoted on inspection</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-inner">
+    <div class="section-eyebrow" style="color:var(--sky-light);">
+      <span style="background:var(--sky-light);"></span>
+      The Process
+    </div>
+    <h2 class="section-title section-title-light">Simple As It Gets</h2>
+
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <div class="how-step-icon">📱</div>
+        <div class="how-step-title">Book Online</div>
+        <p class="how-step-body">Pick your service, choose a date, and pay your deposit — all in under 3 minutes. No phone tag, no waiting.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <div class="how-step-icon">📅</div>
+        <div class="how-step-title">We Confirm</div>
+        <p class="how-step-body">You'll get a text and email confirmation with your tech's name and an arrival window. Reminders the day before too.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <div class="how-step-icon">🌪️</div>
+        <div class="how-step-title">We Show Up</div>
+        <p class="how-step-body">Our tech arrives, completes the full checklist, and takes before & after photos — shared directly to your customer portal.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">4</div>
+        <div class="how-step-icon">✅</div>
+        <div class="how-step-title">You're Ready</div>
+        <p class="how-step-body">Receive your service report, photos, and any upgrade recommendations. Your shelter is shelter-ready. That's it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Fair, Flat Pricing.<br>No Surprises.</h2>
+    <p class="section-body">One-time visit or annual membership — both include full cleaning, photo report, and safety checklist. Upgrades are quoted separately.</p>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-plan">One-Time Visit</div>
+        <div class="pricing-name">Single Sweep</div>
+        <p class="pricing-desc">Perfect for first-timers or those who want a one-time assessment and clean before storm season.</p>
+        <div class="pricing-amount">
+          <span class="pricing-dollar">$</span>
+          <span class="pricing-num">149</span>
+          <span class="pricing-per">/ visit</span>
+        </div>
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span>Full deep clean & deodorize</li>
+          <li><span class="pricing-check">✓</span>Before & after photo report</li>
+          <li><span class="pricing-check">✓</span>Safety inspection checklist</li>
+          <li><span class="pricing-check">✓</span>Upgrade recommendations</li>
+          <li><span class="pricing-check">✓</span>Minor debris & pest removal</li>
+        </ul>
+        <button class="btn-book">Book a Single Sweep</button>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-plan">Annual Membership</div>
+        <div class="pricing-name">Storm Ready</div>
+        <p class="pricing-desc">Two visits a year, priority scheduling, supply refresh, and 10% off all upgrades. Our most popular plan.</p>
+        <div class="pricing-amount">
+          <span class="pricing-dollar">$</span>
+          <span class="pricing-num">249</span>
+          <span class="pricing-per">/ year</span>
+        </div>
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span>2 full cleaning visits / year</li>
+          <li><span class="pricing-check">✓</span>Priority storm-season scheduling</li>
+          <li><span class="pricing-check">✓</span>Emergency supply kit refresh</li>
+          <li><span class="pricing-check">✓</span>10% off all upgrade services</li>
+          <li><span class="pricing-check">✓</span>Annual safety report card</li>
+          <li><span class="pricing-check">✓</span>SMS storm-season reminders</li>
+        </ul>
+        <button class="btn-book featured-btn">Join Storm Ready</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING FORM -->
+<section class="booking" id="book">
+  <div class="booking-inner">
+    <div class="booking-info">
+      <div class="section-eyebrow">Book Online</div>
+      <h2 class="booking-info-title">Ready to<br>Get Started?</h2>
+      <p class="booking-info-body">Fill out the form and we'll confirm your appointment within a few hours. Same-week scheduling usually available. Stripe and PayPal accepted.</p>
+
+      <div class="booking-perks">
+        <div class="booking-perk">
+          <div class="booking-perk-icon">💳</div>
+          <div>
+            <div class="booking-perk-title">Secure Online Payment</div>
+            <div class="booking-perk-body">Pay via Stripe or PayPal. Deposit taken at booking, balance after service.</div>
+          </div>
+        </div>
+        <div class="booking-perk">
+          <div class="booking-perk-icon">📸</div>
+          <div>
+            <div class="booking-perk-title">Photo Report Delivered</div>
+            <div class="booking-perk-body">Before & after photos sent to your customer portal same day.</div>
+          </div>
+        </div>
+        <div class="booking-perk">
+          <div class="booking-perk-icon">🔔</div>
+          <div>
+            <div class="booking-perk-title">Text & Email Updates</div>
+            <div class="booking-perk-body">Confirmation, reminders, and post-visit summary — all automated.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="booking-form">
+      <div class="form-title">Book Your Sweep</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-input" type="text" placeholder="Jane">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input class="form-input" type="text" placeholder="Smith">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" placeholder="jane@email.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" type="tel" placeholder="(405) 555-0100">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Service Address</label>
+        <input class="form-input" type="text" placeholder="123 Main St, Norman, OK">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Service Type</label>
+          <select class="form-select">
+            <option>Single Sweep — $149</option>
+            <option>Storm Ready Membership — $249/yr</option>
+            <option>Clean + Lighting Upgrade</option>
+            <option>Clean + Supply Kit</option>
+            <option>Full Package</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Preferred Date</label>
+          <input class="form-input" type="date">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <input class="form-input" type="text" placeholder="Shelter size, access notes, etc.">
+      </div>
+
+      <button class="form-submit">Request Appointment →</button>
+      <p class="form-note">🔒 Secure checkout via Stripe · No charge until confirmed</p>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERSHIP CTA -->
+<div class="membership-cta" id="membership">
+  <div class="membership-inner">
+    <div class="membership-text">
+      <div class="membership-label">Storm Ready Membership</div>
+      <h2 class="membership-title">Two Visits.<br>Always Ready.</h2>
+      <p class="membership-body">Tornado season waits for no one. Our annual members get priority booking, automatic reminders before storm season, supply kit refreshes, and 10% off every upgrade. Set it and forget it.</p>
+    </div>
+    <div class="membership-action">
+      <div class="membership-price">$249</div>
+      <div class="membership-price-label">per year · cancel anytime</div>
+      <button class="btn-wheat">Join Storm Ready →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="testimonials-inner">
+    <div class="section-eyebrow">Reviews</div>
+    <h2 class="section-title">Norman Neighbors<br>Trust Storm Sweep</h2>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Hadn't opened our shelter in two years. Storm Sweep came out, cleaned everything top to bottom, installed the LED lights, and left us a full photo report. Worth every penny before May."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">KM</div>
+          <div>
+            <div class="testimonial-name">Karen M.</div>
+            <div class="testimonial-loc">Norman, OK</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Signed up for the Storm Ready plan and already feel better about this storm season. They reminded me to book, showed up on time, and stocked our kit. Couldn't be easier."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">TR</div>
+          <div>
+            <div class="testimonial-name">Tyler R.</div>
+            <div class="testimonial-loc">Norman, OK</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Super professional, really thorough. They found a hinge issue on our door I didn't even know about. Fixed it same day. These guys are the real deal — local and legit."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">SB</div>
+          <div>
+            <div class="testimonial-name">Sarah B.</div>
+            <div class="testimonial-loc">Norman, OK</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand-logo">Storm<span>Sweep</span></div>
+        <p class="footer-brand-body">Underground storm shelter cleaning and upgrades for Norman, OK homeowners. Clean. Safe. Ready.</p>
+        <div class="footer-social">
+          <div class="footer-social-btn">f</div>
+          <div class="footer-social-btn">ig</div>
+          <div class="footer-social-btn">✉</div>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Services</div>
+        <ul class="footer-links">
+          <li><a href="#">Deep Cleaning</a></li>
+          <li><a href="#">LED Lighting</a></li>
+          <li><a href="#">Supply Kits</a></li>
+          <li><a href="#">Door Upgrades</a></li>
+          <li><a href="#">Storm Ready Plan</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">How It Works</a></li>
+          <li><a href="#">Service Area</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Account</div>
+        <ul class="footer-links">
+          <li><a href="#">Customer Login</a></li>
+          <li><a href="#">My Jobs & Photos</a></li>
+          <li><a href="#">Manage Membership</a></li>
+          <li><a href="#">Book a Visit</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Storm Sweep LLC · Norman, Oklahoma</div>
+      <div class="footer-ok">🌪️ Built for Oklahoma</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

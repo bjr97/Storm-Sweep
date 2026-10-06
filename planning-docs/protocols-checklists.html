@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storm Sweep · Operations Protocols</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #2E86C1;
+  --sky-light: #5DADE2;
+  --sky-dark: #1A5276;
+  --sky-pale: #EBF5FB;
+  --wheat: #D4A843;
+  --wheat-light: #F0C96B;
+  --wheat-pale: #FDF6E3;
+  --red: #C0392B;
+  --red-pale: #FDEDEC;
+  --green: #27AE60;
+  --green-light: #2ECC71;
+  --green-pale: #EAFAF1;
+  --orange: #E67E22;
+  --orange-pale: #FEF9E7;
+  --charcoal: #141416;
+  --slate: #2C2C30;
+  --border: #E4E4E0;
+  --light: #F7F7F4;
+  --mid: #8A8A8F;
+  --soft: #5A5A5F;
+  --white: #FFFFFF;
+  --text: #1C1C1F;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--light);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── NAV ── */
+.doc-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--charcoal);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 56px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.doc-nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: white;
+}
+
+.doc-nav-logo span { color: var(--sky-light); }
+
+.doc-nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+.doc-nav-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+}
+
+.doc-nav-links a {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.doc-nav-links a:hover { color: white; }
+
+/* ── COVER ── */
+.cover {
+  background: var(--charcoal);
+  padding: 72px 64px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 10% 60%, rgba(46,134,193,0.12) 0%, transparent 55%),
+              radial-gradient(ellipse at 90% 20%, rgba(212,168,67,0.06) 0%, transparent 50%);
+}
+
+.cover-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.cover-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.cover-eyebrow-line { width: 32px; height: 2px; background: var(--wheat); }
+
+.cover-eyebrow-text {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--wheat);
+}
+
+.cover-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 7vw, 96px);
+  letter-spacing: 2px;
+  line-height: 0.95;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.cover-title span { color: var(--sky-light); }
+
+.cover-desc {
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+.cover-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cover-pill {
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.55);
+}
+
+/* ── TOC ── */
+.toc-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 64px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.toc-bar::-webkit-scrollbar { display: none; }
+
+.toc-item {
+  padding: 14px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--mid);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.toc-item:hover { color: var(--sky); border-bottom-color: var(--sky); }
+
+/* ── CONTENT ── */
+.page { max-width: 900px; margin: 0 auto; padding: 0 40px; }
+
+/* ── CHAPTER ── */
+.chapter {
+  padding: 64px 0 0;
+}
+
+.chapter-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--border);
+}
+
+.chapter-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--sky);
+  background: var(--sky-pale);
+  padding: 6px 14px;
+  border-radius: 6px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.chapter-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(32px, 4vw, 52px);
+  letter-spacing: 1px;
+  line-height: 1;
+  color: var(--charcoal);
+}
+
+.chapter-sub {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--mid);
+  margin-top: 6px;
+  max-width: 540px;
+}
+
+/* ── SECTIONS ── */
+.section { margin-bottom: 40px; }
+
+.section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--charcoal);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px;
+  height: 18px;
+  background: var(--sky);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── TIMELINE FLOW ── */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--border);
+}
+
+.tl-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.tl-dot {
+  position: absolute;
+  left: -26px;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--sky);
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--sky);
+}
+
+.tl-dot.wheat { background: var(--wheat); box-shadow: 0 0 0 2px var(--wheat); }
+.tl-dot.green { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+.tl-dot.orange { background: var(--orange); box-shadow: 0 0 0 2px var(--orange); }
+
+.tl-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.tl-card.active-card {
+  border-color: var(--sky);
+  background: var(--sky-pale);
+}
+
+.tl-trigger {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sky);
+  margin-bottom: 5px;
+}
+
+.tl-card.wheat-card .tl-trigger { color: var(--wheat); }
+.tl-card.green-card .tl-trigger { color: var(--green); }
+.tl-card.orange-card .tl-trigger { color: var(--orange); }
+
+.tl-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--charcoal);
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.tl-body {
+  font-size: 13px;
+  color: var(--soft);
+  line-height: 1.6;
+}
+
+.tl-msg {
+  margin-top: 10px;
+  background: rgba(0,0,0,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text);
+  font-style: italic;
+  line-height: 1.6;
+  position: relative;
+}
+
+.tl-msg::before {
+  content: '💬 Auto-text:';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sky);
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* ── CHECKLIST ── */
+.checklist-block {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.checklist-block-header {
+  padding: 14px 20px;
+  background: var(--charcoal);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cb-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cb-phase {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+}
+
+.cb-phase.sky { background: rgba(46,134,193,0.25); color: var(--sky-light); }
+.cb-phase.wheat { background: rgba(212,168,67,0.2); color: var(--wheat-light); }
+.cb-phase.green { background: rgba(39,174,96,0.2); color: #82e0aa; }
+.cb-phase.orange { background: rgba(230,126,34,0.2); color: #f5cba7; }
+
+.check-list { padding: 8px 0; }
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--light);
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.check-item:last-child { border-bottom: none; }
+.check-item:hover { background: var(--light); }
+
+.check-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.2s;
+  font-size: 11px;
+}
+
+.check-item.checked .check-box {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.check-item.checked .check-text { text-decoration: line-through; color: var(--mid); }
+
+.check-text-wrap { flex: 1; }
+
+.check-text {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.check-note {
+  font-size: 12px;
+  color: var(--mid);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.check-flag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.check-flag.photo { background: var(--sky-pale); color: var(--sky-dark); }
+.check-flag.required { background: var(--red-pale); color: var(--red); }
+.check-flag.upsell { background: var(--wheat-pale); color: var(--wheat); }
+
+/* ── UPGRADE PACKAGES ── */
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.upgrade-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.upgrade-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.upgrade-card.sky::before { background: var(--sky); }
+.upgrade-card.wheat::before { background: var(--wheat); }
+.upgrade-card.green::before { background: var(--green); }
+.upgrade-card.red::before { background: var(--red); }
+
+.uc-icon { font-size: 28px; margin-bottom: 10px; }
+
+.uc-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--charcoal);
+  margin-bottom: 4px;
+}
+
+.uc-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+  color: var(--sky);
+  margin-bottom: 10px;
+}
+
+.upgrade-card.wheat .uc-price { color: var(--wheat); }
+.upgrade-card.green .uc-price { color: var(--green); }
+.upgrade-card.red .uc-price { color: var(--red); }
+
+.uc-includes {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.uc-includes li {
+  font-size: 13px;
+  color: var(--soft);
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  line-height: 1.4;
+}
+
+.uc-includes li::before { content: '→'; color: var(--sky); font-size: 12px; margin-top: 1px; flex-shrink: 0; }
+.upgrade-card.wheat .uc-includes li::before { color: var(--wheat); }
+.upgrade-card.green .uc-includes li::before { color: var(--green); }
+.upgrade-card.red .uc-includes li::before { color: var(--red); }
+
+/* ── SCRIPT BLOCKS ── */
+.script-block {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.script-header {
+  padding: 12px 18px;
+  background: var(--light);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.script-situation {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--sky);
+}
+
+.script-body { padding: 16px 18px; }
+
+.script-exchange {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exchange-line {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.exchange-who {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  min-width: 72px;
+  padding-top: 3px;
+  flex-shrink: 0;
+}
+
+.exchange-who.customer { color: var(--mid); }
+.exchange-who.sweeper { color: var(--sky); }
+
+.exchange-say {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  background: rgba(0,0,0,0.02);
+  border-radius: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  flex: 1;
+}
+
+.exchange-who.sweeper + .exchange-say {
+  background: var(--sky-pale);
+  border-color: rgba(46,134,193,0.2);
+}
+
+.script-note {
+  font-size: 12px;
+  color: var(--mid);
+  font-style: italic;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--light);
+  border-radius: 6px;
+  border-left: 3px solid var(--wheat);
+}
+
+/* ── POLICY CARDS ── */
+.policy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.policy-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.policy-icon { font-size: 22px; margin-bottom: 10px; }
+
+.policy-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+}
+
+.policy-body {
+  font-size: 13px;
+  color: var(--soft);
+  line-height: 1.6;
+}
+
+/* ── ALERT BOXES ── */
+.alert {
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.alert.info { background: var(--sky-pale); border: 1px solid rgba(46,134,193,0.2); }
+.alert.warn { background: var(--orange-pale); border: 1px solid rgba(230,126,34,0.2); }
+.alert.danger { background: var(--red-pale); border: 1px solid rgba(192,57,43,0.2); }
+.alert.success { background: var(--green-pale); border: 1px solid rgba(39,174,96,0.2); }
+
+.alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+.alert-text { font-size: 13px; line-height: 1.6; }
+.alert.info .alert-text { color: var(--sky-dark); }
+.alert.warn .alert-text { color: #784212; }
+.alert.danger .alert-text { color: #922B21; }
+.alert.success .alert-text { color: #1D6A3A; }
+
+.alert-text strong { font-weight: 700; }
+
+/* ── DIVIDER ── */
+.chapter-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 64px 0 0;
+}
+
+/* ── FOOTER ── */
+.doc-footer {
+  background: var(--charcoal);
+  padding: 40px 64px;
+  margin-top: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.doc-footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: white;
+}
+
+.doc-footer-logo span { color: var(--sky-light); }
+
+.doc-footer-note {
+  font-size: 12px;
+  color: var(--mid);
+}
+
+/* ── PROGRESS TRACKER ── */
+.progress-tracker {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--charcoal);
+  border-radius: 12px;
+  padding: 12px 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 100;
+  font-size: 12px;
+}
+
+.pt-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+.pt-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--green-light);
+  letter-spacing: 1px;
+}
+
+.pt-bar-wrap {
+  width: 80px;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pt-bar-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  .doc-nav { padding: 0 20px; }
+  .doc-nav-links { display: none; }
+  .cover { padding: 48px 24px 40px; }
+  .toc-bar { padding: 0 20px; }
+  .page { padding: 0 20px; }
+  .upgrade-grid { grid-template-columns: 1fr; }
+  .policy-grid { grid-template-columns: 1fr; }
+  .doc-footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+  .progress-tracker { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="doc-nav">
+  <div class="doc-nav-logo">Storm<span>Sweep</span></div>
+  <div class="doc-nav-title">Operations Protocols · v1.0</div>
+  <ul class="doc-nav-links">
+    <li><a href="#chapter-1">Sweeper Standards</a></li>
+    <li><a href="#chapter-2">Job Checklist</a></li>
+    <li><a href="#chapter-3">Upgrades</a></li>
+    <li><a href="#chapter-4">Communications</a></li>
+    <li><a href="#chapter-5">Scripts</a></li>
+    <li><a href="#chapter-6">Policies</a></li>
+  </ul>
+</nav>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-eyebrow">
+      <div class="cover-eyebrow-line"></div>
+      <div class="cover-eyebrow-text">Internal Operations Document · Norman, OK</div>
+    </div>
+    <div class="cover-title">Storm Sweep<br><span>Field Protocols</span></div>
+    <p class="cover-desc">The complete operating guide for Storm Sweep Sweepers. Covers job standards, checklists, upgrade identification, customer communication scripts, and company policies. Every job, every time.</p>
+    <div class="cover-pills">
+      <div class="cover-pill">In-Garage Concrete Shelters</div>
+      <div class="cover-pill">Solo Sweeper · IC Model</div>
+      <div class="cover-pill">Norman, OK · Residential</div>
+      <div class="cover-pill">Version 1.0 · 2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOC BAR -->
+<div class="toc-bar">
+  <a href="#chapter-1" class="toc-item">01 · Sweeper Standards</a>
+  <a href="#chapter-2" class="toc-item">02 · Job Checklist</a>
+  <a href="#chapter-3" class="toc-item">03 · Upgrades & Packages</a>
+  <a href="#chapter-4" class="toc-item">04 · Communication Flow</a>
+  <a href="#chapter-5" class="toc-item">05 · Customer Scripts</a>
+  <a href="#chapter-6" class="toc-item">06 · Policies & Standards</a>
+</div>
+
+<div class="page">
+
+  <!-- ══ CHAPTER 1: SWEEPER STANDARDS ══ -->
+  <div class="chapter" id="chapter-1">
+    <div class="chapter-header">
+      <div class="chapter-num">CH · 01</div>
+      <div>
+        <div class="chapter-title">Sweeper Standards</div>
+        <div class="chapter-sub">Appearance, equipment, conduct, and what it means to represent Storm Sweep.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Appearance & Uniform</div>
+      <div class="checklist-block">
+        <div class="checklist-block-header">
+          <div class="cb-title">🧥 Before Every Job</div>
+          <div class="cb-phase sky">Required</div>
+        </div>
+        <div class="check-list">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Storm Sweep branded shirt or polo — clean, no stains</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Work pants or shorts — dark color, no holes</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Closed-toe work boots or shoes</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Storm Sweep ID badge visible</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Hair tied back if applicable</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">No strong cologne/perfume — customers are in close quarters</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Equipment & Van Load-Out</div>
+      <div class="checklist-block">
+        <div class="checklist-block-header">
+          <div class="cb-title">🧹 Required Equipment · Every Job</div>
+          <div class="cb-phase wheat">Load Check</div>
+        </div>
+        <div class="check-list">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Shop vac (wet/dry, charged or corded)</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Stiff-bristle scrub brushes (2 minimum)</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Mop + bucket</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Multi-surface cleaner + mold/mildew spray</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Odor eliminator / deodorizer spray</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Disposable gloves (multiple pairs)</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">N95 or respirator mask</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Headlamp (charged)</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Heavy-duty trash bags</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Phone with Storm Sweep app (logged in, charged)</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Upgrade quote cards / brochures</div></div><div class="check-flag upsell">Upsell</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert info">
+      <div class="alert-icon">ℹ️</div>
+      <div class="alert-text"><strong>IC Reminder:</strong> As an independent contractor, you are responsible for maintaining your own equipment. Storm Sweep provides the brand, the bookings, and the app. Damaged or missing equipment is your responsibility to replace before the next job.</div>
+    </div>
+  </div>
+
+  <div class="chapter-divider"></div>
+
+  <!-- ══ CHAPTER 2: JOB CHECKLIST ══ -->
+  <div class="chapter" id="chapter-2">
+    <div class="chapter-header">
+      <div class="chapter-num">CH · 02</div>
+      <div>
+        <div class="chapter-title">Job Checklist</div>
+        <div class="chapter-sub">Standard in-ground garage shelter cleaning protocol. Follow in order, every time.</div>
+      </div>
+    </div>
+
+    <div class="alert warn">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-text"><strong>Important:</strong> All checklist steps must be marked complete in the app before marking the job done. Incomplete checklists without a note will flag for manager review.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Phase 1 · Arrival & Assessment</div>
+      <div class="checklist-block">
+        <div class="checklist-block-header">
+          <div class="cb-title">📍 On Arrival</div>
+          <div class="cb-phase sky">Phase 1</div>
+        </div>
+        <div class="check-list">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Text customer "On my way" via app (auto-triggered, confirm sent)</div><div class="check-note">App sends this automatically 15 min before arrival window</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Park on street — do not block driveway unless customer OKs it</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Knock / ring bell and greet customer by name</div><div class="check-note">"Hi [Name], I'm [Your Name] from Storm Sweep — here for your shelter service today!"</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Take BEFORE photo of closed shelter hatch from outside</div></div><div class="check-flag photo">📸 Photo</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Take BEFORE photo of shelter interior before any work begins</div></div><div class="check-flag photo">📸 Photo</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Check for standing water, flooding, or structural hazard</div><div class="check-note">If standing water is present — stop, photograph, notify admin immediately. Do not proceed without approval.</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Note shelter size (small / medium / large) and condition in app</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Note any pest presence (spiders, roaches, rodent evidence)</div></div><div class="check-flag upsell">Log It</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Phase 2 · Deep Clean</div>
+      <div class="checklist-block">
+        <div class="checklist-block-header">
+          <div class="cb-title">🧹 Cleaning Sequence</div>
+          <div class="cb-phase wheat">Phase 2</div>
+        </div>
+        <div class="check-list">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Remove all debris, old items, and trash — bag and set aside for customer to review</div><div class="check-note">Do not throw away customer belongings without permission</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Vacuum ceiling and walls top-down with shop vac (cobwebs, loose debris)</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Vacuum floor thoroughly — all corners and step areas</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Apply mold/mildew spray to walls and ceiling — let dwell 5 minutes</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Scrub walls and ceiling with stiff brush — work top to bottom</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Scrub floor — including all step treads and corners</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Rinse walls and floor with clean water + mop</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Apply deodorizer — spray walls, floor, and let air out</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Clean door hatch interior surface and hinges</div></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Final dry wipe of all surfaces</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Phase 3 · Inspection</div>
+      <div class="checklist-block">
+        <div class="checklist-block-header">
+          <div class="cb-title">🔍 Safety Inspection</div>
+          <div class="cb-phase orange">Phase 3</div>
+        </div>
+        <div class="check-list">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Inspect hatch door for damage, cracks, rust, warping</div></div><div class="check-flag upsell">Upgrade?</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Test hinges — open and close door fully, note stiffness or resistance</div></div><div class="check-flag upsell">Upgrade?</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Test locking mechanism from inside — can door be opened from interior?</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Check interior handle — present and functional?</div></div><div class="check-flag upsell">Upgrade?</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Check existing lighting (if any) — functional?</div></div><div class="check-flag upsell">Upgrade?</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Check walls for cracks, water intrusion staining, or spalling concrete</div></div><div class="check-flag photo">📸 Photo</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Note emergency supplies present (water, first aid, radio)</div></div><div class="check-flag upsell">Upsell Kit?</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Log all upgrade opportunities in app notes field</div></div><div class="check-flag required">Required</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Phase 4 · Wrap-Up & Close</div>
+      <div class="checklist-block">
+        <div class="checklist-block-header">
+          <div class="cb-title">✅ Job Completion</div>
+          <div class="cb-phase green">Phase 4</div>
+        </div>
+        <div class="check-list">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Take AFTER photo of shelter interior — clean, lit, wide shot</div></div><div class="check-flag photo">📸 Photo</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Take AFTER photo of hatch door from outside</div></div><div class="check-flag photo">📸 Photo</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Upload all photos to the app before leaving the property</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Walk customer to shelter — show them the finished work</div><div class="check-note">This is a key trust moment. Don't skip it.</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Present upgrade recommendations verbally (see scripts)</div></div><div class="check-flag upsell">Upsell</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Get customer digital signature in app</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Mark job complete in app — triggers auto review request text</div></div><div class="check-flag required">Required</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Leave property clean — take all trash, equipment, nothing left behind</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter-divider"></div>
+
+  <!-- ══ CHAPTER 3: UPGRADES ══ -->
+  <div class="chapter" id="chapter-3">
+    <div class="chapter-header">
+      <div class="chapter-num">CH · 03</div>
+      <div>
+        <div class="chapter-title">Upgrades & Packages</div>
+        <div class="chapter-sub">Add-on services to quote on-site. Every upgrade is an opportunity to serve the customer better and grow the job value.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Add-On Service Pricing</div>
+      <div class="upgrade-grid">
+        <div class="upgrade-card sky">
+          <div class="uc-icon">💡</div>
+          <div class="uc-name">LED Lighting Package</div>
+          <div class="uc-price">From $89</div>
+          <ul class="uc-includes">
+            <li>LED light panel install (battery-powered)</li>
+            <li>Motion-triggered emergency backup light</li>
+            <li>Adhesive mount — no drilling required</li>
+            <li>Test and demo for customer</li>
+          </ul>
+        </div>
+        <div class="upgrade-card wheat">
+          <div class="uc-icon">🎒</div>
+          <div class="uc-name">Emergency Supply Kit</div>
+          <div class="uc-price">From $49</div>
+          <ul class="uc-includes">
+            <li>2L bottled water (3-pack)</li>
+            <li>Basic first aid kit</li>
+            <li>Hand-crank weather radio</li>
+            <li>Emergency mylar blankets (2)</li>
+            <li>USB power bank + phone cable</li>
+          </ul>
+        </div>
+        <div class="upgrade-card green">
+          <div class="uc-icon">🔩</div>
+          <div class="uc-name">Door & Hardware Upgrade</div>
+          <div class="uc-price">Quoted on-site</div>
+          <ul class="uc-includes">
+            <li>Interior grip handle install</li>
+            <li>Hinge inspection + lubrication</li>
+            <li>Latch/lock mechanism replacement</li>
+            <li>Full door replacement (if needed — admin quote)</li>
+          </ul>
+        </div>
+        <div class="upgrade-card red">
+          <div class="uc-icon">🛡️</div>
+          <div class="uc-name">Full Shelter Package</div>
+          <div class="uc-price">From $249</div>
+          <ul class="uc-includes">
+            <li>Deep clean + deodorize</li>
+            <li>LED lighting install</li>
+            <li>Emergency supply kit</li>
+            <li>Door hardware inspection + service</li>
+            <li>Full before/after photo report</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert success">
+      <div class="alert-icon">💰</div>
+      <div class="alert-text"><strong>Sweeper Incentive:</strong> You earn a $15 bonus on every upgrade add-on you sell and complete on-site. Log the upsell in the app — it's tracked automatically. Storm Ready members get 10% off, already factored into your commission.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">When to Flag an Upgrade</div>
+      <div class="checklist-block">
+        <div class="checklist-block-header">
+          <div class="cb-title">🚩 Auto-Flag These During Inspection</div>
+          <div class="cb-phase orange">Inspection Triggers</div>
+        </div>
+        <div class="check-list">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">No interior handle → Quote door hardware upgrade</div></div><div class="check-flag upsell">Flag</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">No lighting at all → Quote LED package</div></div><div class="check-flag upsell">Flag</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Old incandescent or broken lights → Quote LED upgrade</div></div><div class="check-flag upsell">Flag</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">No emergency supplies present → Quote supply kit</div></div><div class="check-flag upsell">Flag</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Rusted or stiff hinge → Quote door hardware service</div></div><div class="check-flag upsell">Flag</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Customer not on Storm Ready → Pitch membership</div></div><div class="check-flag upsell">Membership</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text-wrap"><div class="check-text">Cracks or water staining → Log for admin — do not quote yourself</div></div><div class="check-flag required">Admin Only</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter-divider"></div>
+
+  <!-- ══ CHAPTER 4: COMMUNICATION FLOW ══ -->
+  <div class="chapter" id="chapter-4">
+    <div class="chapter-header">
+      <div class="chapter-num">CH · 04</div>
+      <div>
+        <div class="chapter-title">Communication Flow</div>
+        <div class="chapter-sub">Automated texts + in-app messages sent to customers at every stage. Sweeper triggers are noted.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Full Customer Journey</div>
+      <div class="timeline">
+
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-card active-card">
+            <div class="tl-trigger">Trigger: Booking Confirmed</div>
+            <div class="tl-title">Booking Confirmation</div>
+            <div class="tl-body">Sent automatically when customer completes booking and deposit. Includes date, time window, sweeper name.</div>
+            <div class="tl-msg">Hi [Name]! Your Storm Sweep is confirmed for [Date] between [Time Window]. Your Sweeper will be [First Name]. We'll text you when they're on the way. Questions? Reply here anytime. – Storm Sweep 🌪️</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot wheat"></div>
+          <div class="tl-card wheat-card">
+            <div class="tl-trigger">Trigger: 24 Hours Before</div>
+            <div class="tl-title">Day-Before Reminder</div>
+            <div class="tl-body">Automated reminder with time window and shelter access reminder.</div>
+            <div class="tl-msg">Reminder: Storm Sweep is tomorrow between [Time Window]. Please make sure the garage is accessible. Your Sweeper is [First Name] — see you then! Reply RESCHEDULE if needed.</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            <div class="tl-trigger">Trigger: Sweeper Taps "On My Way" in App · ~15 min out</div>
+            <div class="tl-title">On The Way</div>
+            <div class="tl-body">Sweeper marks "En Route" in the app. Auto-text fires to customer.</div>
+            <div class="tl-msg">Your Sweeper [First Name] is on the way — about 15 minutes out. See you soon! 🌪️</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            <div class="tl-trigger">Trigger: Sweeper Taps "Job Started" in App</div>
+            <div class="tl-title">Job In Progress</div>
+            <div class="tl-body">In-app notification only. Customer portal shows job as active with live checklist progress.</div>
+            <div class="tl-msg">Your shelter cleaning is underway! You can follow along in the Storm Sweep app. Before photos have been uploaded. ✅</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot green"></div>
+          <div class="tl-card green-card">
+            <div class="tl-trigger">Trigger: Sweeper Taps "Mark Complete" + Customer Signs</div>
+            <div class="tl-title">Job Complete — Report Delivered</div>
+            <div class="tl-body">Sends before/after photo report link, service summary, and any upgrade recommendations logged by sweeper.</div>
+            <div class="tl-msg">Your Storm Sweep is complete! 🎉 Before & after photos + your service report are ready in your portal: [link]. [If upgrades noted]: Your Sweeper noted a few upgrade recommendations — check your report for details. Thank you, [Name]!</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot orange"></div>
+          <div class="tl-card orange-card">
+            <div class="tl-trigger">Trigger: 30 Minutes After Job Complete</div>
+            <div class="tl-title">Review Request</div>
+            <div class="tl-body">Automated Google review request. Short and friendly — don't over-ask.</div>
+            <div class="tl-msg">Hi [Name] — hope everything looks great! If you have 30 seconds, a Google review means the world to a small local business. 🙏 [Google Review Link] — Storm Sweep, Norman OK</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot wheat"></div>
+          <div class="tl-card wheat-card">
+            <div class="tl-trigger">Trigger: 30 Days Before Membership Renewal</div>
+            <div class="tl-title">Renewal Reminder (Members Only)</div>
+            <div class="tl-body">Sent to Storm Ready members. Soft reminder — no pressure, just a heads up.</div>
+            <div class="tl-msg">Hey [Name] — your Storm Ready membership renews in 30 days on [Date]. Nothing to do — it auto-renews via Stripe. Time to schedule your next visit? Book here: [link] 🌪️</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            <div class="tl-trigger">Trigger: April 1 Each Year · All Customers</div>
+            <div class="tl-title">Tornado Season Campaign</div>
+            <div class="tl-body">Seasonal outreach blast. One text + in-app push. Non-members get booking link, members get scheduling priority reminder.</div>
+            <div class="tl-msg">🌪️ Tornado season is here, Norman. Is your shelter ready? Storm Sweep is booking fast — secure your spot before May. [Book Now: link] — Storm Sweep, your local shelter pros.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter-divider"></div>
+
+  <!-- ══ CHAPTER 5: SCRIPTS ══ -->
+  <div class="chapter" id="chapter-5">
+    <div class="chapter-header">
+      <div class="chapter-num">CH · 05</div>
+      <div>
+        <div class="chapter-title">Customer Scripts</div>
+        <div class="chapter-sub">Word-for-word guidance for common on-site situations. Adapt naturally — don't read robotically.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Arrival & Greeting</div>
+      <div class="script-block">
+        <div class="script-header"><div class="script-situation">Standard Arrival</div></div>
+        <div class="script-body">
+          <div class="script-exchange">
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"Hi [Name]! I'm [Your Name] from Storm Sweep — great to meet you. I'm here for your shelter service today. Mind if I take a quick look at the shelter before we get started?"</div>
+            </div>
+          </div>
+          <div class="script-note">Always use the customer's first name. You have it in the app. It matters.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Presenting Upgrade Recommendations</div>
+      <div class="script-block">
+        <div class="script-header"><div class="script-situation">LED Lighting Upsell</div></div>
+        <div class="script-body">
+          <div class="script-exchange">
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"Everything's cleaned up and looking great. One thing I noticed — there's no lighting down here right now. In a real tornado situation, you'd be going in blind. We offer a battery-powered LED install that takes about 20 minutes. It's $89 and I can do it right now while I'm here. Want me to show you what it looks like?"</div>
+            </div>
+            <div class="exchange-line">
+              <div class="exchange-who customer">Customer</div>
+              <div class="exchange-say">"How long does the battery last?"</div>
+            </div>
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"The main panel runs about 8 hours on a charge — plenty for any storm situation. The emergency backup light is motion-triggered and lasts even longer. Most people forget it's even down there until they need it."</div>
+            </div>
+          </div>
+          <div class="script-note">Don't push if they decline. Log it in the app and move on warmly. Upsell pressure kills reviews.</div>
+        </div>
+      </div>
+
+      <div class="script-block">
+        <div class="script-header"><div class="script-situation">Supply Kit Upsell</div></div>
+        <div class="script-body">
+          <div class="script-exchange">
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"One more thing — the shelter's clean, but I didn't see any emergency supplies down here. Water, first aid, that kind of thing. We put together a basic kit for $49 — water, a first aid kit, a hand-crank weather radio, and a couple of other things. I can leave it in the shelter today if you want."</div>
+            </div>
+          </div>
+          <div class="script-note">Frame it around preparedness, not fear. Oklahoma families know the risk — you're just solving a real gap for them.</div>
+        </div>
+      </div>
+
+      <div class="script-block">
+        <div class="script-header"><div class="script-situation">Storm Ready Membership Pitch (Non-Members)</div></div>
+        <div class="script-body">
+          <div class="script-exchange">
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"Before I go — are you on our Storm Ready plan? It's $249 a year and covers two cleanings, a supply kit refresh, and bumps you to priority scheduling before tornado season. Basically pays for itself on the second visit. A lot of our customers switch after their first single-sweep."</div>
+            </div>
+            <div class="exchange-line">
+              <div class="exchange-who customer">Customer</div>
+              <div class="exchange-say">"That sounds good, how do I sign up?"</div>
+            </div>
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"I can send you the link right now — you sign up in the app and it takes about 2 minutes. Today's visit would count toward your first Storm Ready service."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Handling Objections</div>
+      <div class="script-block">
+        <div class="script-header"><div class="script-situation">Customer: "That seems expensive."</div></div>
+        <div class="script-body">
+          <div class="script-exchange">
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"Totally fair. For a one-time clean, $149 is the flat rate — no surprises. We keep it straightforward. If you want to get more value out of it, the Storm Ready plan is $249 for the whole year and covers two visits. That's $124 per cleaning. Most people feel better about that once they do the math."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="script-block">
+        <div class="script-header"><div class="script-situation">Customer: "I need to think about the upgrade."</div></div>
+        <div class="script-body">
+          <div class="script-exchange">
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"No problem at all — I'll log the recommendation in your service report and you'll see it in your portal. If you want to add it later, just book through the app and we'll come out. No pressure."</div>
+            </div>
+          </div>
+          <div class="script-note">Always end positively. The report will remind them — you don't have to.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Wrap-Up & Goodbye</div>
+      <div class="script-block">
+        <div class="script-header"><div class="script-situation">Standard Sign-Off</div></div>
+        <div class="script-body">
+          <div class="script-exchange">
+            <div class="exchange-line">
+              <div class="exchange-who sweeper">Sweeper</div>
+              <div class="exchange-say">"All done! Your before and after photos are already in your portal — you should get a text with the link in just a minute. If you think of anything or have questions, you can reply to that text or reach us through the app. Really appreciate you choosing Storm Sweep — stay safe out there."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter-divider"></div>
+
+  <!-- ══ CHAPTER 6: POLICIES ══ -->
+  <div class="chapter" id="chapter-6">
+    <div class="chapter-header">
+      <div class="chapter-num">CH · 06</div>
+      <div>
+        <div class="chapter-title">Policies & Standards</div>
+        <div class="chapter-sub">Non-negotiable rules that protect the customer, the brand, and you.</div>
+      </div>
+    </div>
+
+    <div class="policy-grid">
+      <div class="policy-card">
+        <div class="policy-icon">📸</div>
+        <div class="policy-title">Photo Policy</div>
+        <div class="policy-body">Before and after photos are required on every job — no exceptions. Jobs without photos will not be paid out until photos are submitted. Photos go to the customer portal automatically.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-icon">🕐</div>
+        <div class="policy-title">Punctuality</div>
+        <div class="policy-body">Arrive within your booked time window. If you will be more than 15 minutes late, notify admin immediately via the app. Customers receive automated reminders — don't be a no-show.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-icon">💬</div>
+        <div class="policy-title">Customer Communication</div>
+        <div class="policy-body">All customer communication happens through the Storm Sweep app or the automated text system. Do not give customers your personal cell number or solicit off-platform bookings. Violation results in IC contract termination.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-icon">💧</div>
+        <div class="policy-title">Water & Hazard Protocol</div>
+        <div class="policy-body">If you find standing water, structural damage, mold beyond surface level, or pest infestation, stop work immediately. Photograph the issue and notify admin. Do not attempt structural repairs yourself.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-icon">🚭</div>
+        <div class="policy-title">On-Property Conduct</div>
+        <div class="policy-body">No smoking, vaping, or alcohol on any job site. Treat every customer's home with respect — don't enter other areas of the property without permission. Keep noise minimal.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-icon">⭐</div>
+        <div class="policy-title">Review Standard</div>
+        <div class="policy-body">Storm Sweep aims for 4.8+ on Google at all times. The app sends the review request automatically. Never ask customers to leave a specific rating — just ask them to share their honest experience.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-icon">🔒</div>
+        <div class="policy-title">Privacy & Property</div>
+        <div class="policy-body">Customer photos, addresses, and contact info are confidential. Never share or post customer information or property photos on personal social media. Before/after content for Storm Sweep's social must be approved by admin.</div>
+      </div>
+      <div class="policy-card">
+        <div class="policy-icon">📋</div>
+        <div class="policy-title">Checklist Completion</div>
+        <div class="policy-body">All checklist items must be marked in the app before completing a job. Skipped items require a written note explaining why. Habitual incomplete checklists will be reviewed and can affect IC standing.</div>
+      </div>
+    </div>
+
+    <div class="alert danger">
+      <div class="alert-icon">🚨</div>
+      <div class="alert-text"><strong>Zero Tolerance:</strong> Theft, misrepresentation, off-platform solicitation, or falsifying job records results in immediate IC contract termination and forfeiture of pending earnings. Storm Sweep takes its reputation seriously.</div>
+    </div>
+
+  </div>
+
+  <div style="padding-bottom: 80px;"></div>
+
+</div><!-- /page -->
+
+<!-- FOOTER -->
+<div class="doc-footer">
+  <div class="doc-footer-logo">Storm<span>Sweep</span></div>
+  <div class="doc-footer-note">Field Protocols v1.0 · Norman, OK · Internal Use Only · 2026</div>
+</div>
+
+<!-- PROGRESS TRACKER -->
+<div class="progress-tracker" id="progress-tracker">
+  <div>
+    <div class="pt-label">Checklist Progress</div>
+    <div class="pt-val" id="pt-val">0 / 0</div>
+  </div>
+  <div class="pt-bar-wrap">
+    <div class="pt-bar-fill" id="pt-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<script>
+function toggleCheck(item) {
+  item.classList.toggle('checked');
+  const box = item.querySelector('.check-box');
+  box.textContent = item.classList.contains('checked') ? '✓' : '';
+  updateProgress();
+}
+
+function updateProgress() {
+  const all = document.querySelectorAll('.check-item');
+  const done = document.querySelectorAll('.check-item.checked');
+  const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
+  document.getElementById('pt-val').textContent = done.length + ' / ' + all.length;
+  document.getElementById('pt-fill').style.width = pct + '%';
+}
+
+updateProgress();
+</script>
+</body>
+</html>

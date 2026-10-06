@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storm Sweep · Tech Stack & Build Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #2E86C1; --sky-light: #5DADE2; --sky-dark: #1A5276; --sky-pale: #EBF5FB;
+  --wheat: #D4A843; --wheat-light: #F0C96B; --wheat-pale: #FDF6E3;
+  --red: #C0392B; --red-pale: #FDEDEC;
+  --green: #27AE60; --green-light: #2ECC71; --green-pale: #EAFAF1;
+  --orange: #E67E22; --orange-pale: #FEF9E7;
+  --purple: #8E44AD; --purple-pale: #F5EEF8;
+  --charcoal: #0F0F11; --slate: #1C1C1F; --card: #242428;
+  --border-dark: rgba(255,255,255,0.07);
+  --border: #E4E4E0; --light: #F7F7F4;
+  --mid: #6B6B6F; --soft: #9A9A9F;
+  --white: #FFFFFF; --text: #1C1C1F;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Barlow', sans-serif; background: var(--charcoal); color: #E0E0E0; line-height: 1.6; }
+
+/* NAV */
+.top-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(15,15,17,0.97); backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 56px;
+  border-bottom: 1px solid var(--border-dark);
+}
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: white; }
+.nav-logo span { color: var(--sky-light); }
+.nav-tabs { display: flex; }
+.nav-tab-btn {
+  padding: 0 18px; height: 56px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); border: none; background: none; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap;
+}
+.nav-tab-btn:hover { color: white; }
+.nav-tab-btn.active { color: var(--sky-light); border-bottom-color: var(--sky-light); }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* COVER */
+.cover {
+  background: var(--charcoal); padding: 64px 56px 52px;
+  position: relative; overflow: hidden;
+}
+.cover::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 10% 50%, rgba(46,134,193,0.14) 0%, transparent 55%),
+              radial-gradient(ellipse at 90% 10%, rgba(39,174,96,0.06) 0%, transparent 50%);
+}
+.cover-inner { max-width: 960px; margin: 0 auto; position: relative; }
+.cover-eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.cover-line { width: 32px; height: 2px; background: var(--green); }
+.cover-eyebrow-text { font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--green); }
+.cover-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px, 7vw, 88px); letter-spacing: 2px; line-height: 0.95; color: white; margin-bottom: 20px; }
+.cover-title span { color: var(--sky-light); }
+.cover-desc { font-size: 15px; font-weight: 300; color: rgba(255,255,255,0.45); max-width: 560px; line-height: 1.7; margin-bottom: 36px; }
+.cover-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+.cover-stat { display: flex; flex-direction: column; gap: 3px; }
+.cover-stat-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--mid); }
+.cover-stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: white; }
+
+/* PAGE */
+.page { max-width: 960px; margin: 0 auto; padding: 48px 40px; }
+
+/* SECTION */
+.sec-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(28px, 3vw, 44px); letter-spacing: 1px; color: white; margin-bottom: 6px; }
+.sec-sub { font-size: 14px; font-weight: 300; color: var(--soft); margin-bottom: 28px; max-width: 520px; }
+.sub-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.5px; color: var(--soft);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.sub-title::before { content: ''; width: 3px; height: 14px; background: var(--sky); border-radius: 2px; flex-shrink: 0; }
+
+/* STACK CARDS */
+.stack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.stack-card {
+  background: var(--slate); border: 1px solid var(--border-dark);
+  border-radius: 12px; padding: 20px 18px; position: relative; overflow: hidden;
+}
+.stack-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.stack-card.sky::before { background: var(--sky); }
+.stack-card.green::before { background: var(--green); }
+.stack-card.wheat::before { background: var(--wheat); }
+.stack-card.purple::before { background: var(--purple); }
+.stack-card.orange::before { background: var(--orange); }
+.stack-card.red::before { background: var(--red); }
+.stack-icon { font-size: 24px; margin-bottom: 10px; }
+.stack-tool { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: white; margin-bottom: 3px; }
+.stack-role { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.stack-card.sky .stack-role { color: var(--sky-light); }
+.stack-card.green .stack-role { color: var(--green-light); }
+.stack-card.wheat .stack-role { color: var(--wheat-light); }
+.stack-card.purple .stack-role { color: #c39bd3; }
+.stack-card.orange .stack-role { color: #f0b27a; }
+.stack-card.red .stack-role { color: #f1948a; }
+.stack-desc { font-size: 12px; color: var(--soft); line-height: 1.6; }
+.stack-cost {
+  display: inline-block; margin-top: 10px;
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 10px; background: rgba(255,255,255,0.06); color: var(--mid);
+}
+.stack-cost.free { background: rgba(39,174,96,0.12); color: var(--green-light); }
+.stack-cost.paid { background: rgba(212,168,67,0.1); color: var(--wheat-light); }
+
+/* BUDGET TABLE */
+.budget-table { width: 100%; border-collapse: collapse; background: var(--slate); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-dark); margin-bottom: 20px; }
+.budget-table th { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); text-align: left; padding: 12px 18px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-dark); }
+.budget-table td { padding: 13px 18px; border-bottom: 1px solid var(--border-dark); font-size: 13px; color: #D0D0D0; vertical-align: middle; }
+.budget-table tr:last-child td { border-bottom: none; font-weight: 700; color: white; background: rgba(255,255,255,0.02); }
+.b-val { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; }
+.b-val.green { color: var(--green-light); }
+.b-val.sky { color: var(--sky-light); }
+.b-val.wheat { color: var(--wheat-light); }
+.b-free { color: var(--green-light); font-weight: 700; }
+
+/* SCHEMA TABLES */
+.schema-block { background: var(--slate); border: 1px solid var(--border-dark); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+.schema-header { padding: 12px 18px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+.schema-table-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: white; }
+.schema-tag { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; background: rgba(46,134,193,0.15); color: var(--sky-light); }
+.schema-table { width: 100%; border-collapse: collapse; }
+.schema-table th { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); text-align: left; padding: 10px 18px; border-bottom: 1px solid var(--border-dark); }
+.schema-table td { padding: 10px 18px; border-bottom: 1px solid var(--border-dark); font-size: 12px; color: #C0C0C0; font-family: 'Barlow', monospace; }
+.schema-table tr:last-child td { border-bottom: none; }
+.col-name { color: var(--sky-light); font-weight: 600; }
+.col-type { color: var(--wheat-light); }
+.col-pk { color: var(--green-light); font-size: 10px; font-weight: 700; }
+.col-fk { color: #c39bd3; font-size: 10px; font-weight: 700; }
+.col-note { color: var(--soft); font-style: italic; }
+
+/* ROUTE MAP */
+.route-group { background: var(--slate); border: 1px solid var(--border-dark); border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
+.route-group-header { padding: 12px 18px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; gap: 10px; }
+.route-group-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: white; }
+.route-badge { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 10px; }
+.rb-public { background: rgba(39,174,96,0.15); color: var(--green-light); }
+.rb-customer { background: rgba(46,134,193,0.15); color: var(--sky-light); }
+.rb-sweeper { background: rgba(212,168,67,0.12); color: var(--wheat-light); }
+.rb-admin { background: rgba(192,57,43,0.15); color: #f1948a; }
+.route-row { display: flex; align-items: flex-start; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--border-dark); }
+.route-row:last-child { border-bottom: none; }
+.route-path { font-family: monospace; font-size: 13px; color: var(--sky-light); min-width: 220px; flex-shrink: 0; }
+.route-desc { font-size: 13px; color: var(--soft); }
+
+/* PHASE TIMELINE */
+.phase-timeline { display: flex; flex-direction: column; gap: 0; position: relative; padding-left: 28px; }
+.phase-timeline::before { content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px; width: 2px; background: var(--border-dark); }
+.phase-item { position: relative; margin-bottom: 20px; }
+.phase-dot { position: absolute; left: -24px; top: 10px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; }
+.phase-dot.sky { background: var(--sky); box-shadow: 0 0 0 2px var(--sky); }
+.phase-dot.wheat { background: var(--wheat); box-shadow: 0 0 0 2px var(--wheat); }
+.phase-dot.green { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+.phase-dot.purple { background: var(--purple); box-shadow: 0 0 0 2px var(--purple); }
+.phase-card { background: var(--slate); border: 1px solid var(--border-dark); border-radius: 12px; padding: 18px 20px; }
+.phase-card.active-phase { border-color: rgba(46,134,193,0.4); background: rgba(46,134,193,0.06); }
+.phase-num { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--sky-light); margin-bottom: 5px; }
+.phase-card.wheat-phase .phase-num { color: var(--wheat-light); }
+.phase-card.green-phase .phase-num { color: var(--green-light); }
+.phase-card.purple-phase .phase-num { color: #c39bd3; }
+.phase-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: white; margin-bottom: 4px; }
+.phase-timeline-date { font-size: 12px; color: var(--mid); margin-bottom: 10px; }
+.phase-tasks { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.phase-tasks li { font-size: 13px; color: var(--soft); display: flex; gap: 8px; line-height: 1.5; }
+.phase-tasks li::before { content: '→'; color: var(--sky-light); flex-shrink: 0; }
+.phase-card.wheat-phase .phase-tasks li::before { color: var(--wheat-light); }
+.phase-card.green-phase .phase-tasks li::before { color: var(--green-light); }
+.phase-card.purple-phase .phase-tasks li::before { color: #c39bd3; }
+
+/* ENV VARS */
+.env-block { background: #0A0A0C; border: 1px solid var(--border-dark); border-radius: 10px; padding: 20px 22px; font-family: monospace; font-size: 12px; line-height: 2; margin-bottom: 20px; overflow-x: auto; }
+.env-comment { color: var(--mid); }
+.env-key { color: var(--sky-light); }
+.env-eq { color: var(--soft); }
+.env-val { color: var(--wheat-light); }
+
+/* ALERT */
+.alert { border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-start; }
+.alert.info { background: rgba(46,134,193,0.08); border: 1px solid rgba(46,134,193,0.2); }
+.alert.warn { background: rgba(212,168,67,0.07); border: 1px solid rgba(212,168,67,0.2); }
+.alert.success { background: rgba(39,174,96,0.08); border: 1px solid rgba(39,174,96,0.2); }
+.alert.danger { background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.2); }
+.alert-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+.alert-text { font-size: 13px; line-height: 1.6; }
+.alert.info .alert-text { color: #a9d4ed; }
+.alert.warn .alert-text { color: #e8d5a0; }
+.alert.success .alert-text { color: #a9dfbf; }
+.alert.danger .alert-text { color: #f1948a; }
+.alert-text strong { font-weight: 700; color: white; }
+
+/* CODE SNIPPET */
+.code-block { background: #0A0A0C; border: 1px solid var(--border-dark); border-radius: 10px; padding: 18px 22px; font-family: monospace; font-size: 12px; line-height: 1.8; margin-bottom: 16px; overflow-x: auto; white-space: pre; color: #C0C0C0; }
+.code-comment { color: var(--mid); }
+.code-key { color: var(--sky-light); }
+.code-str { color: var(--wheat-light); }
+.code-fn { color: #c39bd3; }
+.code-kw { color: var(--green-light); }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border-dark); margin: 48px 0; }
+
+@media (max-width: 640px) {
+  .top-nav { padding: 0 16px; }
+  .cover { padding: 40px 20px 36px; }
+  .page { padding: 32px 20px; }
+  .stack-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-logo">Storm<span>Sweep</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab-btn active" onclick="switchTab('overview')">Overview</button>
+    <button class="nav-tab-btn" onclick="switchTab('architecture')">Architecture</button>
+    <button class="nav-tab-btn" onclick="switchTab('database')">Database</button>
+    <button class="nav-tab-btn" onclick="switchTab('routes')">Routes</button>
+    <button class="nav-tab-btn" onclick="switchTab('buildplan')">Build Plan</button>
+    <button class="nav-tab-btn" onclick="switchTab('newfeatures')" style="color:var(--wheat-light);border-bottom-color:transparent;">✦ New Features</button>
+  </div>
+</nav>
+
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-eyebrow"><div class="cover-line"></div><div class="cover-eyebrow-text">Tech Stack & Build Plan · v1.1</div></div>
+    <div class="cover-title">Tech<br><span>Stack</span></div>
+    <p class="cover-desc">Full technical specification for Storm Sweep. Built with Next.js, Supabase, Vercel, Stripe, Twilio, and PayPal. Now includes: AI photo pre-screening tool (Claude Vision), TikTok integration, and Sweeper onboarding UI spec.</p>
+    <div class="cover-stats">
+      <div class="cover-stat"><div class="cover-stat-label">Framework</div><div class="cover-stat-val">Next.js 14 (App Router)</div></div>
+      <div class="cover-stat"><div class="cover-stat-label">Database</div><div class="cover-stat-val">Supabase (Postgres)</div></div>
+      <div class="cover-stat"><div class="cover-stat-label">Hosting</div><div class="cover-stat-val">Vercel</div></div>
+      <div class="cover-stat"><div class="cover-stat-label">Monthly Cost</div><div class="cover-stat-val">~$20–40/mo</div></div>
+      <div class="cover-stat"><div class="cover-stat-label">Build Tool</div><div class="cover-stat-val">Cursor + Claude Code</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- TAB 1: OVERVIEW               -->
+<!-- ══════════════════════════════ -->
+<div class="view active" id="view-overview">
+<div class="page">
+
+  <div class="sec-title">Full Stack Overview</div>
+  <p class="sec-sub">Every tool, what it does, and what it costs. Designed to fit inside $50/mo with room to grow.</p>
+
+  <div class="sub-title">Core Infrastructure</div>
+  <div class="stack-grid">
+    <div class="stack-card sky">
+      <div class="stack-icon">⚡</div>
+      <div class="stack-tool">Next.js 14</div>
+      <div class="stack-role">Full-Stack Framework</div>
+      <div class="stack-desc">App Router, Server Components, API Routes, and middleware for role-based auth. Handles website, all 3 portals, and backend APIs in one repo.</div>
+      <div class="stack-cost free">Free</div>
+    </div>
+    <div class="stack-card green">
+      <div class="stack-icon">🗄️</div>
+      <div class="stack-tool">Supabase</div>
+      <div class="stack-role">Database + Auth + Storage</div>
+      <div class="stack-desc">Postgres database, row-level security for role access, built-in auth (email + magic link + Google OAuth), and file storage for job photos.</div>
+      <div class="stack-cost free">Free tier · $25/mo Pro when needed</div>
+    </div>
+    <div class="stack-card sky">
+      <div class="stack-icon">▲</div>
+      <div class="stack-tool">Vercel</div>
+      <div class="stack-role">Hosting + Deployments</div>
+      <div class="stack-desc">Zero-config Next.js hosting. Auto-deploy from GitHub on every push. Free Hobby tier handles launch traffic easily. Edge functions for performance.</div>
+      <div class="stack-cost free">Free Hobby tier</div>
+    </div>
+  </div>
+
+  <div class="sub-title">Payments</div>
+  <div class="stack-grid">
+    <div class="stack-card wheat">
+      <div class="stack-icon">💳</div>
+      <div class="stack-tool">Stripe</div>
+      <div class="stack-role">Primary Payments + Subscriptions</div>
+      <div class="stack-desc">One-time job payments, Storm Ready subscriptions (annual $249 + monthly $24/mo), webhooks for membership status, Stripe Customer Portal for self-serve cancellation.</div>
+      <div class="stack-cost paid">2.9% + 30¢ per transaction</div>
+    </div>
+    <div class="stack-card wheat">
+      <div class="stack-icon">🅿️</div>
+      <div class="stack-tool">PayPal</div>
+      <div class="stack-role">Alternative Payment Option</div>
+      <div class="stack-desc">PayPal Buttons SDK for one-time payments. Customers who prefer PayPal choose it at checkout. Membership billing stays Stripe-only — simpler subscriptions.</div>
+      <div class="stack-cost paid">3.49% + fixed fee per transaction</div>
+    </div>
+    <div class="stack-card green">
+      <div class="stack-icon">🔗</div>
+      <div class="stack-tool">Stripe Webhooks</div>
+      <div class="stack-role">Payment → DB Sync</div>
+      <div class="stack-desc">When Stripe processes a payment or subscription event, webhooks update Supabase automatically — activating memberships, logging revenue, triggering Twilio texts.</div>
+      <div class="stack-cost free">Free (part of Stripe)</div>
+    </div>
+  </div>
+
+  <div class="sub-title">Communications</div>
+  <div class="stack-grid">
+    <div class="stack-card purple">
+      <div class="stack-icon">📱</div>
+      <div class="stack-tool">Twilio</div>
+      <div class="stack-role">SMS Automation</div>
+      <div class="stack-desc">All automated customer texts from the protocol flow — booking confirmation, day-before reminder, on-the-way, job complete, review request, seasonal campaigns. ~$0.01/text.</div>
+      <div class="stack-cost paid">~$10–20/mo at launch volume</div>
+    </div>
+    <div class="stack-card purple">
+      <div class="stack-icon">✉️</div>
+      <div class="stack-tool">Resend</div>
+      <div class="stack-role">Transactional Email</div>
+      <div class="stack-desc">Beautiful transactional emails — booking confirmations, photo reports, membership receipts. React Email templates. 3,000 emails/mo free tier is plenty for launch.</div>
+      <div class="stack-cost free">Free tier (3k/mo)</div>
+    </div>
+    <div class="stack-card orange">
+      <div class="stack-icon">🔔</div>
+      <div class="stack-tool">Supabase Realtime</div>
+      <div class="stack-role">Live Job Updates</div>
+      <div class="stack-desc">Powers real-time checklist progress in admin dash, live job status updates, and sweeper location pings. Built into Supabase — no extra cost or service needed.</div>
+      <div class="stack-cost free">Free (included in Supabase)</div>
+    </div>
+  </div>
+
+  <div class="sub-title">Storage + Media</div>
+  <div class="stack-grid">
+    <div class="stack-card green">
+      <div class="stack-icon">🖼️</div>
+      <div class="stack-tool">Supabase Storage</div>
+      <div class="stack-role">Job Photos</div>
+      <div class="stack-desc">Before/after photos uploaded by sweepers stored here, organized by job ID. Signed URLs give customers secure access via their portal. 1GB free, then $0.021/GB.</div>
+      <div class="stack-cost free">Free tier (1GB)</div>
+    </div>
+    <div class="stack-card sky">
+      <div class="stack-icon">🔐</div>
+      <div class="stack-tool">Supabase Auth</div>
+      <div class="stack-role">Auth + Role Management</div>
+      <div class="stack-desc">Email/password + magic link + Google OAuth. User roles (customer / sweeper / admin) stored in profiles table, enforced via Supabase RLS policies and Next.js middleware.</div>
+      <div class="stack-cost free">Free</div>
+    </div>
+    <div class="stack-card orange">
+      <div class="stack-icon">🗺️</div>
+      <div class="stack-tool">Google Maps API</div>
+      <div class="stack-role">Route + Map View</div>
+      <div class="stack-desc">Sweeper app map view, address autocomplete on booking form, and route optimization between jobs. $200 free credit/mo — covers launch volume easily.</div>
+      <div class="stack-cost free">Free tier ($200/mo credit)</div>
+    </div>
+  </div>
+
+  <div class="sub-title">New Additions · v1.1</div>
+  <div class="stack-grid">
+    <div class="stack-card red">
+      <div class="stack-icon">🤖</div>
+      <div class="stack-tool">Claude Vision API</div>
+      <div class="stack-role">AI Photo Pre-Screening</div>
+      <div class="stack-desc">Anthropic's claude-sonnet-4-5 vision model grades shelter photos uploaded at booking (A–F). Flags excessive junk, water, hazards. Admin reviews C grades; D/F auto-pause booking. Called via /api/photo-screen route.</div>
+      <div class="stack-cost paid">~$0.003/image · negligible at volume</div>
+    </div>
+    <div class="stack-card purple">
+      <div class="stack-icon">🎵</div>
+      <div class="stack-tool">TikTok API</div>
+      <div class="stack-role">Video Publishing + Analytics</div>
+      <div class="stack-desc">TikTok Content Posting API posts approved before/after Reels directly from admin dash. Analytics endpoint pulls views, likes, shares back into the admin marketing panel. Requires TikTok for Business account.</div>
+      <div class="stack-cost free">Free (API access)</div>
+    </div>
+    <div class="stack-card orange">
+      <div class="stack-icon">🧹</div>
+      <div class="stack-tool">Sweeper Onboarding Flow</div>
+      <div class="stack-role">IC Application + Approval Portal</div>
+      <div class="stack-desc">Dedicated /sweepers/apply route: application form, tool photo uploads to Supabase Storage, IC agreement e-signature (via DocuSeal), admin approval dashboard. Sweeper account activated only after admin approval.</div>
+      <div class="stack-cost free">DocuSeal free tier (10 docs/mo)</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sec-title">Monthly Cost Breakdown</div>
+  <p class="sec-sub">At launch volume — estimated 30–50 jobs/month, 20–30 active members.</p>
+
+  <table class="budget-table">
+    <thead>
+      <tr><th>Service</th><th>Plan</th><th>Monthly Cost</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Vercel</td><td>Hobby</td><td class="b-free">$0</td><td>Free until high traffic — upgrade to Pro ($20/mo) if needed</td></tr>
+      <tr><td>Supabase</td><td>Free</td><td class="b-free">$0</td><td>500MB DB, 1GB storage, 50k auth users — plenty for launch</td></tr>
+      <tr><td>Resend</td><td>Free</td><td class="b-free">$0</td><td>3,000 emails/mo free — upgrade at scale</td></tr>
+      <tr><td>Twilio SMS</td><td>Pay-as-go</td><td><div class="b-val sky">~$15</div></td><td>~1,500 texts/mo at launch · $0.01/text</td></tr>
+      <tr><td>Google Maps API</td><td>Free credit</td><td class="b-free">$0</td><td>$200/mo free credit · won't exceed at launch</td></tr>
+      <tr><td>Domain (stormsweep.com)</td><td>Annual</td><td><div class="b-val">~$1.50</div></td><td>~$18/yr via Namecheap or Cloudflare</td></tr>
+      <tr><td>Stripe fees</td><td>Per transaction</td><td><div class="b-val wheat">~$15–25</div></td><td>2.9%+30¢ per job · varies with volume</td></tr>
+      <tr><td>Buffer (social scheduling)</td><td>Free</td><td class="b-free">$0</td><td>Free plan handles 3 channels · upgrade to $15/mo for analytics</td></tr>
+      <tr><td>Canva</td><td>Free</td><td class="b-free">$0</td><td>Free tier adequate at launch · Pro $13/mo optional</td></tr>
+      <tr><td>Claude Vision API (photo screening)</td><td>Pay-per-use</td><td class="b-free">~$0</td><td>~$0.003/image · 100 bookings/mo = $0.30 · effectively free</td></tr>
+      <tr><td>TikTok API</td><td>Free</td><td class="b-free">$0</td><td>Content Posting API free with TikTok for Business account</td></tr>
+      <tr><td>DocuSeal (IC e-signatures)</td><td>Free tier</td><td class="b-free">$0</td><td>10 docs/mo free · upgrade to $19/mo when sweeper volume grows</td></tr>
+      <tr><td><strong>TOTAL</strong></td><td></td><td><div class="b-val green">~$32–42/mo</div></td><td>Still within $50/mo budget ✓ · new features add ~$0.30/mo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert success">
+    <div class="alert-icon">✅</div>
+    <div class="alert-text"><strong>Budget verdict:</strong> You're comfortably inside $50/mo at launch. The only real variable cost is Twilio (scales with job volume — a good problem to have) and Stripe fees (scales with revenue). Everything else is free tier or near-zero.</div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- TAB 2: ARCHITECTURE           -->
+<!-- ══════════════════════════════ -->
+<div class="view" id="view-architecture">
+<div class="page">
+
+  <div class="sec-title">App Architecture</div>
+  <p class="sec-sub">One Next.js monorepo, three portals, one Supabase backend. Role-based access enforced at middleware and database levels.</p>
+
+  <div class="sub-title">Repo Structure</div>
+  <div class="code-block"><span class="code-comment"># storm-sweep/ — single Next.js 14 App Router repo</span>
+<span class="code-key">app/</span>
+  <span class="code-key">(public)/</span>               <span class="code-comment"># Marketing site — no auth required</span>
+    page.tsx               <span class="code-comment"># Homepage</span>
+    services/page.tsx
+    pricing/page.tsx
+    book/page.tsx          <span class="code-comment"># Booking form + Stripe/PayPal checkout</span>
+    login/page.tsx
+
+  <span class="code-key">(customer)/</span>             <span class="code-comment"># Role: customer</span>
+    dashboard/page.tsx
+    history/page.tsx
+    photos/page.tsx
+    membership/page.tsx
+
+  <span class="code-key">(sweeper)/</span>              <span class="code-comment"># Role: sweeper</span>
+    jobs/page.tsx          <span class="code-comment"># Today's job queue</span>
+    jobs/[id]/page.tsx     <span class="code-comment"># Job detail + checklist</span>
+    schedule/page.tsx
+    earnings/page.tsx
+
+  <span class="code-key">(admin)/</span>                <span class="code-comment"># Role: admin</span>
+    dashboard/page.tsx
+    jobs/page.tsx
+    customers/page.tsx
+    crew/page.tsx
+    revenue/page.tsx
+    marketing/page.tsx
+
+  <span class="code-key">api/</span>
+    bookings/route.ts      <span class="code-comment"># Create booking, charge deposit</span>
+    stripe/webhook/route.ts <span class="code-comment"># Handle payment events</span>
+    paypal/route.ts        <span class="code-comment"># PayPal one-time payments</span>
+    jobs/route.ts          <span class="code-comment"># CRUD for jobs</span>
+    sms/route.ts           <span class="code-comment"># Twilio trigger endpoint</span>
+    photos/route.ts        <span class="code-comment"># Upload to Supabase Storage</span>
+
+<span class="code-key">middleware.ts</span>             <span class="code-comment"># Route protection + role redirect</span>
+<span class="code-key">lib/</span>
+  supabase.ts             <span class="code-comment"># Supabase client (server + browser)</span>
+  stripe.ts               <span class="code-comment"># Stripe client</span>
+  twilio.ts               <span class="code-comment"># Twilio SMS helpers</span>
+  resend.ts               <span class="code-comment"># Email templates</span></div>
+
+  <div class="sub-title" style="margin-top:32px;">Auth & Role Flow</div>
+  <div class="code-block"><span class="code-comment">// middleware.ts — protects all portal routes</span>
+<span class="code-kw">export async function</span> <span class="code-fn">middleware</span>(request: NextRequest) {
+  <span class="code-kw">const</span> { data: { session } } = <span class="code-kw">await</span> supabase.auth.getSession()
+
+  <span class="code-comment">// Not logged in → redirect to login</span>
+  <span class="code-kw">if</span> (!session) <span class="code-kw">return</span> redirect(<span class="code-str">'/login'</span>)
+
+  <span class="code-comment">// Get role from profiles table</span>
+  <span class="code-kw">const</span> role = session.user.user_metadata.role
+
+  <span class="code-comment">// Enforce role-based access</span>
+  <span class="code-kw">if</span> (path.startsWith(<span class="code-str">'/admin'</span>) && role !== <span class="code-str">'admin'</span>) <span class="code-kw">return</span> redirect(<span class="code-str">'/'</span>)
+  <span class="code-kw">if</span> (path.startsWith(<span class="code-str">'/sweeper'</span>) && role !== <span class="code-str">'sweeper'</span>) <span class="code-kw">return</span> redirect(<span class="code-str">'/'</span>)
+  <span class="code-kw">if</span> (path.startsWith(<span class="code-str">'/customer'</span>) && role !== <span class="code-str">'customer'</span>) <span class="code-kw">return</span> redirect(<span class="code-str">'/'</span>)
+}</div>
+
+  <div class="sub-title" style="margin-top:32px;">Key Data Flows</div>
+
+  <div class="alert info">
+    <div class="alert-icon">📅</div>
+    <div class="alert-text"><strong>Booking Flow:</strong> Customer fills form → Stripe/PayPal charges deposit → Webhook fires → Supabase creates job record → Twilio sends confirmation SMS + Resend sends email → Job appears in admin dash and sweeper queue.</div>
+  </div>
+  <div class="alert info">
+    <div class="alert-icon">✅</div>
+    <div class="alert-text"><strong>Job Complete Flow:</strong> Sweeper marks complete in app → Supabase updates job status → Photos move to customer-accessible storage bucket → Twilio fires "job complete" + review request SMS → Admin dash reflects instantly via Supabase Realtime.</div>
+  </div>
+  <div class="alert info">
+    <div class="alert-icon">★</div>
+    <div class="alert-text"><strong>Membership Flow:</strong> Customer picks annual ($249) or monthly ($24/mo) at checkout → Stripe creates subscription + customer → Webhook activates Storm Ready status in Supabase profiles table → Customer portal shows member benefits → Stripe handles all future billing automatically.</div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- TAB 3: DATABASE               -->
+<!-- ══════════════════════════════ -->
+<div class="view" id="view-database">
+<div class="page">
+
+  <div class="sec-title">Supabase Schema</div>
+  <p class="sec-sub">Eight core tables. Row-level security policies enforce that customers only see their own data, sweepers only see assigned jobs, and admins see everything.</p>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">profiles</div><div class="schema-tag">Auth + Roles</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">uuid</td><td class="col-pk">PK</td><td class="col-note">References auth.users</td></tr>
+        <tr><td class="col-name">role</td><td class="col-type">enum</td><td></td><td class="col-note">customer | sweeper | admin</td></tr>
+        <tr><td class="col-name">full_name</td><td class="col-type">text</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">phone</td><td class="col-type">text</td><td></td><td class="col-note">Used for Twilio SMS</td></tr>
+        <tr><td class="col-name">address</td><td class="col-type">text</td><td></td><td class="col-note">Primary service address</td></tr>
+        <tr><td class="col-name">membership_status</td><td class="col-type">enum</td><td></td><td class="col-note">none | active | cancelled | past_due</td></tr>
+        <tr><td class="col-name">membership_plan</td><td class="col-type">enum</td><td></td><td class="col-note">annual | monthly | null</td></tr>
+        <tr><td class="col-name">stripe_customer_id</td><td class="col-type">text</td><td></td><td class="col-note">Stripe customer ref</td></tr>
+        <tr><td class="col-name">stripe_subscription_id</td><td class="col-type">text</td><td></td><td class="col-note">Null for non-members</td></tr>
+        <tr><td class="col-name">membership_renews_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note">Auto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">jobs</div><div class="schema-tag">Core Entity</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">uuid</td><td class="col-pk">PK</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">customer_id</td><td class="col-type">uuid</td><td class="col-fk">FK → profiles</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">sweeper_id</td><td class="col-type">uuid</td><td class="col-fk">FK → profiles</td><td class="col-note">Nullable until assigned</td></tr>
+        <tr><td class="col-name">status</td><td class="col-type">enum</td><td></td><td class="col-note">pending | confirmed | in_progress | complete | cancelled</td></tr>
+        <tr><td class="col-name">service_type</td><td class="col-type">text[]</td><td></td><td class="col-note">Array: ['clean','led','kit','structural']</td></tr>
+        <tr><td class="col-name">scheduled_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">address</td><td class="col-type">text</td><td></td><td class="col-note">Job address (may differ from profile)</td></tr>
+        <tr><td class="col-name">notes</td><td class="col-type">text</td><td></td><td class="col-note">Gate codes, dogs, access info</td></tr>
+        <tr><td class="col-name">checklist_progress</td><td class="col-type">jsonb</td><td></td><td class="col-note">{ item_id: boolean } map</td></tr>
+        <tr><td class="col-name">upgrade_flags</td><td class="col-type">jsonb</td><td></td><td class="col-note">Upgrade opportunities logged by sweeper</td></tr>
+        <tr><td class="col-name">total_amount</td><td class="col-type">integer</td><td></td><td class="col-note">In cents</td></tr>
+        <tr><td class="col-name">payment_status</td><td class="col-type">enum</td><td></td><td class="col-note">unpaid | deposit_paid | paid | refunded</td></tr>
+        <tr><td class="col-name">stripe_payment_id</td><td class="col-type">text</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">customer_signed_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note">Digital signature timestamp</td></tr>
+        <tr><td class="col-name">referral_source</td><td class="col-type">text</td><td></td><td class="col-note">How customer heard about Storm Sweep — partner code or channel</td></tr>
+        <tr><td class="col-name">partner_id</td><td class="col-type">uuid</td><td class="col-fk">FK → partners (nullable)</td><td class="col-note">Set when referral_code matches a partner record</td></tr>
+        <tr><td class="col-name">completed_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note">Auto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">job_photos</div><div class="schema-tag">Storage References</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">uuid</td><td class="col-pk">PK</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">job_id</td><td class="col-type">uuid</td><td class="col-fk">FK → jobs</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">photo_type</td><td class="col-type">enum</td><td></td><td class="col-note">before | after | upgrade | signature</td></tr>
+        <tr><td class="col-name">storage_path</td><td class="col-type">text</td><td></td><td class="col-note">Supabase Storage path</td></tr>
+        <tr><td class="col-name">uploaded_by</td><td class="col-type">uuid</td><td class="col-fk">FK → profiles</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note">Auto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">sms_log</div><div class="schema-tag">Twilio Audit Trail</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">uuid</td><td class="col-pk">PK</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">profile_id</td><td class="col-type">uuid</td><td class="col-fk">FK → profiles</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">job_id</td><td class="col-type">uuid</td><td class="col-fk">FK → jobs (nullable)</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">trigger</td><td class="col-type">text</td><td></td><td class="col-note">booking_confirmed | on_the_way | job_complete | review_request | etc.</td></tr>
+        <tr><td class="col-name">body</td><td class="col-type">text</td><td></td><td class="col-note">Full message sent</td></tr>
+        <tr><td class="col-name">twilio_sid</td><td class="col-type">text</td><td></td><td class="col-note">Twilio message SID for tracking</td></tr>
+        <tr><td class="col-name">sent_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">partners</div><div class="schema-tag">Referral Partner Tracking</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">uuid</td><td class="col-pk">PK</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">name</td><td class="col-type">text</td><td></td><td class="col-note">e.g. "ABC Roofing", "Jane Smith - Realtor"</td></tr>
+        <tr><td class="col-name">type</td><td class="col-type">enum</td><td></td><td class="col-note">roofing | realtor | lawn | hoa | inspector | other</td></tr>
+        <tr><td class="col-name">referral_code</td><td class="col-type">text</td><td></td><td class="col-note">Unique code embedded in QR on leave-behinds · auto-fills at booking</td></tr>
+        <tr><td class="col-name">contact_name</td><td class="col-type">text</td><td></td><td class="col-note">Owner or point of contact</td></tr>
+        <tr><td class="col-name">contact_phone</td><td class="col-type">text</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">payout_per_referral</td><td class="col-type">integer</td><td></td><td class="col-note">In dollars: 15, 20, or 25 depending on partner type</td></tr>
+        <tr><td class="col-name">total_referrals</td><td class="col-type">integer</td><td></td><td class="col-note">Computed from bookings.referral_source</td></tr>
+        <tr><td class="col-name">total_payout_owed</td><td class="col-type">integer</td><td></td><td class="col-note">In cents · updated when referral books</td></tr>
+        <tr><td class="col-name">total_paid_out</td><td class="col-type">integer</td><td></td><td class="col-note">In cents · updated when admin marks paid</td></tr>
+        <tr><td class="col-name">active</td><td class="col-type">boolean</td><td></td><td class="col-note">Toggle off without deleting</td></tr>
+        <tr><td class="col-name">notes</td><td class="col-type">text</td><td></td><td class="col-note">Admin notes on relationship</td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note">Auto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">reviews</div><div class="schema-tag">Customer Ratings</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">uuid</td><td class="col-pk">PK</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">job_id</td><td class="col-type">uuid</td><td class="col-fk">FK → jobs</td><td class="col-note">One review per job</td></tr>
+        <tr><td class="col-name">customer_id</td><td class="col-type">uuid</td><td class="col-fk">FK → profiles</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">rating</td><td class="col-type">integer</td><td></td><td class="col-note">1–5</td></tr>
+        <tr><td class="col-name">body</td><td class="col-type">text</td><td></td><td class="col-note">Optional written review</td></tr>
+        <tr><td class="col-name">photo_consent</td><td class="col-type">boolean</td><td></td><td class="col-note">Permission to use B&A photos on social</td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sub-title" style="margin-top:8px;">Environment Variables</div>
+  <div class="env-block"><span class="code-comment"># .env.local — never commit this file</span>
+
+<span class="code-comment"># Supabase</span>
+<span class="env-key">NEXT_PUBLIC_SUPABASE_URL</span><span class="env-eq">=</span><span class="env-val">https://xxxx.supabase.co</span>
+<span class="env-key">NEXT_PUBLIC_SUPABASE_ANON_KEY</span><span class="env-eq">=</span><span class="env-val">your-anon-key</span>
+<span class="env-key">SUPABASE_SERVICE_ROLE_KEY</span><span class="env-eq">=</span><span class="env-val">your-service-role-key</span>
+
+<span class="code-comment"># Stripe</span>
+<span class="env-key">STRIPE_SECRET_KEY</span><span class="env-eq">=</span><span class="env-val">sk_live_...</span>
+<span class="env-key">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</span><span class="env-eq">=</span><span class="env-val">pk_live_...</span>
+<span class="env-key">STRIPE_WEBHOOK_SECRET</span><span class="env-eq">=</span><span class="env-val">whsec_...</span>
+<span class="env-key">STRIPE_ANNUAL_PRICE_ID</span><span class="env-eq">=</span><span class="env-val">price_... </span><span class="code-comment"># $249/yr</span>
+<span class="env-key">STRIPE_MONTHLY_PRICE_ID</span><span class="env-eq">=</span><span class="env-val">price_... </span><span class="code-comment"># $24/mo</span>
+
+<span class="code-comment"># PayPal</span>
+<span class="env-key">PAYPAL_CLIENT_ID</span><span class="env-eq">=</span><span class="env-val">your-client-id</span>
+<span class="env-key">PAYPAL_CLIENT_SECRET</span><span class="env-eq">=</span><span class="env-val">your-secret</span>
+<span class="env-key">NEXT_PUBLIC_PAYPAL_CLIENT_ID</span><span class="env-eq">=</span><span class="env-val">your-client-id</span>
+
+<span class="code-comment"># Twilio</span>
+<span class="env-key">TWILIO_ACCOUNT_SID</span><span class="env-eq">=</span><span class="env-val">ACxxxx</span>
+<span class="env-key">TWILIO_AUTH_TOKEN</span><span class="env-eq">=</span><span class="env-val">your-token</span>
+<span class="env-key">TWILIO_PHONE_NUMBER</span><span class="env-eq">=</span><span class="env-val">+14055550100</span>
+
+<span class="code-comment"># Resend</span>
+<span class="env-key">RESEND_API_KEY</span><span class="env-eq">=</span><span class="env-val">re_xxxx</span>
+<span class="env-key">RESEND_FROM_EMAIL</span><span class="env-eq">=</span><span class="env-val">hello@stormsweep.com</span>
+
+<span class="code-comment"># Google Maps</span>
+<span class="env-key">NEXT_PUBLIC_GOOGLE_MAPS_KEY</span><span class="env-eq">=</span><span class="env-val">AIza...</span></div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- TAB 4: ROUTES                 -->
+<!-- ══════════════════════════════ -->
+<div class="view" id="view-routes">
+<div class="page">
+
+  <div class="sec-title">Route Map</div>
+  <p class="sec-sub">Every page in the app, organized by access level. Middleware enforces role checks on all protected routes.</p>
+
+  <div class="route-group">
+    <div class="route-group-header"><div class="route-group-name">Public Routes</div><div class="route-badge rb-public">No Auth Required</div></div>
+    <div class="route-row"><div class="route-path">/</div><div class="route-desc">Marketing homepage — hero, services, pricing, booking CTA, testimonials</div></div>
+    <div class="route-row"><div class="route-path">/services</div><div class="route-desc">Full services page with upgrade details and pricing</div></div>
+    <div class="route-row"><div class="route-path">/pricing</div><div class="route-desc">Single Sweep vs Storm Ready comparison with Stripe checkout</div></div>
+    <div class="route-row"><div class="route-path">/book</div><div class="route-desc">Booking form — service selection, date, address, Stripe/PayPal payment</div></div>
+    <div class="route-row"><div class="route-path">/login</div><div class="route-desc">Supabase Auth — email/password, magic link, Google OAuth</div></div>
+    <div class="route-row"><div class="route-path">/register</div><div class="route-desc">New customer signup — auto-assigns 'customer' role</div></div>
+    <div class="route-row"><div class="route-path">/about</div><div class="route-desc">About Storm Sweep, Norman OK local story, team</div></div>
+  </div>
+
+  <div class="route-group">
+    <div class="route-group-header"><div class="route-group-name">Customer Portal</div><div class="route-badge rb-customer">Role: customer</div></div>
+    <div class="route-row"><div class="route-path">/dashboard</div><div class="route-desc">Welcome band, membership status, next appointment, recent visit preview</div></div>
+    <div class="route-row"><div class="route-path">/history</div><div class="route-desc">All past jobs with dates, services, photos, and report links</div></div>
+    <div class="route-row"><div class="route-path">/history/[jobId]</div><div class="route-desc">Individual job detail — full before/after photos, checklist, sweeper notes</div></div>
+    <div class="route-row"><div class="route-path">/photos</div><div class="route-desc">Photo gallery — all before/after/upgrade photos, filterable by type</div></div>
+    <div class="route-row"><div class="route-path">/membership</div><div class="route-desc">Storm Ready card, benefits tracker, book visit, manage/cancel via Stripe Portal</div></div>
+    <div class="route-row"><div class="route-path">/book</div><div class="route-desc">Pre-filled booking form for returning customers</div></div>
+    <div class="route-row"><div class="route-path">/account</div><div class="route-desc">Profile, address, phone, notification preferences</div></div>
+  </div>
+
+  <div class="route-group">
+    <div class="route-group-header"><div class="route-group-name">Sweeper App</div><div class="route-badge rb-sweeper">Role: sweeper</div></div>
+    <div class="route-row"><div class="route-path">/sweeper</div><div class="route-desc">Home dashboard — online toggle, today's stats, job queue</div></div>
+    <div class="route-row"><div class="route-path">/sweeper/jobs</div><div class="route-desc">Full job list with status indicators and navigation buttons</div></div>
+    <div class="route-row"><div class="route-path">/sweeper/jobs/[id]</div><div class="route-desc">Job detail — customer info, map, checklist (tap to complete), photo upload, signature, mark complete</div></div>
+    <div class="route-row"><div class="route-path">/sweeper/schedule</div><div class="route-desc">Weekly calendar view with day selector and timeline</div></div>
+    <div class="route-row"><div class="route-path">/sweeper/earnings</div><div class="route-desc">Weekly/monthly earnings breakdown, per-job history</div></div>
+  </div>
+
+  <div class="route-group">
+    <div class="route-group-header"><div class="route-group-name">Admin Dashboard</div><div class="route-badge rb-admin">Role: admin</div></div>
+    <div class="route-row"><div class="route-path">/admin</div><div class="route-desc">Main dashboard — KPI row, today's jobs, live activity feed, revenue chart, crew status</div></div>
+    <div class="route-row"><div class="route-path">/admin/schedule</div><div class="route-desc">5-day week view, all jobs, assignment management</div></div>
+    <div class="route-row"><div class="route-path">/admin/jobs</div><div class="route-desc">All jobs table — searchable, filterable, editable</div></div>
+    <div class="route-row"><div class="route-path">/admin/jobs/[id]</div><div class="route-desc">Full job detail — photos, checklist progress, edit, reassign sweeper</div></div>
+    <div class="route-row"><div class="route-path">/admin/customers</div><div class="route-desc">Customer list — plan, visits, lifetime value, next appointment</div></div>
+    <div class="route-row"><div class="route-path">/admin/customers/[id]</div><div class="route-desc">Customer profile — full history, membership status, direct message</div></div>
+    <div class="route-row"><div class="route-path">/admin/crew</div><div class="route-desc">Sweeper management — live status, current job, performance stats</div></div>
+    <div class="route-row"><div class="route-path">/admin/revenue</div><div class="route-desc">Revenue charts, breakdown by service, MRR, Stripe sync</div></div>
+    <div class="route-row"><div class="route-path">/admin/marketing</div><div class="route-desc">Meta post calendar, ad performance, ROAS tracking</div></div>
+  </div>
+
+  <div class="route-group">
+    <div class="route-group-header"><div class="route-group-name">API Routes</div><div class="route-badge rb-admin">Server Only</div></div>
+    <div class="route-row"><div class="route-path">POST /api/bookings</div><div class="route-desc">Create booking, trigger Stripe payment intent, fire Twilio confirmation SMS</div></div>
+    <div class="route-row"><div class="route-path">POST /api/stripe/webhook</div><div class="route-desc">Handle payment_intent.succeeded, subscription events — update Supabase</div></div>
+    <div class="route-row"><div class="route-path">POST /api/paypal</div><div class="route-desc">Create + capture PayPal order for one-time payments</div></div>
+    <div class="route-row"><div class="route-path">PATCH /api/jobs/[id]</div><div class="route-desc">Update job status, checklist, notes — sweeper and admin access</div></div>
+    <div class="route-row"><div class="route-path">POST /api/photos</div><div class="route-desc">Upload photo to Supabase Storage, create job_photos record</div></div>
+    <div class="route-row"><div class="route-path">POST /api/sms</div><div class="route-desc">Trigger Twilio SMS by event type — wraps all message templates</div></div>
+    <div class="route-row"><div class="route-path" style="color:#f1948a;">POST /api/photo-screen ✦</div><div class="route-desc">NEW — Receives shelter booking photo → calls Claude Vision API → returns A–F grade + flags → stored on booking record</div></div>
+    <div class="route-row"><div class="route-path" style="color:#c39bd3;">POST /api/tiktok/publish ✦</div><div class="route-desc">NEW — Admin-triggered: uploads approved job video to TikTok Content Posting API with caption and hashtags</div></div>
+    <div class="route-row"><div class="route-path" style="color:#c39bd3;">GET /api/tiktok/analytics ✦</div><div class="route-desc">NEW — Pulls TikTok post metrics (views, likes, shares) into admin marketing panel</div></div>
+    <div class="route-row"><div class="route-path" style="color:#f0b27a;">POST /api/sweepers/apply ✦</div><div class="route-desc">NEW — Creates sweeper_applicants record, triggers admin notification SMS + email</div></div>
+    <div class="route-row"><div class="route-path" style="color:#f0b27a;">POST /api/sweepers/approve ✦</div><div class="route-desc">NEW — Admin approves applicant → creates sweeper account → sends welcome SMS</div></div>
+    <div class="route-row"><div class="route-path" style="color:#f0b27a;">POST /api/sweepers/reject ✦</div><div class="route-desc">NEW — Admin rejects → sends decline SMS → marks applicant_status = rejected</div></div>
+  </div>
+
+  <div class="route-group">
+    <div class="route-group-header"><div class="route-group-name">Sweeper Onboarding ✦ New</div><div class="route-badge rb-public">Public + Admin</div></div>
+    <div class="route-row"><div class="route-path">/sweepers/apply</div><div class="route-desc">Public IC application form — name, experience, availability, vehicle, how they heard about Storm Sweep</div></div>
+    <div class="route-row"><div class="route-path">/sweepers/apply/tools</div><div class="route-desc">Tool photo upload step — 7 required photos (shop vac, brushes, blower, extension cord, mop, headlamp, PPE)</div></div>
+    <div class="route-row"><div class="route-path">/sweepers/apply/agreement</div><div class="route-desc">DocuSeal IC agreement embed — e-signature required before application submits</div></div>
+    <div class="route-row"><div class="route-path">/sweepers/apply/confirmation</div><div class="route-desc">"Application received — we'll review within 24 hours" confirmation screen</div></div>
+    <div class="route-row"><div class="route-path">/admin/sweepers</div><div class="route-desc">Admin applicant queue — all pending applications, tool photo review, approve/reject buttons</div></div>
+    <div class="route-row"><div class="route-path">/admin/sweepers/[id]</div><div class="route-desc">Individual applicant detail — all tool photos, agreement status, notes field, approve/reject action</div></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- TAB 6: NEW FEATURES           -->
+<!-- ══════════════════════════════ -->
+<div class="view" id="view-newfeatures">
+<div class="page">
+
+  <div class="sec-title">New Features · v1.1</div>
+  <p class="sec-sub">Three additions embedded into the stack — AI photo screening, TikTok integration, and the sweeper onboarding portal.</p>
+
+  <!-- ── AI PHOTO TOOL ── -->
+  <div class="sub-title">1 · AI Photo Pre-Screening Tool</div>
+
+  <div class="alert info">
+    <div class="alert-icon">🤖</div>
+    <div class="alert-text"><strong>How it works:</strong> Customer uploads 1–2 shelter photos during booking. A Next.js API route sends the image to Claude's vision model with a grading prompt. Grades A/B auto-approve. Grade C triggers admin review within 2 hours. D/F pause the booking and notify admin immediately. All results stored on the booking record in Supabase.</div>
+  </div>
+
+  <div class="code-block"><span class="code-comment">// /api/photo-screen/route.ts</span>
+<span class="code-kw">import</span> Anthropic <span class="code-kw">from</span> <span class="code-str">'@anthropic-ai/sdk'</span>
+
+<span class="code-kw">export async function</span> <span class="code-fn">POST</span>(req: Request) {
+  <span class="code-kw">const</span> { imageBase64, mediaType, bookingId } = <span class="code-kw">await</span> req.json()
+  <span class="code-kw">const</span> client = <span class="code-kw">new</span> <span class="code-fn">Anthropic</span>()
+
+  <span class="code-kw">const</span> response = <span class="code-kw">await</span> client.messages.<span class="code-fn">create</span>({
+    model: <span class="code-str">'claude-sonnet-4-5'</span>,
+    max_tokens: <span class="code-str">1024</span>,
+    messages: [{
+      role: <span class="code-str">'user'</span>,
+      content: [
+        { type: <span class="code-str">'image'</span>, source: { type: <span class="code-str">'base64'</span>, media_type: mediaType, data: imageBase64 } },
+        { type: <span class="code-str">'text'</span>, text: <span class="code-str">`Grade this storm shelter photo A–F. Respond ONLY in JSON:
+{
+  "grade": "A|B|C|D|F",
+  "approved": true|false,
+  "flags": ["excessive_junk","standing_water","structural_damage","mold_walls","rodent_evidence"],
+  "surcharge_suggested": true|false,
+  "surcharge_amount": 0|35|50|75,
+  "admin_note": "brief note for admin",
+  "customer_message": "friendly message for customer"
+}
+A=clean/minor dust · B=manageable items · C=moderate junk (admin review)
+D=excessive furniture/bags (pause+contact) · F=hazard present (admin call)`</span> }
+      ]
+    }]
+  })
+
+  <span class="code-kw">const</span> result = <span class="code-fn">JSON</span>.parse(response.content[<span class="code-str">0</span>].text)
+
+  <span class="code-comment">// Store result on booking record in Supabase</span>
+  <span class="code-kw">await</span> supabase.from(<span class="code-str">'bookings'</span>).update({
+    photo_grade: result.grade,
+    photo_flags: result.flags,
+    photo_approved: result.approved,
+    photo_surcharge: result.surcharge_amount,
+    photo_admin_note: result.admin_note
+  }).eq(<span class="code-str">'id'</span>, bookingId)
+
+  <span class="code-comment">// Notify admin if C, D, or F grade</span>
+  <span class="code-kw">if</span> ([<span class="code-str">'C'</span>, <span class="code-str">'D'</span>, <span class="code-str">'F'</span>].includes(result.grade)) {
+    <span class="code-kw">await</span> <span class="code-fn">notifyAdmin</span>(bookingId, result)
+  }
+
+  <span class="code-kw">return</span> Response.<span class="code-fn">json</span>(result)
+}</div>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">bookings — photo_screen fields added</div><div class="schema-tag">Schema Update</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">photo_urls</td><td class="col-type">text[]</td><td class="col-note">Supabase Storage paths for uploaded pre-booking photos</td></tr>
+        <tr><td class="col-name">photo_grade</td><td class="col-type">text</td><td class="col-note">A / B / C / D / F — returned by Claude Vision</td></tr>
+        <tr><td class="col-name">photo_flags</td><td class="col-type">text[]</td><td class="col-note">Array: excessive_junk, standing_water, structural_damage, etc.</td></tr>
+        <tr><td class="col-name">photo_approved</td><td class="col-type">boolean</td><td class="col-note">true for A/B · false for C/D/F until admin reviews</td></tr>
+        <tr><td class="col-name">photo_surcharge</td><td class="col-type">integer</td><td class="col-note">Suggested surcharge in dollars: 0, 35, 50, or 75</td></tr>
+        <tr><td class="col-name">photo_admin_note</td><td class="col-type">text</td><td class="col-note">Claude's note for admin review context</td></tr>
+        <tr><td class="col-name">admin_reviewed_at</td><td class="col-type">timestamptz</td><td class="col-note">Timestamp of admin manual review completion</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── TIKTOK ── -->
+  <div class="sub-title">2 · TikTok Integration</div>
+
+  <div class="alert info">
+    <div class="alert-icon">🎵</div>
+    <div class="alert-text"><strong>Architecture:</strong> Sweeper uploads before/after video clips → stored in Supabase Storage (job-videos bucket) → admin reviews in marketing panel → one-click "Publish to TikTok" triggers Content Posting API → video goes live. Same video pushed to Instagram Reels via Meta Graph API. Analytics synced back weekly into the admin marketing panel.</div>
+  </div>
+
+  <div class="code-block"><span class="code-comment">// /api/tiktok/publish/route.ts</span>
+<span class="code-kw">export async function</span> <span class="code-fn">POST</span>(req: Request) {
+  <span class="code-kw">const</span> { videoStoragePath, caption, jobId } = <span class="code-kw">await</span> req.json()
+
+  <span class="code-comment">// 1. Get signed video URL from Supabase Storage (1hr expiry)</span>
+  <span class="code-kw">const</span> { data: signedUrl } = <span class="code-kw">await</span> supabase.storage
+    .from(<span class="code-str">'job-videos'</span>).<span class="code-fn">createSignedUrl</span>(videoStoragePath, <span class="code-str">3600</span>)
+
+  <span class="code-comment">// 2. Init TikTok upload via Content Posting API</span>
+  <span class="code-kw">const</span> initRes = <span class="code-kw">await</span> <span class="code-fn">fetch</span>(<span class="code-str">'https://open.tiktokapis.com/v2/post/publish/video/init/'</span>, {
+    method: <span class="code-str">'POST'</span>,
+    headers: { <span class="code-str">'Authorization'</span>: <span class="code-str">`Bearer ${process.env.TIKTOK_ACCESS_TOKEN}`</span> },
+    body: <span class="code-fn">JSON</span>.stringify({
+      post_info: { title: caption, privacy_level: <span class="code-str">'PUBLIC_TO_EVERYONE'</span> },
+      source_info: { source: <span class="code-str">'PULL_FROM_URL'</span>, video_url: signedUrl.signedUrl }
+    })
+  })
+
+  <span class="code-kw">const</span> { data } = <span class="code-kw">await</span> initRes.<span class="code-fn">json</span>()
+
+  <span class="code-comment">// 3. Log to social_posts table for analytics tracking</span>
+  <span class="code-kw">await</span> supabase.from(<span class="code-str">'social_posts'</span>).insert({
+    job_id: jobId, platform: <span class="code-str">'tiktok'</span>,
+    publish_id: data.publish_id, caption,
+    video_path: videoStoragePath,
+    published_at: <span class="code-kw">new</span> <span class="code-fn">Date</span>().toISOString()
+  })
+
+  <span class="code-kw">return</span> Response.<span class="code-fn">json</span>({ success: <span class="code-kw">true</span>, publish_id: data.publish_id })
+}</div>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">social_posts (new table)</div><div class="schema-tag">TikTok + Meta Analytics</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">uuid</td><td class="col-pk">PK</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">job_id</td><td class="col-type">uuid</td><td class="col-fk">FK → jobs</td><td class="col-note">Source job for this content</td></tr>
+        <tr><td class="col-name">platform</td><td class="col-type">enum</td><td></td><td class="col-note">tiktok | instagram | facebook</td></tr>
+        <tr><td class="col-name">publish_id</td><td class="col-type">text</td><td></td><td class="col-note">Platform post ID for analytics lookup</td></tr>
+        <tr><td class="col-name">caption</td><td class="col-type">text</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">video_path</td><td class="col-type">text</td><td></td><td class="col-note">Supabase Storage path</td></tr>
+        <tr><td class="col-name">customer_consent</td><td class="col-type">boolean</td><td></td><td class="col-note">Must be true — checked before publishing</td></tr>
+        <tr><td class="col-name">views</td><td class="col-type">integer</td><td></td><td class="col-note">Synced from platform weekly</td></tr>
+        <tr><td class="col-name">likes</td><td class="col-type">integer</td><td></td><td class="col-note">Synced from platform weekly</td></tr>
+        <tr><td class="col-name">shares</td><td class="col-type">integer</td><td></td><td class="col-note">Synced from platform weekly</td></tr>
+        <tr><td class="col-name">published_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">analytics_synced_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note">Last metrics sync</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert warn">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>TikTok setup lead time:</strong> Apply for TikTok for Business + Content Posting API access now — approval takes 1–5 business days. Add TIKTOK_ACCESS_TOKEN + TIKTOK_CLIENT_KEY to Vercel env vars once approved. The actual build is Phase 4 (post-launch), but the account needs to exist at launch so organic posting can start immediately.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── SWEEPER ONBOARDING ── -->
+  <div class="sub-title">3 · Sweeper Onboarding Portal</div>
+
+  <div class="alert info">
+    <div class="alert-icon">🧹</div>
+    <div class="alert-text"><strong>4-step flow:</strong> Apply form → tool photo uploads → IC agreement e-sign (DocuSeal) → pending confirmation. Admin reviews in /admin/sweepers dashboard → approves → Supabase account auto-created with role: sweeper → welcome SMS sent → sweeper sees jobs immediately in app.</div>
+  </div>
+
+  <div class="code-block"><span class="code-comment">// /api/sweepers/approve/route.ts</span>
+<span class="code-kw">export async function</span> <span class="code-fn">POST</span>(req: Request) {
+  <span class="code-kw">const</span> { applicantId } = <span class="code-kw">await</span> req.json()
+
+  <span class="code-comment">// Fetch applicant record</span>
+  <span class="code-kw">const</span> { data: applicant } = <span class="code-kw">await</span> supabase
+    .from(<span class="code-str">'sweeper_applicants'</span>).select(<span class="code-str">'*'</span>).eq(<span class="code-str">'id'</span>, applicantId).single()
+
+  <span class="code-comment">// Create Supabase auth user</span>
+  <span class="code-kw">const</span> tempPassword = <span class="code-fn">generateSecurePassword</span>()
+  <span class="code-kw">const</span> { data: { user } } = <span class="code-kw">await</span> supabase.auth.admin.<span class="code-fn">createUser</span>({
+    email: applicant.email, password: tempPassword, email_confirm: <span class="code-kw">true</span>
+  })
+
+  <span class="code-comment">// Create profile with sweeper role</span>
+  <span class="code-kw">await</span> supabase.from(<span class="code-str">'profiles'</span>).insert({
+    id: user.id, role: <span class="code-str">'sweeper'</span>,
+    full_name: applicant.full_name, phone: applicant.phone,
+    approved_at: <span class="code-kw">new</span> <span class="code-fn">Date</span>().toISOString()
+  })
+
+  <span class="code-comment">// Mark applicant as approved</span>
+  <span class="code-kw">await</span> supabase.from(<span class="code-str">'sweeper_applicants'</span>)
+    .update({ status: <span class="code-str">'approved'</span>, profile_id: user.id })
+    .eq(<span class="code-str">'id'</span>, applicantId)
+
+  <span class="code-comment">// Send welcome SMS with login details</span>
+  <span class="code-kw">await</span> <span class="code-fn">sendSMS</span>(applicant.phone,
+    <span class="code-str">`Welcome to Storm Sweep! 🌪️ You're approved. Log in at stormsweep.com/sweeper — temp password: ${tempPassword}. Change it on first login. Questions? Reply here.`</span>
+  )
+
+  <span class="code-kw">return</span> Response.<span class="code-fn">json</span>({ success: <span class="code-kw">true</span> })
+}</div>
+
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">sweeper_applicants (new table)</div><div class="schema-tag">IC Onboarding Pipeline</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">uuid</td><td class="col-pk">PK</td><td class="col-note"></td></tr>
+        <tr><td class="col-name">full_name</td><td class="col-type">text</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">email</td><td class="col-type">text</td><td></td><td class="col-note">Unique</td></tr>
+        <tr><td class="col-name">phone</td><td class="col-type">text</td><td></td><td class="col-note"></td></tr>
+        <tr><td class="col-name">availability</td><td class="col-type">enum</td><td></td><td class="col-note">weekdays | weekends | both</td></tr>
+        <tr><td class="col-name">heard_about</td><td class="col-type">text</td><td></td><td class="col-note">Recruitment source — tracks which channels work</td></tr>
+        <tr><td class="col-name">tool_photos</td><td class="col-type">jsonb</td><td></td><td class="col-note">{ shop_vac: path, brushes: path, blower: path, ... }</td></tr>
+        <tr><td class="col-name">all_tools_verified</td><td class="col-type">boolean</td><td></td><td class="col-note">True when all 7 required photos uploaded</td></tr>
+        <tr><td class="col-name">agreement_signed</td><td class="col-type">boolean</td><td></td><td class="col-note">DocuSeal webhook sets this true on completion</td></tr>
+        <tr><td class="col-name">agreement_pdf_path</td><td class="col-type">text</td><td></td><td class="col-note">Supabase Storage path to completed signed PDF</td></tr>
+        <tr><td class="col-name">status</td><td class="col-type">enum</td><td></td><td class="col-note">pending | approved | rejected</td></tr>
+        <tr><td class="col-name">admin_notes</td><td class="col-type">text</td><td></td><td class="col-note">Admin review notes visible only to admin</td></tr>
+        <tr><td class="col-name">profile_id</td><td class="col-type">uuid</td><td class="col-fk">FK → profiles (nullable)</td><td class="col-note">Populated on approval</td></tr>
+        <tr><td class="col-name">applied_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note">Auto</td></tr>
+        <tr><td class="col-name">approved_at</td><td class="col-type">timestamptz</td><td></td><td class="col-note">Set on admin approval</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sub-title" style="margin-top:32px;">New Environment Variables</div>
+  <div class="env-block"><span class="code-comment"># Add to .env.local and Vercel project settings</span>
+
+<span class="code-comment"># Anthropic — AI Photo Screening</span>
+<span class="env-key">ANTHROPIC_API_KEY</span><span class="env-eq">=</span><span class="env-val">sk-ant-...</span>
+
+<span class="code-comment"># TikTok — Content Posting API</span>
+<span class="env-key">TIKTOK_ACCESS_TOKEN</span><span class="env-eq">=</span><span class="env-val">your-tiktok-access-token</span>
+<span class="env-key">TIKTOK_CLIENT_KEY</span><span class="env-eq">=</span><span class="env-val">your-client-key</span>
+<span class="env-key">TIKTOK_CLIENT_SECRET</span><span class="env-eq">=</span><span class="env-val">your-client-secret</span>
+
+<span class="code-comment"># DocuSeal — IC Agreement E-Signatures</span>
+<span class="env-key">DOCUSEAL_API_KEY</span><span class="env-eq">=</span><span class="env-val">your-docuseal-api-key</span>
+<span class="env-key">DOCUSEAL_IC_TEMPLATE_ID</span><span class="env-eq">=</span><span class="env-val">template-id </span><span class="code-comment"># Set up once in DocuSeal dashboard</span></div>
+
+  <div class="sub-title">Phase Assignments for New Features</div>
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">Build Plan Updates</div><div class="schema-tag">Where each feature fits</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Feature</th><th>Phase</th><th>Est. Effort</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">sweeper_applicants DB table</td><td class="col-type">Phase 1</td><td class="col-note">1 hr</td><td class="col-note">Simple migration. Add to initial schema.</td></tr>
+        <tr><td class="col-name">Sweeper onboarding apply flow</td><td class="col-type">Phase 1</td><td class="col-note">6 hrs</td><td class="col-note">Launch blocker — needed before first sweeper starts.</td></tr>
+        <tr><td class="col-name">DocuSeal IC agreement embed</td><td class="col-type">Phase 1</td><td class="col-note">2 hrs</td><td class="col-note">Embed iframe in step 3 of onboarding. One-time template setup.</td></tr>
+        <tr><td class="col-name">Admin sweeper approval dashboard</td><td class="col-type">Phase 1</td><td class="col-note">3 hrs</td><td class="col-note">Add /admin/sweepers route. Review + approve/reject UI.</td></tr>
+        <tr><td class="col-name">AI photo screening (booking flow)</td><td class="col-type">Phase 1</td><td class="col-note">4 hrs</td><td class="col-note">Add photo upload step to booking form. Wire to /api/photo-screen.</td></tr>
+        <tr><td class="col-name">bookings photo_screen columns</td><td class="col-type">Phase 1</td><td class="col-note">30 min</td><td class="col-note">Add 7 columns to bookings table migration.</td></tr>
+        <tr><td class="col-name">social_posts DB table</td><td class="col-type">Phase 2</td><td class="col-note">1 hr</td><td class="col-note">Add before TikTok build starts.</td></tr>
+        <tr><td class="col-name">TikTok Business account setup</td><td class="col-type">Pre-launch</td><td class="col-note">1 hr</td><td class="col-note">Apply for API access now — 1–5 day approval.</td></tr>
+        <tr><td class="col-name">TikTok publish API integration</td><td class="col-type">Phase 4</td><td class="col-note">6 hrs</td><td class="col-note">Post-launch. Admin one-click publish from marketing panel.</td></tr>
+        <tr><td class="col-name">TikTok analytics in admin dash</td><td class="col-type">Phase 4</td><td class="col-note">3 hrs</td><td class="col-note">Weekly sync of views/likes/shares to social_posts table.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- TAB 5: BUILD PLAN             -->
+<!-- ══════════════════════════════ -->
+<div class="view" id="view-buildplan">
+<div class="page">
+
+  <div class="sec-title">Build Plan</div>
+  <p class="sec-sub">Phased build targeting mid-June 2026 soft launch. Built with Cursor + Claude Code. Each phase is shippable on its own.</p>
+
+  <div class="alert warn">
+    <div class="alert-icon">🎯</div>
+    <div class="alert-text"><strong>Launch target: June 16, 2026.</strong> That's roughly 3–4 weeks from now. Phase 1 and 2 are the minimum viable product for launch day. Phases 3 and 4 can ship after launch without blocking customers from booking or sweepers from working.</div>
+  </div>
+
+  <div class="phase-timeline">
+
+    <div class="phase-item">
+      <div class="phase-dot sky"></div>
+      <div class="phase-card active-phase">
+        <div class="phase-num">Phase 1 · Week 1–2 · Ship First</div>
+        <div class="phase-title">Foundation & Public Site</div>
+        <div class="phase-timeline-date">Target: June 1–8</div>
+        <ul class="phase-tasks">
+          <li>Initialize Next.js 14 repo, Supabase project, Vercel deployment</li>
+          <li>Configure Supabase Auth (email + Google OAuth), create profiles table with roles</li>
+          <li>Build middleware.ts for role-based route protection</li>
+          <li>Build public marketing site (homepage, services, pricing pages)</li>
+          <li>Build booking form with Stripe Checkout (one-time payment)</li>
+          <li>Add Stripe webhook handler → create job in Supabase → fire Twilio SMS</li>
+          <li>Set up Resend transactional email templates (booking confirmation)</li>
+          <li>Connect custom domain stormsweep.com via Vercel</li>
+          <li>Install Meta Pixel on all public pages</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-dot wheat"></div>
+      <div class="phase-card wheat-phase">
+        <div class="phase-num">Phase 2 · Week 2–3 · Required for Launch</div>
+        <div class="phase-title">Sweeper App + Admin Core</div>
+        <div class="phase-timeline-date">Target: June 8–14</div>
+        <ul class="phase-tasks">
+          <li>Build sweeper dashboard — job queue, status toggle, today's stats</li>
+          <li>Build job detail page — customer info, map embed, tap-to-complete checklist</li>
+          <li>Photo upload flow → Supabase Storage → job_photos table</li>
+          <li>Mark job complete → triggers SMS chain + unlocks customer photo access</li>
+          <li>Build admin dashboard — KPI cards, today's jobs table, activity feed</li>
+          <li>Admin schedule view — week grid, job blocks, assignment controls</li>
+          <li>Manual sweeper assignment from admin panel</li>
+          <li>Add PayPal SDK for one-time payment alternative at checkout</li>
+          <li>Smoke test full booking → job → complete → SMS flow end-to-end</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-dot green"></div>
+      <div class="phase-card green-phase">
+        <div class="phase-num">Phase 3 · Week 3–4 · Launch Week</div>
+        <div class="phase-title">Customer Portal + Memberships</div>
+        <div class="phase-timeline-date">Target: June 14–21</div>
+        <ul class="phase-tasks">
+          <li>Build customer portal — dashboard, job history, photo gallery</li>
+          <li>Stripe subscription setup — annual ($249) + monthly ($24) price IDs</li>
+          <li>Membership checkout — customer chooses plan at checkout</li>
+          <li>Stripe webhook → activate membership_status in Supabase profiles</li>
+          <li>Stripe Customer Portal link for self-serve cancellation/upgrade</li>
+          <li>Membership benefits display in customer portal</li>
+          <li>Renewal reminder SMS via Twilio (30 days before)</li>
+          <li>Build admin customer management page with membership status</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-dot purple"></div>
+      <div class="phase-card purple-phase">
+        <div class="phase-num">Phase 4 · Post-Launch · Continuous</div>
+        <div class="phase-title">Polish, Analytics & Growth Features</div>
+        <div class="phase-timeline-date">Target: June 21+</div>
+        <ul class="phase-tasks">
+          <li>Admin revenue charts with Supabase aggregation queries</li>
+          <li>Sweeper earnings page with per-job history and upsell bonus tracking</li>
+          <li>Supabase Realtime for live checklist progress in admin dash</li>
+          <li>Google Maps route optimization in sweeper job view</li>
+          <li>Referral system — unique referral codes, $25 credit tracking</li>
+          <li>Review system — in-app rating + Google review deep link</li>
+          <li>Seasonal SMS campaign triggers (April tornado season blast)</li>
+          <li>Admin marketing panel — Meta post tracking, ad performance notes</li>
+          <li>PWA manifest for sweeper app — add to home screen on mobile</li>
+          <li>Push notifications for sweepers (new job assigned)</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="sub-title">Cursor + Claude Code Workflow</div>
+  <div class="alert info">
+    <div class="alert-icon">🤖</div>
+    <div class="alert-text"><strong>Recommended approach:</strong> Use Cursor's Composer mode for building full features (paste the route spec + schema and let it scaffold). Use Claude Code for debugging, refactoring, and writing complex logic like the Stripe webhook handler or Supabase RLS policies. Commit after every working feature — small, frequent commits make debugging much easier.</div>
+  </div>
+
+  <div class="sub-title">Cursor Prompt Templates</div>
+  <div class="code-block"><span class="code-comment">// Prompt 1 — Scaffold a new page</span>
+<span class="code-str">"Build a Next.js 14 App Router page at /sweeper/jobs/[id].
+Use Supabase server client to fetch the job by ID.
+The job has: customer name, address, service_type array,
+checklist_progress jsonb, and notes.
+Include a tap-to-complete checklist that updates Supabase on each tap.
+Use Tailwind CSS. Match the dark theme with these colors:
+bg: #1C1C1F, accent: #2E86C1, text: #F0F0F0."</span>
+
+<span class="code-comment">// Prompt 2 — Stripe webhook</span>
+<span class="code-str">"Write a Next.js API route at /api/stripe/webhook.
+Handle these events: payment_intent.succeeded (update job payment_status),
+customer.subscription.created (set membership_status to active in profiles),
+customer.subscription.deleted (set to cancelled).
+Use Supabase service role client. Verify webhook signature."</span>
+
+<span class="code-comment">// Prompt 3 — Twilio SMS helper</span>
+<span class="code-str">"Write a /api/sms route that accepts { trigger, jobId, profileId }.
+Look up the profile phone number from Supabase.
+Match trigger to message template (booking_confirmed, on_the_way,
+job_complete, review_request).
+Send via Twilio and log to sms_log table."</span></div>
+
+  <div class="sub-title" style="margin-top:8px;">Pre-Launch Checklist</div>
+  <div class="schema-block">
+    <div class="schema-header"><div class="schema-table-name">Go-Live Checklist</div><div class="schema-tag">Before June 16</div></div>
+    <table class="schema-table">
+      <thead><tr><th>Item</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">Domain connected to Vercel</td><td class="col-note">stormsweep.com → Vercel DNS</td></tr>
+        <tr><td class="col-name">Stripe live keys in Vercel env vars</td><td class="col-note">Not test keys</td></tr>
+        <tr><td class="col-name">Stripe webhook endpoint registered</td><td class="col-note">stormsweep.com/api/stripe/webhook</td></tr>
+        <tr><td class="col-name">Supabase RLS policies enabled on all tables</td><td class="col-note">Test each role manually</td></tr>
+        <tr><td class="col-name">Twilio phone number purchased</td><td class="col-note">Norman area code if possible (405)</td></tr>
+        <tr><td class="col-name">Full booking flow tested end-to-end</td><td class="col-note">Real Stripe card, real SMS received</td></tr>
+        <tr><td class="col-name">Admin and sweeper accounts created</td><td class="col-note">Set roles in Supabase dashboard</td></tr>
+        <tr><td class="col-name">Meta Pixel firing on website</td><td class="col-note">Verify in Meta Events Manager</td></tr>
+        <tr><td class="col-name">Google Business Profile created</td><td class="col-note">stormsweep.com as website</td></tr>
+        <tr><td class="col-name">SSL certificate active</td><td class="col-note">Auto via Vercel</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

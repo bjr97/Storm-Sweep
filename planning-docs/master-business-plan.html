@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storm Sweep · Master Business Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky:#2E86C1;--sky-light:#5DADE2;--sky-dark:#1A5276;--sky-pale:#EBF5FB;
+  --wheat:#D4A843;--wheat-light:#F0C96B;--wheat-pale:#FDF6E3;
+  --red:#C0392B;--red-pale:#FDEDEC;
+  --green:#27AE60;--green-light:#2ECC71;--green-pale:#EAFAF1;
+  --orange:#E67E22;--orange-pale:#FEF9E7;
+  --purple:#8E44AD;--purple-pale:#F5EEF8;
+  --charcoal:#0F0F11;--slate:#1C1C1F;--card:#242428;
+  --border-dark:rgba(255,255,255,0.07);
+  --border:#E4E4E0;--light:#F7F7F4;
+  --mid:#6B6B6F;--soft:#9A9A9F;
+  --white:#FFFFFF;--text:#1C1C1F;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:var(--charcoal);color:#E0E0E0;line-height:1.6;}
+
+/* NAV */
+.top-nav{position:sticky;top:0;z-index:50;background:rgba(15,15,17,0.97);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 36px;height:56px;border-bottom:1px solid var(--border-dark);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:white;}
+.nav-logo span{color:var(--sky-light);}
+.nav-tabs{display:flex;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tab-btn{padding:0 14px;height:56px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;}
+.nav-tab-btn:hover{color:white;}
+.nav-tab-btn.active{color:var(--sky-light);border-bottom-color:var(--sky-light);}
+
+/* VIEWS */
+.view{display:none;}
+.view.active{display:block;}
+
+/* COVER */
+.cover{background:var(--charcoal);padding:64px 56px 52px;position:relative;overflow:hidden;}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,rgba(46,134,193,0.14) 0%,transparent 55%),radial-gradient(ellipse at 90% 10%,rgba(39,174,96,0.06) 0%,transparent 50%);}
+.cover-inner{max-width:960px;margin:0 auto;position:relative;}
+.cover-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.cover-line{width:32px;height:2px;background:var(--wheat);}
+.cover-eyebrow-text{font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--wheat);}
+.cover-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,7vw,88px);letter-spacing:2px;line-height:0.95;color:white;margin-bottom:20px;}
+.cover-title span{color:var(--sky-light);}
+.cover-desc{font-size:15px;font-weight:300;color:rgba(255,255,255,0.45);max-width:600px;line-height:1.7;margin-bottom:36px;}
+.cover-pills{display:flex;gap:10px;flex-wrap:wrap;}
+.cover-pill{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.45);}
+
+/* PAGE */
+.page{max-width:960px;margin:0 auto;padding:48px 40px;}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,3vw,44px);letter-spacing:1px;color:white;margin-bottom:6px;}
+.sec-sub{font-size:14px;font-weight:300;color:var(--soft);margin-bottom:28px;max-width:560px;}
+.sub-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--soft);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sub-title::before{content:'';width:3px;height:14px;background:var(--sky);border-radius:2px;flex-shrink:0;}
+.divider{height:1px;background:var(--border-dark);margin:40px 0;}
+
+/* CARDS */
+.card{background:var(--slate);border:1px solid var(--border-dark);border-radius:12px;padding:20px;margin-bottom:14px;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:white;margin-bottom:8px;}
+.card-body{font-size:13px;color:var(--soft);line-height:1.6;}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+
+/* KPI */
+.kpi-card{background:var(--slate);border:1px solid var(--border-dark);border-radius:12px;padding:18px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi-card.sky::before{background:var(--sky);}
+.kpi-card.green::before{background:var(--green);}
+.kpi-card.wheat::before{background:var(--wheat);}
+.kpi-card.red::before{background:var(--red);}
+.kpi-card.purple::before{background:var(--purple);}
+.kpi-card.orange::before{background:var(--orange);}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:8px;}
+.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.5px;color:white;line-height:1;margin-bottom:4px;}
+.kpi-note{font-size:12px;color:var(--mid);}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;background:var(--slate);border-radius:12px;overflow:hidden;border:1px solid var(--border-dark);margin-bottom:20px;}
+.data-table th{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mid);text-align:left;padding:11px 16px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border-dark);}
+.data-table td{padding:12px 16px;border-bottom:1px solid var(--border-dark);font-size:13px;color:#C0C0C0;vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr.total-row td{font-weight:700;color:white;background:rgba(255,255,255,0.02);}
+.val-green{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--green-light);}
+.val-red{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#f1948a;}
+.val-wheat{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--wheat-light);}
+.val-sky{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--sky-light);}
+.val-big{font-family:'Bebas Neue',sans-serif;font-size:22px;color:white;}
+
+/* TIER CARD */
+.tier-card{background:var(--slate);border:1px solid var(--border-dark);border-radius:14px;padding:22px;position:relative;overflow:hidden;}
+.tier-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.tier-card.t1::before{background:var(--sky);}
+.tier-card.t2::before{background:var(--wheat);}
+.tier-card.t3::before{background:var(--orange);}
+.tier-card.t4::before{background:var(--red);}
+.tier-card.t5::before{background:var(--purple);}
+.tier-icon{font-size:26px;margin-bottom:10px;}
+.tier-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:white;margin-bottom:4px;}
+.tier-price{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--sky-light);margin-bottom:10px;line-height:1;}
+.tier-card.t2 .tier-price{color:var(--wheat-light);}
+.tier-card.t3 .tier-price{color:#f0b27a;}
+.tier-card.t4 .tier-price{color:#f1948a;}
+.tier-card.t5 .tier-price{color:#c39bd3;}
+.tier-items{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.tier-items li{font-size:12px;color:var(--soft);display:flex;gap:7px;line-height:1.4;}
+.tier-items li::before{content:'→';color:var(--sky-light);flex-shrink:0;font-size:11px;margin-top:1px;}
+.tier-card.t2 .tier-items li::before{color:var(--wheat-light);}
+.tier-card.t3 .tier-items li::before{color:#f0b27a;}
+.tier-card.t4 .tier-items li::before{color:#f1948a;}
+.tier-card.t5 .tier-items li::before{color:#c39bd3;}
+
+/* ALERT */
+.alert{border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
+.alert.info{background:rgba(46,134,193,0.08);border:1px solid rgba(46,134,193,0.2);}
+.alert.warn{background:rgba(212,168,67,0.07);border:1px solid rgba(212,168,67,0.2);}
+.alert.success{background:rgba(39,174,96,0.08);border:1px solid rgba(39,174,96,0.2);}
+.alert.danger{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:2px;}
+.alert-text{font-size:13px;line-height:1.6;}
+.alert.info .alert-text{color:#a9d4ed;}
+.alert.warn .alert-text{color:#e8d5a0;}
+.alert.success .alert-text{color:#a9dfbf;}
+.alert.danger .alert-text{color:#f1948a;}
+.alert-text strong{font-weight:700;color:white;}
+
+/* POLICY BLOCK */
+.policy-block{background:var(--slate);border:1px solid var(--border-dark);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.policy-header{padding:12px 18px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border-dark);display:flex;align-items:center;gap:10px;}
+.policy-icon{font-size:18px;}
+.policy-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:white;}
+.policy-body{padding:14px 18px;font-size:13px;color:var(--soft);line-height:1.7;}
+.policy-body ul{padding-left:16px;margin-top:8px;display:flex;flex-direction:column;gap:5px;}
+.policy-body li{font-size:13px;color:var(--soft);}
+
+/* CANVAS */
+.canvas-grid{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:auto auto;gap:2px;background:var(--border-dark);border-radius:14px;overflow:hidden;border:1px solid var(--border-dark);margin-bottom:20px;}
+.canvas-cell{background:var(--slate);padding:18px;}
+.canvas-cell.center{background:rgba(46,134,193,0.08);}
+.canvas-cell-title{font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--sky-light);margin-bottom:10px;}
+.canvas-cell.center .canvas-cell-title{color:var(--wheat-light);}
+.canvas-items{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.canvas-items li{font-size:12px;color:var(--soft);line-height:1.4;display:flex;gap:6px;}
+.canvas-items li::before{content:'·';color:var(--sky-light);font-size:16px;line-height:1;flex-shrink:0;}
+.canvas-cell.center .canvas-items li::before{color:var(--wheat-light);}
+.canvas-full{grid-column:1/-1;}
+
+/* CHECKLIST */
+.check-list-block{background:var(--slate);border:1px solid var(--border-dark);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.clb-header{padding:11px 18px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border-dark);}
+.clb-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:white;}
+.cli{display:flex;align-items:flex-start;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border-dark);cursor:pointer;transition:background 0.15s;user-select:none;}
+.cli:last-child{border-bottom:none;}
+.cli:hover{background:rgba(255,255,255,0.02);}
+.cli-box{width:18px;height:18px;border-radius:4px;border:2px solid var(--mid);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all 0.2s;font-size:10px;}
+.cli.checked .cli-box{background:var(--green);border-color:var(--green);color:white;}
+.cli.checked .cli-text{text-decoration:line-through;color:var(--mid);}
+.cli-text{font-size:13px;color:#C0C0C0;line-height:1.4;}
+.cli-note{font-size:11px;color:var(--mid);font-style:italic;margin-top:2px;}
+.cli-badge{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;flex-shrink:0;margin-top:3px;}
+.cli-badge.legal{background:rgba(192,57,43,0.15);color:#f1948a;}
+.cli-badge.action{background:rgba(46,134,193,0.15);color:var(--sky-light);}
+.cli-badge.cost{background:rgba(212,168,67,0.1);color:var(--wheat-light);}
+
+/* PAY TIER */
+.pay-tier{background:var(--slate);border:1px solid var(--border-dark);border-radius:10px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+.pt-speed{font-family:'Bebas Neue',sans-serif;font-size:28px;color:white;min-width:60px;}
+.pt-info{flex:1;}
+.pt-label{font-size:12px;font-weight:700;color:var(--soft);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;}
+.pt-desc{font-size:12px;color:var(--mid);line-height:1.4;}
+.pt-pct{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green-light);letter-spacing:0.5px;}
+.pt-bonus{font-size:11px;color:var(--wheat-light);font-weight:600;}
+
+@media(max-width:640px){
+  .top-nav{padding:0 16px;}
+  .cover{padding:40px 20px 36px;}
+  .page{padding:32px 20px;}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+  .canvas-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-logo">Storm<span>Sweep</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab-btn active" onclick="switchTab('model')">Business Model</button>
+    <button class="nav-tab-btn" onclick="switchTab('costs')">Cost & Pricing</button>
+    <button class="nav-tab-btn" onclick="switchTab('sweepers')">Sweeper Program</button>
+    <button class="nav-tab-btn" onclick="switchTab('kits')">Supply Kits</button>
+    <button class="nav-tab-btn" onclick="switchTab('legal')">Legal & Insurance</button>
+    <button class="nav-tab-btn" onclick="switchTab('marketing')">Marketing Updates</button>
+    <button class="nav-tab-btn" onclick="switchTab('breakeven')">Breakeven</button>
+    <button class="nav-tab-btn" onclick="switchTab('launch')">Launch Checklist</button>
+  </div>
+</nav>
+
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-eyebrow"><div class="cover-line"></div><div class="cover-eyebrow-text">Master Business Plan · Updated</div></div>
+    <div class="cover-title">Storm Sweep<br><span>Master Plan</span></div>
+    <p class="cover-desc">Comprehensive business plan incorporating all new decisions — compensation model, pricing structure, supply kit tiers, legal setup, Google Ads analysis, TikTok integration, OU sweeper recruitment, AI photo tool, young family targeting, and full breakeven model.</p>
+    <div class="cover-pills">
+      <div class="cover-pill">Norman, OK · Residential</div>
+      <div class="cover-pill">IC Sweeper Model</div>
+      <div class="cover-pill">Soft Launch · June 16, 2026</div>
+      <div class="cover-pill">Next.js + Supabase + Vercel</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB 1: BUSINESS MODEL ══ -->
+<div class="view active" id="view-model">
+<div class="page">
+  <div class="sec-title">Business Model Canvas</div>
+  <p class="sec-sub">The full Storm Sweep value proposition and business model — updated with all new decisions.</p>
+
+  <div class="canvas-grid">
+    <div class="canvas-cell">
+      <div class="canvas-cell-title">Key Partners</div>
+      <ul class="canvas-items">
+        <li>OU student sweeper ICs</li>
+        <li>Roofing companies (referral partners)</li>
+        <li>Realtors & real estate agents</li>
+        <li>Yard & lawn service companies</li>
+        <li>Stripe & PayPal (payments)</li>
+        <li>Twilio (SMS automation)</li>
+        <li>Supabase (infrastructure)</li>
+        <li>Supply kit vendors (wholesale)</li>
+        <li>LED lighting suppliers</li>
+        <li>Oklahoma LLC registered agent</li>
+        <li>General liability insurer</li>
+      </ul>
+    </div>
+    <div class="canvas-cell">
+      <div class="canvas-cell-title">Key Activities</div>
+      <ul class="canvas-items">
+        <li>Shelter cleaning & deodorizing</li>
+        <li>LED & lighting installs</li>
+        <li>Emergency supply kit stocking</li>
+        <li>Door & structural upgrades</li>
+        <li>Sweeper recruiting & onboarding</li>
+        <li>AI photo pre-screening</li>
+        <li>Automated booking + SMS flow</li>
+        <li>Meta + TikTok content engine</li>
+        <li>Membership billing management</li>
+      </ul>
+    </div>
+    <div class="canvas-cell">
+      <div class="canvas-cell-title">Key Resources</div>
+      <ul class="canvas-items">
+        <li>Storm Sweep brand & app</li>
+        <li>Approved IC sweeper network</li>
+        <li>Cleaning protocols & checklists</li>
+        <li>Before/after content library</li>
+        <li>Norman homeowner customer base</li>
+        <li>Supabase + Vercel infrastructure</li>
+      </ul>
+    </div>
+    <div class="canvas-cell center canvas-full" style="border-top:1px solid var(--border-dark);">
+      <div class="canvas-cell-title">Value Propositions</div>
+      <ul class="canvas-items" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <li>Clean, safe, stocked shelter in one visit — no coordination required</li>
+        <li>Photo report every time — documented proof the job was done right</li>
+        <li>Oklahoma-local, tornado-season-aware — we live here too</li>
+        <li>Mid-range pricing — premium quality without premium price</li>
+        <li>Storm Ready membership — set it and forget it annual peace of mind</li>
+        <li>Baby & family safety angle — the shelter your kids deserve</li>
+      </ul>
+    </div>
+    <div class="canvas-cell">
+      <div class="canvas-cell-title">Customer Relationships</div>
+      <ul class="canvas-items">
+        <li>Automated SMS touchpoints (8 triggers)</li>
+        <li>Customer portal — history, photos, membership</li>
+        <li>Annual membership renewal reminders</li>
+        <li>Tornado season outreach (April)</li>
+        <li>Referral program ($25 credit)</li>
+        <li>Google review follow-up</li>
+      </ul>
+    </div>
+    <div class="canvas-cell">
+      <div class="canvas-cell-title">Channels</div>
+      <ul class="canvas-items">
+        <li>stormsweep.com (booking)</li>
+        <li>Meta (FB + IG) paid ads</li>
+        <li>TikTok + Reels (organic + viral)</li>
+        <li>Google Search Ads (phase 2)</li>
+        <li>Nextdoor (hyperlocal)</li>
+        <li>Facebook parent groups</li>
+        <li>OU campus (sweeper + awareness)</li>
+        <li>Word of mouth + referral</li>
+      </ul>
+    </div>
+    <div class="canvas-cell">
+      <div class="canvas-cell-title">Customer Segments</div>
+      <ul class="canvas-items">
+        <li>Norman homeowners (primary)</li>
+        <li>Young families w/ infants/toddlers</li>
+        <li>HOAs & neighborhood groups</li>
+        <li>Homes 5–20 yrs old (shelter installed but neglected)</li>
+        <li>New homeowners (first clean)</li>
+        <li>Expand: Moore, Midwest City, OKC</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sec-title">Strategic Partners</div>
+  <p class="sec-sub">Three high-value referral partner categories — each one has direct access to homeowners who likely have storm shelters. Build these relationships before launch.</p>
+
+  <div class="grid-3">
+
+    <div class="card" style="border-color:rgba(46,134,193,0.3);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:44px;height:44px;background:rgba(46,134,193,0.12);border:1px solid rgba(46,134,193,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏠</div>
+        <div>
+          <div class="card-title" style="margin-bottom:2px;">Roofing Companies</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--sky-light);">Highest Potential</div>
+        </div>
+      </div>
+      <div class="card-body" style="margin-bottom:14px;">After a storm damages a roof, the homeowner is already thinking about home safety. Roofers are on-site, trusted, and often work the same neighborhoods you do. Perfect moment to mention shelter cleaning.</div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;font-size:12px;color:var(--soft);">
+        <strong style="color:white;display:block;margin-bottom:6px;">Partnership Structure:</strong>
+        Roofer mentions Storm Sweep + leaves a card at every job → customer books → roofer gets $20/referral credited or cash payout monthly. Provide co-branded leave-behind cards: "While we fix your roof, Storm Sweep can fix your shelter."
+      </div>
+    </div>
+
+    <div class="card" style="border-color:rgba(212,168,67,0.3);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:44px;height:44px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🔑</div>
+        <div>
+          <div class="card-title" style="margin-bottom:2px;">Realtors & Agents</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--wheat-light);">New Homeowner Pipeline</div>
+        </div>
+      </div>
+      <div class="card-body" style="margin-bottom:14px;">New homeowners in Norman often inherit a shelter they've never seen. Realtors can recommend Storm Sweep as part of the move-in checklist — "get your shelter inspected and cleaned before your first storm season."</div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;font-size:12px;color:var(--soft);">
+        <strong style="color:white;display:block;margin-bottom:6px;">Partnership Structure:</strong>
+        Realtor includes a Storm Sweep gift card ($30 off first sweep) in every closing package → we track redemptions → realtor gets $25 per converted booking. Also pitch: Storm Sweep inspection as a selling point — "shelter professionally cleaned and inspected" in the listing.
+      </div>
+    </div>
+
+    <div class="card" style="border-color:rgba(39,174,96,0.3);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:44px;height:44px;background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🌿</div>
+        <div>
+          <div class="card-title" style="margin-bottom:2px;">Yard & Lawn Services</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green-light);">Neighborhood Overlap</div>
+        </div>
+      </div>
+      <div class="card-body" style="margin-bottom:14px;">Lawn crews are in residential driveways every week — many shelters have exterior hatch doors visible from the yard. They see the shelter regularly, know the homeowner personally, and service the same Norman neighborhoods.</div>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;font-size:12px;color:var(--soft);">
+        <strong style="color:white;display:block;margin-bottom:6px;">Partnership Structure:</strong>
+        Lawn crew mentions Storm Sweep when they notice a shelter hatch → leaves door hanger or business card → $15/referral payout. Low effort, high frequency. Their seasonal schedule (spring/summer) aligns perfectly with storm season awareness.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sub-title" style="margin-top:8px;">Partner Outreach Playbook</div>
+  <table class="data-table">
+    <thead><tr><th>Partner Type</th><th>How to Find Them</th><th>First Approach</th><th>What You Offer</th><th>Timeline</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Roofing Companies</strong></td><td>Google "roofing Norman OK" · HomeAdvisor · Angi · Nextdoor ads</td><td>Drop in with a 1-pager + co-branded card sample. Ask for the owner.</td><td>$20/referral + co-branded leave-behinds printed for them free</td><td>Before launch · 3–5 targets</td></tr>
+      <tr><td><strong>Realtors</strong></td><td>Norman Board of Realtors · Zillow agent listings · Facebook realtor groups</td><td>Email + DM: "I want to put a $30 Storm Sweep gift card in every closing package you do"</td><td>$25/booking + gift card + listing copy they can use</td><td>Before launch · 5–10 agents</td></tr>
+      <tr><td><strong>Yard Services</strong></td><td>Nextdoor lawn ads · Facebook marketplace · Google "lawn care Norman OK"</td><td>Direct text or Facebook DM to owners. Simple pitch, quick yes.</td><td>$15/referral · door hangers printed and delivered to them</td><td>Month 1 · 3–5 crews</td></tr>
+      <tr><td><strong>HOA Managers</strong></td><td>Norman neighborhood HOA Facebook groups · City records</td><td>Offer a bulk neighborhood discount — "book 5+ homes, every homeowner saves $20"</td><td>Bulk rate + Storm Sweep branded neighborhood mailer</td><td>Month 2</td></tr>
+      <tr><td><strong>Home Inspectors</strong></td><td>ASHI directory · local Google search</td><td>They find shelter issues on inspection — they need someone to refer</td><td>$25/referral · they look good recommending a solution</td><td>Month 2</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert success">
+    <div class="alert-icon">💡</div>
+    <div class="alert-text"><strong>The referral flywheel:</strong> One roofing company doing 10 jobs/week in Norman = potentially 10 Storm Sweep referral opportunities/week. At a 15% conversion rate that's 1–2 extra bookings per week from a single partner — without spending a dollar on ads. Build 5 partner relationships and you may not need paid ads at all in year 1.</div>
+  </div>
+
+  <div class="sub-title">Partner Referral Tracking (Tech)</div>
+  <div class="card">
+    <div class="card-title">How to Track Partner Referrals in the App</div>
+    <div class="card-body" style="line-height:1.8;">
+      Add a <strong style="color:var(--sky-light);">referral_source</strong> field to the bookings table in Supabase. At booking, the customer selects how they heard about Storm Sweep — include partner names as options (e.g. "Referred by ABC Roofing"). Each partner gets a unique referral code embedded in their leave-behind QR code → auto-populated at booking. Admin dash shows referrals per partner monthly → triggers payout. Partners can be tracked in a simple <strong style="color:var(--sky-light);">partners</strong> table with name, type, referral_code, total_referrals, total_payout.
+    </div>
+  </div>
+  <p class="sec-sub">Refined for the young family angle and off-season launch.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Primary Value Prop</div>
+      <div class="card-body" style="font-size:15px;color:#D0D0D0;font-style:italic;line-height:1.7;">"Storm Sweep makes sure your family's underground shelter is clean, lit, stocked, and ready — so when sirens sound, you step down into safety, not a forgotten hole in the ground."</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Young Family Angle</div>
+      <div class="card-body" style="font-size:15px;color:#D0D0D0;font-style:italic;line-height:1.7;">"You baby-proofed your house. Baby-proof your shelter too. Storm Sweep keeps it clean, lit, and stocked — because when the sirens go off, the last thing you need is a filthy shelter."</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ TAB 2: COST & PRICING ══ -->
+<div class="view" id="view-costs">
+<div class="page">
+  <div class="sec-title">Cost Analysis & Pricing</div>
+  <p class="sec-sub">Per-job economics, overhead, and full suggested pricing structure.</p>
+
+  <div class="sub-title">Per-Job Cost Breakdown (Standard Clean)</div>
+  <table class="data-table">
+    <thead><tr><th>Cost Item</th><th>Basis</th><th>Per Job Est.</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Sweeper pay (base 60%)</td><td>60% of $149</td><td class="val-red">$89.40</td><td>Base rate before bonuses</td></tr>
+      <tr><td>Cleaning supplies</td><td>Per job avg</td><td class="val-red">$4.00</td><td>Mold spray, deodorizer, bags, gloves — wholesale cost</td></tr>
+      <tr><td>Stripe fee</td><td>2.9% + $0.30</td><td class="val-red">$4.62</td><td>On $149 transaction</td></tr>
+      <tr><td>Twilio SMS</td><td>~8 texts/job</td><td class="val-red">$0.08</td><td>Negligible</td></tr>
+      <tr><td>Free LED light (first clean promo)</td><td>Cost of small LED</td><td class="val-red">$4.00</td><td>Included in first booking offer · small clip-on LED</td></tr>
+      <tr><td>Allocated overhead</td><td>$500/mo ÷ 20 jobs</td><td class="val-red">$25.00</td><td>Insurance, app, Twilio, domain, misc</td></tr>
+      <tr class="total-row"><td><strong>Total Cost</strong></td><td></td><td class="val-red"><strong>$127.10</strong></td><td>At base 60% sweeper rate</td></tr>
+      <tr class="total-row"><td><strong>Gross Margin (base)</strong></td><td>$149 - $127.10</td><td class="val-green"><strong>$21.90</strong></td><td>14.7% margin at base — tight. Upgrades are the margin driver.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert warn">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>Key insight:</strong> The base clean at $149 with 60% sweeper pay is tight at ~15% margin. This is intentional — the clean is the acquisition vehicle. Upgrades (LED, kit, door work), memberships ($249/yr), and volume are where the real margin lives. Price the clean to win the customer, monetize through upgrades and retention.</div>
+  </div>
+
+  <div class="sub-title">Upgrade Job Economics</div>
+  <table class="data-table">
+    <thead><tr><th>Service</th><th>Price</th><th>COGS</th><th>Sweeper Pay (60%)</th><th>Gross Margin</th><th>Margin %</th></tr></thead>
+    <tbody>
+      <tr><td>Deep Clean (standard)</td><td>$149</td><td>$8</td><td>$89</td><td class="val-wheat">$27</td><td>18%</td></tr>
+      <tr><td>LED Package (add-on)</td><td>$89</td><td>$18</td><td>$43</td><td class="val-green">$28</td><td>31%</td></tr>
+      <tr><td>Supply Kit — Basic</td><td>$49</td><td>$22</td><td>$18</td><td class="val-green">$9</td><td>18%</td></tr>
+      <tr><td>Supply Kit — Standard</td><td>$79</td><td>$34</td><td>$27</td><td class="val-green">$18</td><td>23%</td></tr>
+      <tr><td>Supply Kit — Premium</td><td>$129</td><td>$54</td><td>$45</td><td class="val-green">$30</td><td>23%</td></tr>
+      <tr><td>Clean + LED Bundle</td><td>$219</td><td>$26</td><td>$131</td><td class="val-green">$62</td><td>28%</td></tr>
+      <tr><td>Full Package</td><td>$299</td><td>$32</td><td>$179</td><td class="val-green">$88</td><td>29%</td></tr>
+      <tr><td>Storm Ready (annual)</td><td>$249</td><td>$8</td><td>$0</td><td class="val-green">$241</td><td>97%</td></tr>
+      <tr><td>Storm Ready (monthly)</td><td>$24/mo</td><td>$1</td><td>$0</td><td class="val-green">$23/mo</td><td>96%</td></tr>
+      <tr class="total-row"><td colspan="3"><strong>Target Blended Job Value</strong></td><td colspan="2"><div class="val-big">$195–220</div></td><td><strong>~25% margin</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="sub-title">Full Pricing Structure</div>
+
+  <div class="grid-3" style="margin-bottom:14px;">
+    <div class="tier-card t1">
+      <div class="tier-icon">🧹</div>
+      <div class="tier-name">Single Sweep</div>
+      <div class="tier-price">$149</div>
+      <ul class="tier-items">
+        <li>Full deep clean & deodorize</li>
+        <li>Before & after photos</li>
+        <li>Safety inspection checklist</li>
+        <li>Pest & debris removal</li>
+        <li>Free small LED light (first visit)</li>
+        <li>Upgrade recommendations report</li>
+      </ul>
+    </div>
+    <div class="tier-card t2">
+      <div class="tier-icon">💡</div>
+      <div class="tier-name">Clean + Lights</div>
+      <div class="tier-price">$219</div>
+      <ul class="tier-items">
+        <li>Everything in Single Sweep</li>
+        <li>LED panel install (battery-powered)</li>
+        <li>Motion emergency backup light</li>
+        <li>Saves $19 vs. buying separately</li>
+      </ul>
+    </div>
+    <div class="tier-card t3">
+      <div class="tier-icon">🎒</div>
+      <div class="tier-name">Clean + Kit</div>
+      <div class="tier-price">From $179</div>
+      <ul class="tier-items">
+        <li>Everything in Single Sweep</li>
+        <li>Choose kit tier (Basic/Standard/Premium)</li>
+        <li>Supplies stocked in shelter same visit</li>
+        <li>Basic $179 · Standard $209 · Premium $249</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="tier-card t4">
+      <div class="tier-icon">🛡️</div>
+      <div class="tier-name">Full Package</div>
+      <div class="tier-price">From $299</div>
+      <ul class="tier-items">
+        <li>Deep clean + deodorize</li>
+        <li>LED lighting install</li>
+        <li>Standard supply kit</li>
+        <li>Door & hardware inspection</li>
+        <li>Full before/after photo report</li>
+        <li>Best value — saves $38</li>
+      </ul>
+    </div>
+    <div class="tier-card t5">
+      <div class="tier-icon">★</div>
+      <div class="tier-name">Storm Ready Plan</div>
+      <div class="tier-price">$249/yr · $24/mo</div>
+      <ul class="tier-items">
+        <li>2 full cleaning visits/year</li>
+        <li>Priority storm-season scheduling</li>
+        <li>Supply kit refresh annually</li>
+        <li>10% off all upgrades</li>
+        <li>SMS tornado season reminders</li>
+        <li>Annual safety report card</li>
+      </ul>
+    </div>
+    <div class="tier-card t1">
+      <div class="tier-icon">🔩</div>
+      <div class="tier-name">Upgrade Add-Ons</div>
+      <div class="tier-price">Quoted on-site</div>
+      <ul class="tier-items">
+        <li>LED package: $89</li>
+        <li>Interior handle install: $45</li>
+        <li>Hinge service & lube: $35</li>
+        <li>Lock mechanism replace: $65</li>
+        <li>Full door replacement: admin quote</li>
+        <li>Extension cord add: $15</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert info">
+    <div class="alert-icon">💡</div>
+    <div class="alert-text"><strong>Free LED on first clean:</strong> A small clip-on or adhesive LED (~$4 wholesale) is included in every first-time Single Sweep. It's a tangible leave-behind that demonstrates the value of a full LED install and seeds the upsell on the next visit. Cost: ~$4. Perceived value: much higher.</div>
+  </div>
+
+  <div class="sub-title">Shelter Size Pricing Modifier</div>
+  <table class="data-table">
+    <thead><tr><th>Shelter Size</th><th>Approx Dimensions</th><th>Base Clean Price</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Small</td><td>4×4 or smaller</td><td class="val-sky">$129</td><td>Quick clean, single-person shelters</td></tr>
+      <tr><td>Standard</td><td>4×6 to 5×7</td><td class="val-sky">$149</td><td>Most Norman residential shelters</td></tr>
+      <tr><td>Large</td><td>6×8 to 7×9+</td><td class="val-sky">$179</td><td>Family-sized or older installed units</td></tr>
+      <tr><td>Extra Large / Custom</td><td>8×10+</td><td class="val-wheat">Quoted</td><td>Admin review required</td></tr>
+    </tbody>
+  </table>
+
+</div>
+</div>
+
+<!-- ══ TAB 3: SWEEPER PROGRAM ══ -->
+<div class="view" id="view-sweepers">
+<div class="page">
+  <div class="sec-title">Sweeper Program</div>
+  <p class="sec-sub">Compensation model, onboarding requirements, uniform policy, and OU recruitment strategy.</p>
+
+  <div class="sub-title">Compensation — Speed-of-Accept Tiers</div>
+  <div class="alert info">
+    <div class="alert-icon">ℹ️</div>
+    <div class="alert-text"><strong>Model:</strong> Base pay is 60% of job revenue. Sweepers earn more by accepting jobs faster and completing them sooner after booking. This rewards availability and drives great customer experience simultaneously. Upgrade bonuses (+$15/upgrade sold) are separate and stack on top.</div>
+  </div>
+
+  <div class="pay-tier">
+    <div class="pt-speed">⚡&lt;1hr</div>
+    <div class="pt-info">
+      <div class="pt-label">Accept within 1 hour of posting</div>
+      <div class="pt-desc">Highest priority tier. Job appears in app, sweeper claims it within 60 minutes.</div>
+    </div>
+    <div><div class="pt-pct">68%</div><div class="pt-bonus">+$15 upgrade bonus</div></div>
+  </div>
+  <div class="pay-tier">
+    <div class="pt-speed">⏱ &lt;4hr</div>
+    <div class="pt-info">
+      <div class="pt-label">Accept within 4 hours</div>
+      <div class="pt-desc">Standard fast-accept. Still same-day response for customer.</div>
+    </div>
+    <div><div class="pt-pct">64%</div><div class="pt-bonus">+$15 upgrade bonus</div></div>
+  </div>
+  <div class="pay-tier">
+    <div class="pt-speed">📅 &lt;24hr</div>
+    <div class="pt-info">
+      <div class="pt-label">Accept within 24 hours</div>
+      <div class="pt-desc">Acceptable for non-urgent bookings. Customer still gets good experience.</div>
+    </div>
+    <div><div class="pt-pct">62%</div><div class="pt-bonus">+$15 upgrade bonus</div></div>
+  </div>
+  <div class="pay-tier" style="opacity:0.6;">
+    <div class="pt-speed">🐢 &gt;24hr</div>
+    <div class="pt-info">
+      <div class="pt-label">Accept after 24 hours</div>
+      <div class="pt-desc">Base rate only. Job may be re-offered to other sweepers after 24hrs.</div>
+    </div>
+    <div><div class="pt-pct">60%</div><div class="pt-bonus">+$15 upgrade bonus</div></div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Turnaround Bonus — Days from Booking to Completion</div>
+  <table class="data-table">
+    <thead><tr><th>Completion Timing</th><th>Bonus</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>Same day as booking</td><td class="val-green">+$25</td><td>Customer books at 8am, job done by 5pm</td></tr>
+      <tr><td>Next day (day 1)</td><td class="val-green">+$20</td><td>Booked Monday, completed Tuesday</td></tr>
+      <tr><td>Day 2 from booking</td><td class="val-wheat">+$10</td><td>Booked Monday, completed Wednesday</td></tr>
+      <tr><td>Day 3 from booking</td><td class="val-wheat">+$5</td><td>Booked Monday, completed Thursday</td></tr>
+      <tr><td>Day 4+ from booking</td><td class="val-sky">+$0</td><td>Standard rate, no turnaround bonus</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert success">
+    <div class="alert-icon">💰</div>
+    <div class="alert-text"><strong>Top sweeper potential:</strong> Accept within 1hr (68%) + same-day completion (+$25) + LED upsell (+$15) on a $219 Clean + Lights job = <strong>$149 + $40 in bonuses</strong> = exceptional per-job earnings for a 2-hour field visit. This is your recruiting pitch.</div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Video Upload Bonus (New)</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📹 Before + After Video Bonus</div>
+      <div class="card-body">Sweeper earns <strong style="color:var(--wheat-light);">+$10 per job</strong> when they upload both a before AND after video clip (minimum 10 seconds each, portrait orientation). Videos auto-sync to the customer portal and are used for TikTok/Reels content. Better content = better marketing = more jobs for everyone.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📱 TikTok Content Standards</div>
+      <div class="card-body">10-sec before pan + 10-sec after pan. Portrait (9:16). No talking required. Stable footage — use phone propped if needed. Customer permission obtained (logged in app). Admin reviews before publishing. Best videos featured on @stormsweepok — sweeper credited internally.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Uniform & Equipment Policy</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">👕 Uniform Tiers</div>
+      <div class="card-body">
+        <strong style="color:var(--sky-light);">Tier 1 — Onboarding:</strong> 1 free Storm Sweep branded t-shirt upon approval and first completed job.<br><br>
+        <strong style="color:var(--wheat-light);">Tier 2 — 10 jobs:</strong> Branded polo shirt + hat.<br><br>
+        <strong style="color:#f0b27a;">Tier 3 — 25 jobs:</strong> Premium embroidered work shirt + jacket.<br><br>
+        <strong style="color:#c39bd3;">Tier 4 — 50 jobs:</strong> Full uniform set (2 shirts, pants, hat) + Storm Sweep branded gear bag.<br><br>
+        All additional shirts purchasable at cost.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🧰 Required Tool Proof (Approval)</div>
+      <div class="card-body">
+        Before first job, sweeper must submit photos of:<br><br>
+        ✓ Shop vac (wet/dry capable)<br>
+        ✓ Stiff scrub brushes (2+)<br>
+        ✓ Mop + bucket<br>
+        ✓ Extension cord (25ft+ minimum)<br>
+        ✓ Outdoor blower / leaf blower<br>
+        ✓ Headlamp (charged)<br>
+        ✓ PPE: N95 mask + gloves<br><br>
+        Tool verification is a one-time approval step in the onboarding flow. Missing tools = not approved until submitted.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Trash & Junk Removal Policy</div>
+  <div class="policy-block">
+    <div class="policy-header"><div class="policy-icon">🗑️</div><div class="policy-title">Junk & Trash Policy — Clear Scope of Work</div></div>
+    <div class="policy-body">
+      Storm Sweep is a <strong>cleaning and upgrade service</strong>, not a junk removal service. The following policy applies to all jobs:<br><br>
+      <ul>
+        <li><strong>Normal debris & pest waste:</strong> Included in every clean. Swept, vacuumed, bagged, and left for customer at exterior.</li>
+        <li><strong>Old small items (expired supplies, boxes, etc.):</strong> Set aside neatly for customer to review. Do not discard without explicit customer permission.</li>
+        <li><strong>Excessive junk or furniture:</strong> Not included. If customer's pre-booking photo shows excessive items, admin will contact customer to clear before scheduling. Sweeper is NOT responsible for heavy item removal.</li>
+        <li><strong>On-site junk discovery:</strong> If sweeper arrives and finds excessive items beyond what was in the pre-booking photo, they must contact admin before proceeding. A junk surcharge ($35–$75) may be applied with customer approval, or job may be rescheduled.</li>
+        <li><strong>Hazardous materials:</strong> Immediately stop work, photograph, contact admin. Do not remove.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">OU Campus Sweeper Recruitment Strategy</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🎓 Why OU Students</div>
+      <div class="card-body">Norman is home to 30,000+ OU students. Many are local Oklahoma residents who know tornado culture. Flexible schedules, motivated by gig income, and physically capable. Your ideal sweeper profile: junior/senior, own a car, mechanically inclined, customer-facing attitude.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📱 Digital Recruitment Channels</div>
+      <div class="card-body">
+        <strong style="color:var(--sky-light);">Handshake</strong> — OU's official job board. Post as IC gig role.<br><br>
+        <strong style="color:var(--sky-light);">OU Facebook Groups</strong> — "OU Class of [year]", "OU Buy/Sell/Trade", "OU Jobs & Gigs".<br><br>
+        <strong style="color:var(--sky-light);">r/uofoklahoma</strong> — Reddit post in local subreddit.<br><br>
+        <strong style="color:var(--sky-light);">Instagram/TikTok ads</strong> — Target 18–25, Norman OK, OU interests.<br><br>
+        <strong style="color:var(--sky-light);">Nextdoor + Norman community FB</strong> — Local gig listings.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📣 Sweeper Recruitment Ad Copy</div>
+    <div class="card-body" style="font-style:italic;font-size:14px;color:#D0D0D0;line-height:1.7;">
+      "Earn $80–$140 per 2-hour job in Norman, OK. 🌪️ Storm Sweep is hiring independent contractor Sweepers to clean and upgrade underground storm shelters for homeowners. Flexible scheduling — you choose your jobs. Faster you accept, higher you earn. No experience needed — we train you. Must have own cleaning equipment and reliable transport. Apply at stormsweep.com/sweepers — takes 5 minutes."
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Tax Transparency Policy for ICs</div>
+  <div class="policy-block">
+    <div class="policy-header"><div class="policy-icon">📋</div><div class="policy-title">1099 Contractor Tax Policy</div></div>
+    <div class="policy-body">
+      Storm Sweep hires sweepers as independent contractors (1099-NEC). The following is communicated clearly at onboarding:<br><br>
+      <ul>
+        <li>Storm Sweep does NOT withhold federal or state income taxes from IC pay.</li>
+        <li>Sweepers earning $600+ in a calendar year will receive a 1099-NEC by January 31.</li>
+        <li>Sweepers are responsible for tracking their own income and paying estimated quarterly taxes to the IRS (Form 1040-ES).</li>
+        <li>Self-employment tax (15.3%) applies to net IC income. Sweepers should set aside ~25–30% of earnings for taxes.</li>
+        <li>Business expenses (equipment, supplies, mileage) are likely deductible — sweepers should consult a tax professional.</li>
+        <li>Storm Sweep will provide an earnings summary dashboard in the sweeper app for easy tax-year reporting.</li>
+      </ul>
+      <br>This policy is acknowledged via e-signature during IC onboarding.
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ TAB 4: SUPPLY KITS ══ -->
+<div class="view" id="view-kits">
+<div class="page">
+  <div class="sec-title">Supply Kit Tiers</div>
+  <p class="sec-sub">Five kit tiers from essential to full 72-hour family preparedness. All stocked in-shelter same day.</p>
+
+  <div class="alert info">
+    <div class="alert-icon">🎁</div>
+    <div class="alert-text"><strong>Launch offer:</strong> Every first-time Single Sweep includes a free small LED clip light + a printed "Storm Ready Checklist" card. This seeds awareness of the kit tiers without giving away a full kit.</div>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:14px;">
+    <div class="tier-card t1">
+      <div class="tier-icon">⚡</div>
+      <div class="tier-name">Starter Kit</div>
+      <div class="tier-price">$29</div>
+      <ul class="tier-items">
+        <li>1L bottled water (2-pack)</li>
+        <li>Basic first aid kit (mini)</li>
+        <li>Emergency whistle</li>
+        <li>Small LED keychain flashlight</li>
+        <li>Storm Sweep checklist card</li>
+      </ul>
+    </div>
+    <div class="tier-card t2">
+      <div class="tier-icon">🎒</div>
+      <div class="tier-name">Essential Kit</div>
+      <div class="tier-price">$49</div>
+      <ul class="tier-items">
+        <li>2L water (3-pack)</li>
+        <li>Standard first aid kit</li>
+        <li>Hand-crank weather radio</li>
+        <li>Emergency mylar blanket (2)</li>
+        <li>USB power bank (5,000mAh)</li>
+        <li>Phone cable (universal)</li>
+      </ul>
+    </div>
+    <div class="tier-card t3">
+      <div class="tier-icon">🏠</div>
+      <div class="tier-name">Family Kit</div>
+      <div class="tier-price">$79</div>
+      <ul class="tier-items">
+        <li>Everything in Essential</li>
+        <li>Extra water (6-pack total)</li>
+        <li>3-day food bars (2 person)</li>
+        <li>Baby/toddler comfort items</li>
+        <li>Extra mylar blankets (4)</li>
+        <li>Dust masks (4-pack)</li>
+        <li>Glow sticks (6-pack)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="tier-card t4">
+      <div class="tier-icon">🛡️</div>
+      <div class="tier-name">Pro Kit</div>
+      <div class="tier-price">$109</div>
+      <ul class="tier-items">
+        <li>Everything in Family Kit</li>
+        <li>72-hr water supply (family of 4)</li>
+        <li>Full first aid kit w/ trauma items</li>
+        <li>Hand-crank + solar radio/flashlight</li>
+        <li>20,000mAh power bank</li>
+        <li>Multi-tool / utility knife</li>
+        <li>Waterproof document pouch</li>
+        <li>N95 masks (4-pack)</li>
+      </ul>
+    </div>
+    <div class="tier-card t5">
+      <div class="tier-icon">👑</div>
+      <div class="tier-name">Storm Ready Elite Kit</div>
+      <div class="tier-price">$149</div>
+      <ul class="tier-items">
+        <li>Everything in Pro Kit</li>
+        <li>7-day water supply</li>
+        <li>72-hr emergency food (4 person)</li>
+        <li>Portable toilet kit</li>
+        <li>Cash envelope ($20 small bills)</li>
+        <li>Extra medication organizer</li>
+        <li>Kids activity/comfort pack</li>
+        <li>Laminated family emergency card</li>
+        <li>Storm Sweep branded storage bin</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert success">
+    <div class="alert-icon">★</div>
+    <div class="alert-text"><strong>Storm Ready member perk:</strong> Members receive a free Essential Kit refresh every year at their fall visit. Members upgrading to Family Kit or above pay only the difference. The kit refresh is a major membership retention driver — it's tangible value they receive every year.</div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ TAB 5: LEGAL & INSURANCE ══ -->
+<div class="view" id="view-legal">
+<div class="page">
+  <div class="sec-title">Legal & Insurance</div>
+  <p class="sec-sub">Oklahoma LLC formation, insurance requirements, and IC legal framework.</p>
+
+  <div class="sub-title">LLC Formation — Oklahoma</div>
+  <div class="check-list-block">
+    <div class="clb-header"><div class="clb-title">Steps to Form Storm Sweep LLC in Oklahoma</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Choose a registered agent — use Northwest Registered Agent (~$125/yr) or Oklahoma-licensed attorney</div><div class="cli-note">Required by Oklahoma law. Receives legal documents on behalf of the LLC.</div></div><div class="cli-badge legal">Legal</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">File Articles of Organization with Oklahoma Secretary of State online at sos.ok.gov</div><div class="cli-note">Filing fee: $100. Takes 1–3 business days online.</div></div><div class="cli-badge cost">$100</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Obtain EIN (Employer Identification Number) from IRS.gov — free, instant online</div><div class="cli-note">Required for business bank account and issuing 1099s to sweepers.</div></div><div class="cli-badge action">Free</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Open a dedicated business bank account (not personal)</div><div class="cli-note">Recommended: Relay or Mercury (free online business banking). Essential for LLC liability protection.</div></div><div class="cli-badge action">Action</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Draft IC agreement for sweepers — covers scope, pay, 1099, non-solicitation, photo consent</div><div class="cli-note">Use a template from Clerky or have an attorney review. ~$200–400 one-time legal cost.</div></div><div class="cli-badge cost">~$300</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Create Operating Agreement (internal document — not filed)</div><div class="cli-note">Establishes how the LLC is managed. Template available free from Northwest Registered Agent.</div></div><div class="cli-badge legal">Legal</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Annual Oklahoma LLC filing fee — $25/year to maintain active status</div></div><div class="cli-badge cost">$25/yr</div></div>
+  </div>
+
+  <div class="alert warn">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text"><strong>Important:</strong> Oklahoma does not require a general business license at the state level for cleaning services. However, check Norman city business licensing requirements at normanok.gov. Typically a home occupation or general business registration (~$50/yr).</div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Insurance Recommendations</div>
+  <table class="data-table">
+    <thead><tr><th>Policy Type</th><th>Why You Need It</th><th>Est. Annual Cost</th><th>Provider Options</th></tr></thead>
+    <tbody>
+      <tr><td><strong>General Liability (GL)</strong></td><td>Covers property damage or injury at a customer's home. Essential — protects if a sweeper damages something.</td><td class="val-wheat">$500–900/yr</td><td>Next Insurance, Hiscox, USAA Business</td></tr>
+      <tr><td><strong>Commercial Auto</strong></td><td>Sweepers use personal vehicles for jobs. Personal auto insurance typically excludes commercial use — this fills the gap.</td><td class="val-wheat">$800–1,400/yr</td><td>Progressive Commercial, State Farm</td></tr>
+      <tr><td><strong>Tools & Equipment Rider</strong></td><td>Covers cleaning equipment if damaged or stolen on a job site.</td><td class="val-sky">$150–300/yr</td><td>Add-on to GL policy</td></tr>
+      <tr><td><strong>Errors & Omissions (E&O)</strong></td><td>Covers claims that your service caused harm (e.g. customer claims mold wasn't treated properly). Lower priority at launch.</td><td class="val-sky">$400–700/yr</td><td>Add in year 2</td></tr>
+      <tr class="total-row"><td><strong>Launch Priority Total</strong></td><td>GL + Auto + Tools</td><td><div class="val-big">~$1,500–2,600/yr</div></td><td>~$125–215/mo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert success">
+    <div class="alert-icon">💡</div>
+    <div class="alert-text"><strong>IC Insurance Note:</strong> As ICs, sweepers are technically responsible for their own insurance. However, Storm Sweep's GL policy should cover incidents that happen while a sweeper is on a job. Require sweepers to carry their own auto insurance (standard) and document proof during onboarding. Consider requiring a basic GL certificate from sweepers as they scale to protect the business further.</div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Customer Consent Policies</div>
+  <div class="grid-2">
+    <div class="policy-block">
+      <div class="policy-header"><div class="policy-icon">📸</div><div class="policy-title">Property Photo Consent</div></div>
+      <div class="policy-body">Sweepers obtain digital consent during the job wrap-up flow in the app. Two separate consents are required:<br><br>
+        <strong>1. Service Documentation Consent:</strong> Photos used in customer portal and service report only. Auto-opt-in at booking (disclosed in T&Cs).<br><br>
+        <strong>2. Marketing Use Consent:</strong> Before/after photos and videos used on Storm Sweep social media. Customer name and address are NEVER published. Opt-in only — sweeper checks a box in the app, logged with timestamp. Default is OFF.
+      </div>
+    </div>
+    <div class="policy-block">
+      <div class="policy-header"><div class="policy-icon">🔒</div><div class="policy-title">Privacy Standards</div></div>
+      <div class="policy-body">
+        When sharing content publicly:<br><br>
+        ✓ No customer names, addresses, or identifying info<br>
+        ✓ No license plates or visible street numbers<br>
+        ✓ Location tagged as "Norman, OK" only — not specific address<br>
+        ✓ Consent logged in Supabase with job ID and timestamp<br>
+        ✓ Customer can revoke consent at any time via portal<br><br>
+        Sweepers who share customer content on personal social media without consent = immediate IC termination.
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ TAB 6: MARKETING UPDATES ══ -->
+<div class="view" id="view-marketing">
+<div class="page">
+  <div class="sec-title">Marketing Updates</div>
+  <p class="sec-sub">TikTok integration, Google Ads analysis, young family targeting, and AI photo tool.</p>
+
+  <div class="sub-title">TikTok + Instagram Reels Strategy</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📱 Cross-Post Workflow</div>
+      <div class="card-body">
+        Sweeper captures 10-sec before + after videos on every job (vertical 9:16). Admin or AI edits in CapCut:<br><br>
+        <strong style="color:var(--sky-light);">Edit → add text overlay → trending audio → export</strong><br><br>
+        Same video posted to:<br>
+        ✓ TikTok @stormsweepok<br>
+        ✓ Instagram Reels @stormsweepok<br>
+        ✓ Facebook Reels (auto via Meta)<br><br>
+        Target: 3–4 before/after Reels per week at launch. Volume builds the algorithm.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎬 TikTok-Specific Hooks</div>
+      <div class="card-body">
+        TikTok rewards pattern interrupts. Top-performing hooks for this content type:<br><br>
+        <em style="color:#D0D0D0;">"POV: You open your storm shelter for the first time in 3 years 😬"</em><br><br>
+        <em style="color:#D0D0D0;">"Oklahoma homeowners, this is what's living in your shelter rn 👀"</em><br><br>
+        <em style="color:#D0D0D0;">"Before and after: the shelter your family actually deserves 🌪️"</em><br><br>
+        <em style="color:#D0D0D0;">"We cleaned 3 shelters in Norman today. Here's the worst one."</em><br><br>
+        Post at 6–9pm CT. Tag: #NormanOK #TornadoSeason #OklahomaLiving
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Google Ads Analysis</div>
+  <div class="alert success">
+    <div class="alert-icon">🔍</div>
+    <div class="alert-text"><strong>Research finding:</strong> "Storm shelter cleaning" and related terms have very low search volume nationally — but that's actually an advantage. It means zero direct competitors bidding on these keywords in Norman/OKC. Estimated CPC: <strong>$1.50–4.00</strong> (vs. $15–40 for competitive home services). You can dominate the entire keyword category for $200–300/mo.</div>
+  </div>
+
+  <table class="data-table">
+    <thead><tr><th>Keyword</th><th>Intent</th><th>Est. Monthly Searches (Norman + OKC)</th><th>Est. CPC</th><th>Recommended?</th></tr></thead>
+    <tbody>
+      <tr><td>"storm shelter cleaning Norman OK"</td><td>🔥 High</td><td>50–150</td><td class="val-green">$1.50–3.00</td><td>✅ Priority 1</td></tr>
+      <tr><td>"storm shelter cleaning Oklahoma"</td><td>🔥 High</td><td>100–300</td><td class="val-green">$2.00–4.00</td><td>✅ Priority 1</td></tr>
+      <tr><td>"storm shelter service Norman"</td><td>High</td><td>50–200</td><td class="val-green">$2.00–3.50</td><td>✅ Priority 1</td></tr>
+      <tr><td>"clean storm shelter OKC"</td><td>High</td><td>100–400</td><td class="val-green">$2.00–4.00</td><td>✅ Phase 2</td></tr>
+      <tr><td>"storm shelter maintenance Oklahoma"</td><td>Medium</td><td>200–500</td><td class="val-wheat">$3.00–6.00</td><td>✅ Phase 2</td></tr>
+      <tr><td>"tornado shelter cleaning"</td><td>High</td><td>200–600</td><td class="val-wheat">$2.50–5.00</td><td>✅ Phase 2</td></tr>
+      <tr><td>"storm shelter upgrade Norman"</td><td>High</td><td>50–150</td><td class="val-green">$2.00–4.00</td><td>✅ Priority 1</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card">
+    <div class="card-title">📅 Google Ads Recommendation — Phase 2 (August)</div>
+    <div class="card-body">
+      Start Google Search Ads in August once Meta cash flow is established. Budget: $150–200/mo. Focus on exact and phrase match for high-intent keywords above.<br><br>
+      <strong style="color:var(--sky-light);">Expected results at $200/mo:</strong> ~60–120 clicks/mo at avg $2.50 CPC. If 8% convert to booking: <strong>5–10 additional bookings/mo</strong> from Google alone. At $149 avg job value = <strong>$745–1,490 additional revenue</strong> for $200 spend = 3.7–7.5× ROAS.<br><br>
+      Google Ads captures people already searching — they just need a provider. You'll be the only one.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">Young Family Targeting</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">👶 Meta Targeting Parameters</div>
+      <div class="card-body">
+        <strong style="color:var(--sky-light);">Audience:</strong> Norman OK + 10mi · 25–40 · Homeowners<br>
+        <strong style="color:var(--sky-light);">Parental:</strong> Parents of children under 5 (Meta parental status targeting)<br>
+        <strong style="color:var(--sky-light);">Interests:</strong> Baby products, parenting, home safety, new homeowner<br><br>
+        <strong>Ad Headline:</strong> "You baby-proofed the house. Baby-proof the shelter."<br>
+        <strong>Body:</strong> "Norman parents — when the sirens go off at 2am, you need a clean, lit, stocked shelter your family can actually use. Storm Sweep makes it happen."<br>
+        <strong>Visual:</strong> Clean shelter interior, warm lighting, family supplies visible. Safe feeling.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">💬 Facebook Parent Group Strategy</div>
+      <div class="card-body">
+        Target Norman-specific parent groups organically:<br><br>
+        ✓ "Norman Moms" Facebook group<br>
+        ✓ "Norman/Moore Oklahoma Parents"<br>
+        ✓ "OKC Area Moms"<br>
+        ✓ "Norman Oklahoma Community"<br><br>
+        <strong>Approach:</strong> Provide genuinely helpful tornado preparedness content — not direct ads. Share the "5 things to have in your shelter before baby season" post. Let the CTA be soft. Build trust first, convert second.<br><br>
+        <strong>Cadence:</strong> 1 post per group per month. Never spam.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sub-title">AI Photo Pre-Booking Tool</div>
+  <div class="card">
+    <div class="card-title">🤖 How It Works</div>
+    <div class="card-body" style="line-height:1.8;">
+      At booking, customer uploads 1–2 photos of their shelter interior before confirming. The AI tool (Claude Vision via API) grades the photo on a scale:<br><br>
+      <strong style="color:var(--green-light);">Grade A–B:</strong> Normal condition. Auto-approved. Booking proceeds.<br>
+      <strong style="color:var(--wheat-light);">Grade C:</strong> Moderate junk or debris. Admin notified for manual review within 2 hours. Customer shown: "Your shelter has some extra items — we'll confirm your appointment shortly."<br>
+      <strong style="color:#f1948a);">Grade D–F:</strong> Excessive junk, large items, or potential hazard. Booking paused. Admin contacts customer: junk must be cleared OR junk surcharge ($35–$75) is offered before confirmation.<br><br>
+      <strong>What AI looks for:</strong> Large furniture/appliances, bags of trash, water accumulation, visible mold walls (schedule structural review), rodent evidence (flag to admin).<br><br>
+      <strong>Manual final pass:</strong> All C grades reviewed by admin before approval. D/F grades always get a personal call. This keeps the AI as a filter, not a gatekeeper.
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ TAB 7: BREAKEVEN ══ -->
+<div class="view" id="view-breakeven">
+<div class="page">
+  <div class="sec-title">Breakeven & Financial Goals</div>
+  <p class="sec-sub">Monthly overhead, breakeven job count, and 6-month trajectory.</p>
+
+  <div class="sub-title">Monthly Fixed Overhead</div>
+  <table class="data-table">
+    <thead><tr><th>Item</th><th>Monthly Cost</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>General Liability Insurance</td><td class="val-red">$65</td><td>~$780/yr ÷ 12</td></tr>
+      <tr><td>Commercial Auto Insurance</td><td class="val-red">$100</td><td>~$1,200/yr ÷ 12 · Owner vehicle</td></tr>
+      <tr><td>Tech stack (Vercel + Twilio + domain)</td><td class="val-red">$30</td><td>Per tech stack plan</td></tr>
+      <tr><td>LLC registered agent</td><td class="val-red">$10</td><td>$125/yr ÷ 12</td></tr>
+      <tr><td>Cleaning supply restocking</td><td class="val-red">$40</td><td>Shared supplies / bulk order</td></tr>
+      <tr><td>Uniform & onboarding costs</td><td class="val-red">$30</td><td>Amortized per new sweeper</td></tr>
+      <tr><td>Buffer / Canva / tools</td><td class="val-red">$15</td><td>Social scheduling + design</td></tr>
+      <tr><td>Misc / contingency</td><td class="val-red">$30</td><td>Fuel, supplies, unexpected</td></tr>
+      <tr class="total-row"><td><strong>Total Monthly Fixed Overhead</strong></td><td><div class="val-big">$320/mo</div></td><td>Not including ad spend</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sub-title">Breakeven Calculation</div>
+  <div class="grid-4">
+    <div class="kpi-card sky"><div class="kpi-label">Fixed Overhead</div><div class="kpi-val">$320</div><div class="kpi-note">Per month</div></div>
+    <div class="kpi-card wheat"><div class="kpi-label">Gross Margin/Job</div><div class="kpi-val">$27</div><div class="kpi-note">Standard clean (18%)</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Breakeven Jobs</div><div class="kpi-val">12</div><div class="kpi-note">At base clean only</div></div>
+    <div class="kpi-card purple"><div class="kpi-label">Breakeven w/ Upgrades</div><div class="kpi-val">7</div><div class="kpi-note">At $195 blended value</div></div>
+  </div>
+
+  <div class="alert success">
+    <div class="alert-icon">✅</div>
+    <div class="alert-text"><strong>Key insight:</strong> At a blended job value of $195 (mix of cleans + some upgrades), you break even at just 7 jobs per month. That's less than 2 jobs per week. Everything above that is profit. With Meta ads running and a sweeper doing 3 jobs/day, you're well past breakeven in month 1.</div>
+  </div>
+
+  <div class="sub-title">6-Month Goal Trajectory</div>
+  <table class="data-table">
+    <thead><tr><th>Month</th><th>Phase</th><th>Target Jobs</th><th>Members</th><th>Gross Revenue</th><th>Overhead + Ads</th><th>Net Profit Est.</th></tr></thead>
+    <tbody>
+      <tr><td><strong>June</strong></td><td>Soft Launch</td><td>8–12</td><td>3–5</td><td class="val-sky">$1,200–1,800</td><td class="val-red">$620</td><td class="val-wheat">$580–1,180</td></tr>
+      <tr><td><strong>July</strong></td><td>Off-Season Build</td><td>12–18</td><td>8–12</td><td class="val-sky">$2,100–3,200</td><td class="val-red">$720</td><td class="val-wheat">$1,380–2,480</td></tr>
+      <tr><td><strong>August</strong></td><td>Off-Season + Google</td><td>15–22</td><td>14–20</td><td class="val-sky">$2,800–4,000</td><td class="val-red">$920</td><td class="val-wheat">$1,880–3,080</td></tr>
+      <tr><td><strong>September</strong></td><td>Pre-Season Ramp</td><td>20–30</td><td>20–28</td><td class="val-sky">$3,800–5,500</td><td class="val-red">$1,020</td><td class="val-wheat">$2,780–4,480</td></tr>
+      <tr><td><strong>October</strong></td><td>Pre-Season Peak</td><td>28–40</td><td>28–38</td><td class="val-sky">$5,200–7,400</td><td class="val-red">$1,120</td><td class="val-wheat">$4,080–6,280</td></tr>
+      <tr><td><strong>Nov–Mar</strong></td><td>Off-Season Maintenance</td><td>10–15</td><td>35–50</td><td class="val-sky">$2,000–3,000</td><td class="val-red">$820</td><td class="val-wheat">$1,180–2,180</td></tr>
+      <tr class="total-row"><td colspan="2"><strong>Year 1 Projection (12 months)</strong></td><td><strong>200–300 jobs</strong></td><td><strong>50+ members</strong></td><td><div class="val-big">$35–55k</div></td><td class="val-red"><strong>~$12k overhead</strong></td><td><div class="val-big" style="color:var(--green-light);">$23–43k</div></td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert info">
+    <div class="alert-icon">📈</div>
+    <div class="alert-text"><strong>Membership MRR flywheel:</strong> Every Storm Ready member at $24/mo adds <strong>$288/yr in predictable revenue</strong>. 50 members = $1,200/mo MRR before a single job is booked. This is the most important number to grow — it de-risks the seasonal business model completely.</div>
+  </div>
+
+  <div class="sub-title">Quarterly Goals</div>
+  <div class="grid-3">
+    <div class="kpi-card sky">
+      <div class="kpi-label">Q3 2026 (Jul–Sep)</div>
+      <div class="kpi-val">$9k+</div>
+      <div class="kpi-note">Revenue · 25+ members · Google Ads live</div>
+    </div>
+    <div class="kpi-card wheat">
+      <div class="kpi-label">Q4 2026 (Oct–Dec)</div>
+      <div class="kpi-val">$14k+</div>
+      <div class="kpi-note">Revenue · 40+ members · 2nd sweeper added</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Q1 2027 (Jan–Mar)</div>
+      <div class="kpi-val">$8k+</div>
+      <div class="kpi-note">Off-season · MRR covers overhead · Prep for storm season</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ TAB 8: LAUNCH CHECKLIST ══ -->
+<div class="view" id="view-launch">
+<div class="page">
+  <div class="sec-title">Launch Checklist</div>
+  <p class="sec-sub">Everything that needs to happen before June 16, 2026. Tap to check off.</p>
+
+  <div class="check-list-block">
+    <div class="clb-header"><div class="clb-title">⚖️ Legal & Business Formation</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">File Storm Sweep LLC with Oklahoma Secretary of State (sos.ok.gov)</div><div class="cli-note">$100 filing fee · 1–3 day turnaround online</div></div><div class="cli-badge legal">Legal</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Obtain EIN from IRS.gov</div></div><div class="cli-badge action">Free</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Open Storm Sweep business bank account (Relay or Mercury recommended)</div></div><div class="cli-badge action">Action</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Purchase General Liability Insurance (Next Insurance or Hiscox)</div><div class="cli-note">Get quote online in ~15 min · ~$65/mo</div></div><div class="cli-badge cost">~$65/mo</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Add commercial auto endorsement to vehicle insurance</div></div><div class="cli-badge cost">~$100/mo</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Draft IC sweeper agreement (non-solicitation, 1099, photo consent)</div></div><div class="cli-badge legal">Legal</div></div>
+  </div>
+
+  <div class="check-list-block">
+    <div class="clb-header"><div class="clb-title">💻 Tech & Website</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Register stormsweep.com domain (Namecheap or Cloudflare)</div></div><div class="cli-badge cost">~$18/yr</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Initialize Next.js repo, Supabase project, connect to Vercel</div></div><div class="cli-badge action">Dev</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Build and deploy public website with booking form</div></div><div class="cli-badge action">Dev</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Set up Stripe (live keys, both price IDs for annual + monthly)</div></div><div class="cli-badge action">Dev</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Set up PayPal business account + SDK integration</div></div><div class="cli-badge action">Dev</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Configure Twilio account + purchase 405 area code number</div></div><div class="cli-badge cost">~$1/mo</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Build sweeper admin app (job queue, checklist, photo upload)</div></div><div class="cli-badge action">Dev</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Test full booking → SMS → job → complete flow end-to-end</div></div><div class="cli-badge action">QA</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Install Meta Pixel on website · verify in Events Manager</div></div><div class="cli-badge action">Marketing</div></div>
+  </div>
+
+  <div class="check-list-block">
+    <div class="clb-header"><div class="clb-title">🧹 Operations</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Recruit and approve first sweeper(s) — tool verification + IC agreement signed</div></div><div class="cli-badge action">Ops</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Order first batch of uniform shirts (5–10 units)</div></div><div class="cli-badge cost">~$150</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Order wholesale supply kit inventory (Starter + Essential tier)</div></div><div class="cli-badge cost">~$300</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Order LED light inventory (clip-on + panel units)</div></div><div class="cli-badge cost">~$200</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Do 1–2 test jobs (friends/family) to validate checklist and flow</div></div><div class="cli-badge action">Ops</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Create sweeper onboarding video / orientation guide</div></div><div class="cli-badge action">Ops</div></div>
+  </div>
+
+  <div class="check-list-block">
+    <div class="clb-header"><div class="clb-title">📱 Marketing</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Create Facebook Business Page + Instagram @stormsweepok</div></div><div class="cli-badge action">Marketing</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Create TikTok @stormsweepok account</div></div><div class="cli-badge action">Marketing</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Set up Google Business Profile (stormsweep.com as website)</div></div><div class="cli-badge action">Free</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Create Canva brand templates (before/after, quote card, promo graphic)</div></div><div class="cli-badge action">Marketing</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Schedule first 2 weeks of posts in Buffer</div></div><div class="cli-badge action">Marketing</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Launch Meta paid ad — Free Kit offer · $30 initial budget</div></div><div class="cli-badge cost">$30</div></div>
+    <div class="cli" onclick="toggleCheck(this)"><div class="cli-box"></div><div><div class="cli-text">Post OU sweeper recruitment ad on Handshake + OU Facebook groups</div></div><div class="cli-badge action">Recruiting</div></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function switchTab(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0,0);
+}
+function toggleCheck(item){
+  item.classList.toggle('checked');
+  const box=item.querySelector('.cli-box');
+  box.textContent=item.classList.contains('checked')?'✓':'';
+}
+</script>
+</body>
+</html>

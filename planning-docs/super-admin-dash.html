@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storm Sweep · Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #2E86C1;
+  --sky-light: #5DADE2;
+  --sky-dark: #1A5276;
+  --sky-pale: #EBF5FB;
+  --wheat: #D4A843;
+  --wheat-light: #F0C96B;
+  --wheat-pale: #FDF6E3;
+  --red: #C0392B;
+  --red-pale: #FDEDEC;
+  --green: #27AE60;
+  --green-light: #2ECC71;
+  --green-pale: #EAFAF1;
+  --orange: #E67E22;
+  --orange-pale: #FEF9E7;
+  --purple: #8E44AD;
+  --charcoal: #0F0F11;
+  --sidebar-bg: #141416;
+  --card-bg: #1C1C1F;
+  --border-dark: rgba(255,255,255,0.07);
+  --white: #FFFFFF;
+  --text: #F0F0F0;
+  --soft: #9A9A9F;
+  --mid: #5A5A5F;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size: 14px; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--charcoal);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-dark);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.logo-mark {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.logo-mark span { color: var(--sky-light); }
+
+.logo-sub {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-top: 3px;
+}
+
+.sidebar-section {
+  padding: 16px 12px 8px;
+}
+
+.sidebar-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mid);
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  outline: none;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.04); }
+.nav-item.active { background: rgba(46,134,193,0.15); }
+
+.nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+
+.nav-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--soft);
+  flex: 1;
+}
+
+.nav-item.active .nav-label { color: var(--sky-light); font-weight: 600; }
+
+.nav-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--sky);
+  color: white;
+}
+
+.nav-badge.orange { background: var(--orange); }
+.nav-badge.red { background: var(--red); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 12px;
+  border-top: 1px solid var(--border-dark);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.sidebar-user:hover { background: rgba(255,255,255,0.04); }
+
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sky), var(--sky-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  color: white;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.user-info { flex: 1; min-width: 0; }
+
+.user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 10px;
+  color: var(--mid);
+  letter-spacing: 0.5px;
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* TOP BAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 56px;
+  border-bottom: 1px solid var(--border-dark);
+  background: var(--sidebar-bg);
+  flex-shrink: 0;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: var(--white);
+}
+
+.page-date {
+  font-size: 12px;
+  color: var(--mid);
+  font-weight: 500;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tb-btn {
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.tb-btn:active { opacity: 0.8; }
+.tb-btn.primary { background: var(--sky); color: white; }
+.tb-btn.ghost { background: rgba(255,255,255,0.06); color: var(--soft); border: 1px solid var(--border-dark); }
+
+.tb-notif {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+  position: relative;
+}
+
+.tb-notif-dot {
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 7px; height: 7px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 1.5px solid var(--sidebar-bg);
+}
+
+/* CONTENT AREA */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mid) transparent;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── KPI ROW ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.kpi-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-dark);
+  border-radius: 12px;
+  padding: 18px 18px 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--sky);
+}
+
+.kpi-card.wheat::before { background: var(--wheat); }
+.kpi-card.green::before { background: var(--green); }
+.kpi-card.orange::before { background: var(--orange); }
+.kpi-card.purple::before { background: var(--purple); }
+
+.kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 10px;
+}
+
+.kpi-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 0.5px;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.kpi-delta {
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpi-delta.up { color: var(--green-light); }
+.kpi-delta.down { color: var(--red); }
+.kpi-delta.neutral { color: var(--mid); }
+
+/* ── GRID LAYOUTS ── */
+.grid-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid-1-1 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── PANEL ── */
+.panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border-dark);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.panel-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.panel-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sky-light);
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.panel-body { padding: 16px 18px; }
+
+/* ── TODAY'S JOBS TABLE ── */
+.jobs-table { width: 100%; border-collapse: collapse; }
+
+.jobs-table th {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  text-align: left;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.jobs-table td {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border-dark);
+  vertical-align: middle;
+}
+
+.jobs-table tr:last-child td { border-bottom: none; }
+
+.job-customer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.job-cust-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--sky-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  color: white;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.job-cust-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.job-cust-addr { font-size: 11px; color: var(--mid); margin-top: 1px; }
+
+.job-time { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-pill.done { background: var(--green-pale); color: var(--green); }
+.status-pill.active { background: var(--sky-pale); color: var(--sky-dark); }
+.status-pill.upcoming { background: rgba(255,255,255,0.05); color: var(--soft); }
+.status-pill.pending { background: var(--orange-pale); color: var(--orange); }
+
+.job-tech-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--soft);
+}
+
+.tech-mini-dot {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--sky);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 9px;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.job-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green-light);
+}
+
+.service-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.s-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(46,134,193,0.12);
+  color: var(--sky-light);
+}
+
+.s-tag.member { background: rgba(212,168,67,0.12); color: var(--wheat-light); }
+
+.row-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sky-light);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ── REVENUE CHART ── */
+.chart-wrap {
+  position: relative;
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding-top: 20px;
+}
+
+.chart-bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chart-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+  min-height: 4px;
+}
+
+.chart-bar:hover { opacity: 0.8; }
+.chart-bar.revenue { background: var(--sky); }
+.chart-bar.membership { background: var(--wheat); opacity: 0.7; }
+
+.chart-label {
+  font-size: 10px;
+  color: var(--mid);
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--soft);
+}
+
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+}
+
+/* ── TECH CARDS ── */
+.tech-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.tech-card:last-child { border-bottom: none; }
+
+.tech-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sky), var(--sky-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  color: white;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.tech-online-dot {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--green-light);
+  border: 2px solid var(--card-bg);
+}
+
+.tech-online-dot.offline { background: var(--mid); }
+
+.tech-info { flex: 1; min-width: 0; }
+
+.tech-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tech-status {
+  font-size: 11px;
+  color: var(--mid);
+  margin-top: 2px;
+}
+
+.tech-jobs {
+  text-align: right;
+}
+
+.tech-jobs-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.tech-jobs-label {
+  font-size: 10px;
+  color: var(--mid);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── CUSTOMER TABLE ── */
+.cust-table { width: 100%; border-collapse: collapse; }
+
+.cust-table th {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  text-align: left;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.cust-table td {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border-dark);
+  font-size: 13px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.cust-table tr:last-child td { border-bottom: none; }
+.cust-table tr:hover td { background: rgba(255,255,255,0.01); cursor: pointer; }
+
+.cust-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cust-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--sky-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.member-star { color: var(--wheat-light); font-size: 12px; }
+.cust-visits { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; }
+.cust-value { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: var(--green-light); }
+
+/* ── MARKETING PANEL ── */
+.meta-post-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.meta-post-row:last-child { border-bottom: none; }
+
+.meta-thumb {
+  width: 44px; height: 44px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.meta-thumb.b-a { background: linear-gradient(135deg, var(--sky-dark), var(--charcoal)); }
+.meta-thumb.tips { background: linear-gradient(135deg, #B8860B, #DAA520); }
+.meta-thumb.promo { background: linear-gradient(135deg, var(--red), #922B21); }
+.meta-thumb.member { background: linear-gradient(135deg, var(--sky-dark), var(--purple)); }
+
+.meta-info { flex: 1; }
+
+.meta-post-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.meta-post-date { font-size: 11px; color: var(--mid); }
+
+.meta-stats {
+  display: flex;
+  gap: 12px;
+  text-align: right;
+}
+
+.meta-stat-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+}
+
+.meta-stat-label { font-size: 9px; color: var(--mid); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+.scheduled-pill {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: rgba(212,168,67,0.12);
+  color: var(--wheat-light);
+}
+
+/* ── ACTIVITY FEED ── */
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.activity-item:last-child { border-bottom: none; }
+
+.activity-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.activity-icon.booking { background: rgba(46,134,193,0.15); }
+.activity-icon.complete { background: rgba(39,174,96,0.15); }
+.activity-icon.member { background: rgba(212,168,67,0.12); }
+.activity-icon.review { background: rgba(142,68,173,0.15); }
+
+.activity-text { flex: 1; }
+
+.activity-main { font-size: 12px; color: var(--text); line-height: 1.5; }
+.activity-main strong { color: var(--white); }
+.activity-time { font-size: 11px; color: var(--mid); margin-top: 2px; }
+
+/* ── SEARCH BAR ── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  padding: 7px 14px;
+  margin-bottom: 16px;
+  max-width: 400px;
+}
+
+.search-icon { font-size: 14px; color: var(--mid); }
+
+.search-input {
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  flex: 1;
+}
+
+.search-input::placeholder { color: var(--mid); }
+
+/* ── SCHEDULE VIEW ── */
+.schedule-week {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.sched-day-col {
+  background: var(--card-bg);
+  border: 1px solid var(--border-dark);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.sched-day-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border-dark);
+  background: rgba(255,255,255,0.02);
+}
+
+.sched-day-name {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+.sched-day-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.sched-day-col.today .sched-day-num { color: var(--sky-light); }
+.sched-day-col.today .sched-day-header { border-top: 2px solid var(--sky); }
+
+.sched-day-body { padding: 10px 10px; display: flex; flex-direction: column; gap: 6px; }
+
+.sched-job-block {
+  background: rgba(46,134,193,0.12);
+  border: 1px solid rgba(46,134,193,0.2);
+  border-radius: 7px;
+  padding: 7px 9px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.sched-job-block:hover { background: rgba(46,134,193,0.2); }
+.sched-job-block.done { background: rgba(39,174,96,0.08); border-color: rgba(39,174,96,0.15); }
+.sched-job-block.member-job { border-color: rgba(212,168,67,0.25); }
+
+.sjb-time {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sky-light);
+  margin-bottom: 2px;
+}
+
+.sched-job-block.done .sjb-time { color: var(--green-light); }
+
+.sjb-name { font-size: 11px; font-weight: 600; color: var(--text); }
+.sjb-service { font-size: 10px; color: var(--mid); margin-top: 1px; }
+
+/* ── EMPTY DAY ── */
+.sched-empty {
+  font-size: 11px;
+  color: var(--mid);
+  text-align: center;
+  padding: 16px 0;
+  font-style: italic;
+}
+
+/* ── REVENUE VIEW ── */
+.rev-big-chart {
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding-top: 20px;
+  position: relative;
+}
+
+.rev-bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 3px;
+}
+
+.rev-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  min-height: 2px;
+}
+
+.rev-bar:hover { opacity: 0.75; }
+.rev-bar.main { background: var(--sky); }
+.rev-bar.member-bar { background: var(--wheat); }
+
+.rev-bar-label { font-size: 10px; color: var(--mid); font-weight: 600; margin-top: 4px; }
+
+/* Horizontal grid lines */
+.chart-grid {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.chart-grid-line {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.04);
+  position: relative;
+}
+
+.chart-grid-line::before {
+  content: attr(data-val);
+  position: absolute;
+  right: calc(100% + 6px);
+  top: -7px;
+  font-size: 9px;
+  color: var(--mid);
+  white-space: nowrap;
+}
+
+.breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.breakdown-row:last-child { border-bottom: none; }
+
+.breakdown-label { font-size: 13px; color: var(--soft); display: flex; align-items: center; gap: 8px; }
+.breakdown-dot { width: 8px; height: 8px; border-radius: 50%; }
+.breakdown-val { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: var(--white); }
+.breakdown-pct { font-size: 11px; color: var(--mid); margin-left: 8px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Storm<span>Sweep</span></div>
+    <div class="logo-sub">Admin · Norman OK</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div>
+    <button class="nav-item active" onclick="switchView('overview')">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="switchView('schedule')">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Schedule</span>
+      <span class="nav-badge">5</span>
+    </button>
+    <button class="nav-item" onclick="switchView('jobs')">
+      <span class="nav-icon">🔧</span>
+      <span class="nav-label">All Jobs</span>
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">People</div>
+    <button class="nav-item" onclick="switchView('customers')">
+      <span class="nav-icon">👥</span>
+      <span class="nav-label">Customers</span>
+    </button>
+    <button class="nav-item" onclick="switchView('crew')">
+      <span class="nav-icon">🧹</span>
+      <span class="nav-label">Crew</span>
+      <span class="nav-badge orange">1</span>
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Business</div>
+    <button class="nav-item" onclick="switchView('revenue')">
+      <span class="nav-icon">💰</span>
+      <span class="nav-label">Revenue</span>
+    </button>
+    <button class="nav-item" onclick="switchView('marketing')">
+      <span class="nav-icon">📱</span>
+      <span class="nav-label">Marketing</span>
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">System</div>
+    <button class="nav-item" onclick="switchView('overview')">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Settings</span>
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">SS</div>
+      <div class="user-info">
+        <div class="user-name">Storm Sweep Admin</div>
+        <div class="user-role">Owner · Norman OK</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="page-date">Saturday, May 23, 2026</div>
+    </div>
+    <div class="topbar-right">
+      <button class="tb-btn ghost">Export</button>
+      <button class="tb-btn primary" onclick="switchView('jobs')">+ New Job</button>
+      <div class="tb-notif">🔔<div class="tb-notif-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div class="view active" id="view-overview">
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Revenue · MTD</div>
+          <div class="kpi-val">$4,870</div>
+          <div class="kpi-delta up">↑ 18% vs last month</div>
+        </div>
+        <div class="kpi-card wheat">
+          <div class="kpi-label">Jobs · This Week</div>
+          <div class="kpi-val">11</div>
+          <div class="kpi-delta up">↑ 3 vs last week</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Active Members</div>
+          <div class="kpi-val">23</div>
+          <div class="kpi-delta up">↑ 4 new this month</div>
+        </div>
+        <div class="kpi-card orange">
+          <div class="kpi-label">Avg Job Value</div>
+          <div class="kpi-val">$187</div>
+          <div class="kpi-delta up">↑ $22 vs last month</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">Review Score</div>
+          <div class="kpi-val">4.9★</div>
+          <div class="kpi-delta neutral">→ 31 total reviews</div>
+        </div>
+      </div>
+
+      <!-- Jobs + Activity -->
+      <div class="grid-2-1">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Today's Jobs</div>
+            <button class="panel-action" onclick="switchView('schedule')">View Schedule →</button>
+          </div>
+          <div class="panel-body" style="padding:0 18px;">
+            <table class="jobs-table">
+              <thead>
+                <tr>
+                  <th style="width:30%">Customer</th>
+                  <th>Time</th>
+                  <th>Services</th>
+                  <th>Tech</th>
+                  <th>Status</th>
+                  <th>Value</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="job-customer">
+                      <div class="job-cust-avatar">RT</div>
+                      <div><div class="job-cust-name">Robert Tate</div><div class="job-cust-addr">1049 Flood Ave</div></div>
+                    </div>
+                  </td>
+                  <td><div class="job-time">7:30 AM</div></td>
+                  <td><div class="service-tags"><span class="s-tag">Clean</span></div></td>
+                  <td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div> Alex J.</div></td>
+                  <td><span class="status-pill done">✓ Done</span></td>
+                  <td><div class="job-value">$149</div></td>
+                  <td><span class="row-action">View</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="job-customer">
+                      <div class="job-cust-avatar" style="background:var(--sky);">MJ</div>
+                      <div><div class="job-cust-name">Marcus Johnson <span class="member-star">★</span></div><div class="job-cust-addr">412 Chautauqua Ave</div></div>
+                    </div>
+                  </td>
+                  <td><div class="job-time">9:00 AM</div></td>
+                  <td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">LED</span><span class="s-tag member">Member</span></div></td>
+                  <td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div> Alex J.</div></td>
+                  <td><span class="status-pill active">● In Progress</span></td>
+                  <td><div class="job-value">$238</div></td>
+                  <td><span class="row-action">View</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="job-customer">
+                      <div class="job-cust-avatar" style="background:#6C3483;">SW</div>
+                      <div><div class="job-cust-name">Sarah Wilkins</div><div class="job-cust-addr">218 Brooks St</div></div>
+                    </div>
+                  </td>
+                  <td><div class="job-time">11:30 AM</div></td>
+                  <td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">Kit</span></div></td>
+                  <td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div> Alex J.</div></td>
+                  <td><span class="status-pill upcoming">Upcoming</span></td>
+                  <td><div class="job-value">$198</div></td>
+                  <td><span class="row-action">View</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Live Activity</div>
+            <button class="panel-action">All →</button>
+          </div>
+          <div class="panel-body" style="padding:0 18px;">
+            <div class="activity-item">
+              <div class="activity-icon booking">📅</div>
+              <div class="activity-text">
+                <div class="activity-main"><strong>Linda Nguyen</strong> booked a Full Package</div>
+                <div class="activity-time">4 min ago · $312</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon complete">✅</div>
+              <div class="activity-text">
+                <div class="activity-main"><strong>Alex J.</strong> completed job — Robert Tate</div>
+                <div class="activity-time">38 min ago · Photos uploaded</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon member">★</div>
+              <div class="activity-text">
+                <div class="activity-main"><strong>Greg Foster</strong> joined Storm Ready</div>
+                <div class="activity-time">2 hrs ago · $249/yr</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon review">⭐</div>
+              <div class="activity-text">
+                <div class="activity-main"><strong>Karen Mitchell</strong> left a 5-star review</div>
+                <div class="activity-time">Yesterday · Google</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon booking">📅</div>
+              <div class="activity-text">
+                <div class="activity-main"><strong>Pam Foster</strong> booked a Single Sweep</div>
+                <div class="activity-time">Yesterday · $149</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue + Crew -->
+      <div class="grid-2-1">
+        <!-- Revenue Mini Chart -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Revenue · Last 8 Weeks</div>
+            <button class="panel-action" onclick="switchView('revenue')">Full Report →</button>
+          </div>
+          <div class="panel-body">
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--sky);"></div> Job Revenue</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--wheat);"></div> Memberships</div>
+            </div>
+            <div class="chart-wrap">
+              <div class="chart-bar-group">
+                <div class="chart-bar revenue" style="height:45%;"></div>
+                <div class="chart-bar membership" style="height:18%;"></div>
+                <div class="chart-label">Apr 1</div>
+              </div>
+              <div class="chart-bar-group">
+                <div class="chart-bar revenue" style="height:55%;"></div>
+                <div class="chart-bar membership" style="height:22%;"></div>
+                <div class="chart-label">Apr 8</div>
+              </div>
+              <div class="chart-bar-group">
+                <div class="chart-bar revenue" style="height:60%;"></div>
+                <div class="chart-bar membership" style="height:20%;"></div>
+                <div class="chart-label">Apr 15</div>
+              </div>
+              <div class="chart-bar-group">
+                <div class="chart-bar revenue" style="height:72%;"></div>
+                <div class="chart-bar membership" style="height:30%;"></div>
+                <div class="chart-label">Apr 22</div>
+              </div>
+              <div class="chart-bar-group">
+                <div class="chart-bar revenue" style="height:65%;"></div>
+                <div class="chart-bar membership" style="height:25%;"></div>
+                <div class="chart-label">Apr 29</div>
+              </div>
+              <div class="chart-bar-group">
+                <div class="chart-bar revenue" style="height:80%;"></div>
+                <div class="chart-bar membership" style="height:35%;"></div>
+                <div class="chart-label">May 6</div>
+              </div>
+              <div class="chart-bar-group">
+                <div class="chart-bar revenue" style="height:88%;"></div>
+                <div class="chart-bar membership" style="height:38%;"></div>
+                <div class="chart-label">May 13</div>
+              </div>
+              <div class="chart-bar-group">
+                <div class="chart-bar revenue" style="height:100%;"></div>
+                <div class="chart-bar membership" style="height:42%;"></div>
+                <div class="chart-label">May 20</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crew Status -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Crew Status</div>
+            <button class="panel-action" onclick="switchView('crew')">Manage →</button>
+          </div>
+          <div class="panel-body" style="padding:0 18px;">
+            <div class="tech-card">
+              <div class="tech-avatar">AJ<div class="tech-online-dot"></div></div>
+              <div class="tech-info">
+                <div class="tech-name">Alex Johnson</div>
+                <div class="tech-status">🟢 On job · Marcus Johnson</div>
+              </div>
+              <div class="tech-jobs"><div class="tech-jobs-val">3</div><div class="tech-jobs-label">Today</div></div>
+            </div>
+            <div class="tech-card">
+              <div class="tech-avatar" style="background:linear-gradient(135deg,var(--green),#1A8A40);">DM<div class="tech-online-dot offline"></div></div>
+              <div class="tech-info">
+                <div class="tech-name">Derek Mills</div>
+                <div class="tech-status">⚪ Off today · Next: Fri</div>
+              </div>
+              <div class="tech-jobs"><div class="tech-jobs-val">2</div><div class="tech-jobs-label">This Wk</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ SCHEDULE ══ -->
+    <div class="view" id="view-schedule">
+      <div class="schedule-week">
+        <div class="sched-day-col">
+          <div class="sched-day-header"><div class="sched-day-name">Mon</div><div class="sched-day-num">19</div></div>
+          <div class="sched-day-body">
+            <div class="sched-job-block done"><div class="sjb-time">8:00 ✓</div><div class="sjb-name">Karen Mitchell</div><div class="sjb-service">Clean + Kit</div></div>
+            <div class="sched-job-block done member-job"><div class="sjb-time">11:00 ✓</div><div class="sjb-name">Tyler Reynolds ★</div><div class="sjb-service">Deep Clean</div></div>
+          </div>
+        </div>
+        <div class="sched-day-col">
+          <div class="sched-day-header"><div class="sched-day-name">Tue</div><div class="sched-day-num">20</div></div>
+          <div class="sched-day-body">
+            <div class="sched-job-block done"><div class="sjb-time">9:30 ✓</div><div class="sjb-name">Linda Nguyen</div><div class="sjb-service">Full Package</div></div>
+          </div>
+        </div>
+        <div class="sched-day-col">
+          <div class="sched-day-header"><div class="sched-day-name">Wed</div><div class="sched-day-num">21</div></div>
+          <div class="sched-day-body">
+            <div class="sched-job-block done"><div class="sjb-time">8:00 ✓</div><div class="sjb-name">Greg Foster ★</div><div class="sjb-service">Clean + LED</div></div>
+            <div class="sched-job-block done"><div class="sjb-time">11:00 ✓</div><div class="sjb-name">Pam Foster</div><div class="sjb-service">Deep Clean</div></div>
+          </div>
+        </div>
+        <div class="sched-day-col today">
+          <div class="sched-day-header"><div class="sched-day-name">Thu · Today</div><div class="sched-day-num">22</div></div>
+          <div class="sched-day-body">
+            <div class="sched-job-block done"><div class="sjb-time">7:30 ✓</div><div class="sjb-name">Robert Tate</div><div class="sjb-service">Deep Clean</div></div>
+            <div class="sched-job-block"><div class="sjb-time">9:00 AM</div><div class="sjb-name">Marcus Johnson ★</div><div class="sjb-service">Clean + LED</div></div>
+            <div class="sched-job-block"><div class="sjb-time">11:30 AM</div><div class="sjb-name">Sarah Wilkins</div><div class="sjb-service">Clean + Kit</div></div>
+          </div>
+        </div>
+        <div class="sched-day-col">
+          <div class="sched-day-header"><div class="sched-day-name">Fri</div><div class="sched-day-num">23</div></div>
+          <div class="sched-day-body">
+            <div class="sched-job-block member-job"><div class="sjb-time">8:00 AM</div><div class="sjb-name">Greg & Pam Foster ★</div><div class="sjb-service">Deep Clean</div></div>
+            <div class="sched-job-block"><div class="sjb-time">10:30 AM</div><div class="sjb-name">Linda Nguyen</div><div class="sjb-service">Full Package</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">This Week · All Jobs</div>
+          <button class="panel-action">+ Add Job</button>
+        </div>
+        <div class="panel-body" style="padding:0 18px;">
+          <table class="jobs-table">
+            <thead>
+              <tr><th>Customer</th><th>Day · Time</th><th>Services</th><th>Tech</th><th>Status</th><th>Value</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">KM</div><div><div class="job-cust-name">Karen Mitchell ★</div><div class="job-cust-addr">Norman</div></div></div></td><td><div class="job-time">Mon 8:00</div></td><td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">Kit</span><span class="s-tag member">Member</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div></div></td><td><span class="status-pill done">✓ Done</span></td><td><div class="job-value">$249</div></td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">TR</div><div><div class="job-cust-name">Tyler Reynolds</div><div class="job-cust-addr">Norman</div></div></div></td><td><div class="job-time">Mon 11:00</div></td><td><div class="service-tags"><span class="s-tag">Clean</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div></div></td><td><span class="status-pill done">✓ Done</span></td><td><div class="job-value">$149</div></td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">LN</div><div><div class="job-cust-name">Linda Nguyen</div><div class="job-cust-addr">Norman</div></div></div></td><td><div class="job-time">Tue 9:30</div></td><td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">LED</span><span class="s-tag">Kit</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div></div></td><td><span class="status-pill done">✓ Done</span></td><td><div class="job-value">$312</div></td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">MJ</div><div><div class="job-cust-name">Marcus Johnson ★</div><div class="job-cust-addr">Norman</div></div></div></td><td><div class="job-time">Thu 9:00</div></td><td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">LED</span><span class="s-tag member">Member</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div></div></td><td><span class="status-pill active">● Active</span></td><td><div class="job-value">$238</div></td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">SW</div><div><div class="job-cust-name">Sarah Wilkins</div><div class="job-cust-addr">Norman</div></div></div></td><td><div class="job-time">Thu 11:30</div></td><td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">Kit</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div></div></td><td><span class="status-pill upcoming">Upcoming</span></td><td><div class="job-value">$198</div></td><td><span class="row-action">View</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CUSTOMERS ══ -->
+    <div class="view" id="view-customers">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="search-bar" style="margin-bottom:0;flex:1;max-width:360px;">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" placeholder="Search customers...">
+        </div>
+        <div style="display:flex;gap:10px;margin-left:16px;">
+          <button class="tb-btn ghost">Filter: All</button>
+          <button class="tb-btn ghost">Members Only</button>
+          <button class="tb-btn primary">+ Add Customer</button>
+        </div>
+      </div>
+
+      <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+        <div class="kpi-card"><div class="kpi-label">Total Customers</div><div class="kpi-val">47</div><div class="kpi-delta up">↑ 8 this month</div></div>
+        <div class="kpi-card wheat"><div class="kpi-label">Storm Ready Members</div><div class="kpi-val">23</div><div class="kpi-delta up">49% of base</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Avg Lifetime Value</div><div class="kpi-val">$412</div><div class="kpi-delta up">↑ $38 this month</div></div>
+        <div class="kpi-card orange"><div class="kpi-label">Retention Rate</div><div class="kpi-val">82%</div><div class="kpi-delta neutral">→ Industry avg 65%</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">All Customers</div>
+          <button class="panel-action">Export CSV</button>
+        </div>
+        <div class="panel-body" style="padding:0 18px;">
+          <table class="cust-table">
+            <thead>
+              <tr><th>Name</th><th>Plan</th><th>Location</th><th>Visits</th><th>Lifetime Value</th><th>Last Visit</th><th>Next Visit</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr><td><div class="cust-name-cell"><div class="cust-avatar">KM</div><div><div>Karen Mitchell</div><div style="font-size:11px;color:var(--mid);">karen@email.com</div></div></div></td><td><span class="s-tag member">★ Storm Ready</span></td><td style="color:var(--soft);">Norman</td><td><div class="cust-visits">4</div></td><td><div class="cust-value">$746</div></td><td style="color:var(--soft);">Mar 4, 2026</td><td style="color:var(--sky-light);">Jun 13, 2026</td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="cust-name-cell"><div class="cust-avatar">MJ</div><div><div>Marcus Johnson</div><div style="font-size:11px;color:var(--mid);">marcus@email.com</div></div></div></td><td><span class="s-tag member">★ Storm Ready</span></td><td style="color:var(--soft);">Norman</td><td><div class="cust-visits">3</div></td><td><div class="cust-value">$635</div></td><td style="color:var(--soft);">Today</td><td style="color:var(--sky-light);">Oct 2026</td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="cust-name-cell"><div class="cust-avatar">SW</div><div><div>Sarah Wilkins</div><div style="font-size:11px;color:var(--mid);">sarah@email.com</div></div></div></td><td><span class="s-tag" style="background:rgba(255,255,255,0.05);color:var(--soft);">One-Time</span></td><td style="color:var(--soft);">Norman</td><td><div class="cust-visits">2</div></td><td><div class="cust-value">$347</div></td><td style="color:var(--soft);">Nov 2025</td><td style="color:var(--sky-light);">Today</td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="cust-name-cell"><div class="cust-avatar">LN</div><div><div>Linda Nguyen</div><div style="font-size:11px;color:var(--mid);">linda@email.com</div></div></div></td><td><span class="s-tag" style="background:rgba(255,255,255,0.05);color:var(--soft);">One-Time</span></td><td style="color:var(--soft);">Norman</td><td><div class="cust-visits">1</div></td><td><div class="cust-value">$312</div></td><td style="color:var(--soft);">Tue</td><td style="color:var(--sky-light);">Fri</td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="cust-name-cell"><div class="cust-avatar">GF</div><div><div>Greg Foster</div><div style="font-size:11px;color:var(--mid);">greg@email.com</div></div></div></td><td><span class="s-tag member">★ Storm Ready</span></td><td style="color:var(--soft);">Norman</td><td><div class="cust-visits">2</div></td><td><div class="cust-value">$498</div></td><td style="color:var(--soft);">Wed</td><td style="color:var(--sky-light);">Fri</td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="cust-name-cell"><div class="cust-avatar">TR</div><div><div>Tyler Reynolds</div><div style="font-size:11px;color:var(--mid);">tyler@email.com</div></div></div></td><td><span class="s-tag" style="background:rgba(255,255,255,0.05);color:var(--soft);">One-Time</span></td><td style="color:var(--soft);">Norman</td><td><div class="cust-visits">1</div></td><td><div class="cust-value">$149</div></td><td style="color:var(--soft);">Mon</td><td style="color:var(--mid);">—</td><td><span class="row-action">View</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CREW ══ -->
+    <div class="view" id="view-crew">
+      <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+        <div class="kpi-card green"><div class="kpi-label">Active Techs</div><div class="kpi-val">2</div><div class="kpi-delta neutral">→ 1 online now</div></div>
+        <div class="kpi-card"><div class="kpi-label">Jobs This Week</div><div class="kpi-val">11</div><div class="kpi-delta up">↑ 3 vs last wk</div></div>
+        <div class="kpi-card wheat"><div class="kpi-label">Avg Rating</div><div class="kpi-val">4.9★</div><div class="kpi-delta neutral">→ Across all techs</div></div>
+        <div class="kpi-card orange"><div class="kpi-label">Checklists 100%</div><div class="kpi-val">91%</div><div class="kpi-delta up">↑ 6% this month</div></div>
+      </div>
+
+      <div class="grid-1-1">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Alex Johnson</div><span class="status-pill active" style="font-size:11px;">● Online</span></div>
+          <div class="panel-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--white);">3</div>
+                <div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:1px;">Today</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--wheat-light);">$585</div>
+                <div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:1px;">Today Est.</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--green-light);">5.0★</div>
+                <div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:1px;">Rating</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--mid);margin-bottom:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Current Job</div>
+            <div style="background:rgba(46,134,193,0.08);border:1px solid rgba(46,134,193,0.15);border-radius:8px;padding:12px;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Marcus Johnson · 412 Chautauqua</div>
+              <div style="font-size:11px;color:var(--soft);margin-top:3px;">Clean + LED · Checklist 30% done</div>
+              <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:10px;overflow:hidden;">
+                <div style="width:30%;height:100%;background:var(--sky);border-radius:2px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Derek Mills</div><span class="status-pill upcoming" style="font-size:11px;">⚪ Off Today</span></div>
+          <div class="panel-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--white);">0</div>
+                <div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:1px;">Today</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--wheat-light);">2</div>
+                <div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:1px;">This Week</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--green-light);">4.8★</div>
+                <div style="font-size:10px;color:var(--mid);text-transform:uppercase;letter-spacing:1px;">Rating</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--mid);margin-bottom:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Next Shift</div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-dark);border-radius:8px;padding:12px;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Friday, May 23</div>
+              <div style="font-size:11px;color:var(--soft);margin-top:3px;">2 jobs assigned · Greg Foster + Linda Nguyen</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REVENUE ══ -->
+    <div class="view" id="view-revenue">
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-label">Revenue · MTD</div><div class="kpi-val">$4,870</div><div class="kpi-delta up">↑ 18% vs Apr</div></div>
+        <div class="kpi-card wheat"><div class="kpi-label">Membership MRR</div><div class="kpi-val">$478</div><div class="kpi-delta up">↑ $62 this month</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Job Revenue · MTD</div><div class="kpi-val">$4,392</div><div class="kpi-delta up">↑ 21% vs Apr</div></div>
+        <div class="kpi-card orange"><div class="kpi-label">Upgrades · MTD</div><div class="kpi-val">$1,240</div><div class="kpi-delta up">25% of revenue</div></div>
+        <div class="kpi-card purple"><div class="kpi-label">Projected · Month</div><div class="kpi-val">$6,200</div><div class="kpi-delta up">On track ↑</div></div>
+      </div>
+
+      <div class="grid-2-1">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Weekly Revenue · 2026</div>
+            <button class="panel-action">Download →</button>
+          </div>
+          <div class="panel-body">
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--sky);"></div> Job Revenue</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--wheat);"></div> Memberships</div>
+            </div>
+            <div class="rev-big-chart">
+              <div class="chart-grid">
+                <div class="chart-grid-line" data-val="$1.5k"></div>
+                <div class="chart-grid-line" data-val="$1k"></div>
+                <div class="chart-grid-line" data-val="$500"></div>
+                <div class="chart-grid-line" data-val=""></div>
+              </div>
+              <div class="rev-bar-group"><div class="rev-bar main" style="height:30%;"></div><div class="rev-bar member-bar" style="height:12%;"></div><div class="rev-bar-label">Jan</div></div>
+              <div class="rev-bar-group"><div class="rev-bar main" style="height:25%;"></div><div class="rev-bar member-bar" style="height:10%;"></div><div class="rev-bar-label">Feb</div></div>
+              <div class="rev-bar-group"><div class="rev-bar main" style="height:55%;"></div><div class="rev-bar member-bar" style="height:18%;"></div><div class="rev-bar-label">Mar</div></div>
+              <div class="rev-bar-group"><div class="rev-bar main" style="height:75%;"></div><div class="rev-bar member-bar" style="height:28%;"></div><div class="rev-bar-label">Apr</div></div>
+              <div class="rev-bar-group"><div class="rev-bar main" style="height:100%;"></div><div class="rev-bar member-bar" style="height:38%;"></div><div class="rev-bar-label">May ↑</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Revenue Breakdown</div></div>
+          <div class="panel-body" style="padding:0 18px;">
+            <div class="breakdown-row"><div class="breakdown-label"><div class="breakdown-dot" style="background:var(--sky);"></div>Deep Cleans</div><div><span class="breakdown-val">$2,086</span><span class="breakdown-pct">43%</span></div></div>
+            <div class="breakdown-row"><div class="breakdown-label"><div class="breakdown-dot" style="background:var(--wheat);"></div>Memberships</div><div><span class="breakdown-val">$1,245</span><span class="breakdown-pct">26%</span></div></div>
+            <div class="breakdown-row"><div class="breakdown-label"><div class="breakdown-dot" style="background:var(--green);"></div>LED Upgrades</div><div><span class="breakdown-val">$712</span><span class="breakdown-pct">15%</span></div></div>
+            <div class="breakdown-row"><div class="breakdown-label"><div class="breakdown-dot" style="background:var(--orange);"></div>Supply Kits</div><div><span class="breakdown-val">$484</span><span class="breakdown-pct">10%</span></div></div>
+            <div class="breakdown-row"><div class="breakdown-label"><div class="breakdown-dot" style="background:var(--purple);"></div>Structural</div><div><span class="breakdown-val">$343</span><span class="breakdown-pct">7%</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MARKETING ══ -->
+    <div class="view" id="view-marketing">
+      <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+        <div class="kpi-card"><div class="kpi-label">Meta Reach · MTD</div><div class="kpi-val">12.4k</div><div class="kpi-delta up">↑ 34% vs Apr</div></div>
+        <div class="kpi-card wheat"><div class="kpi-label">Ad Spend · MTD</div><div class="kpi-val">$320</div><div class="kpi-delta neutral">→ Budget: $400</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Bookings from Ads</div><div class="kpi-val">7</div><div class="kpi-delta up">↑ $1,043 revenue</div></div>
+        <div class="kpi-card orange"><div class="kpi-label">Cost Per Booking</div><div class="kpi-val">$45</div><div class="kpi-delta up">↓ from $68 in Apr</div></div>
+      </div>
+
+      <div class="grid-2-1">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Scheduled & Recent Posts</div><button class="panel-action">+ New Post</button></div>
+          <div class="panel-body" style="padding:0 18px;">
+            <div class="meta-post-row">
+              <div class="meta-thumb tips">💡</div>
+              <div class="meta-info">
+                <div class="meta-post-title">3 Signs Your Storm Shelter Needs a Cleaning</div>
+                <div class="meta-post-date">📅 Scheduled · Jun 1 · Facebook + Instagram</div>
+              </div>
+              <div class="meta-stats">
+                <div><div class="meta-stat-val">—</div><div class="meta-stat-label">Reach</div></div>
+              </div>
+              <span class="scheduled-pill">Scheduled</span>
+            </div>
+            <div class="meta-post-row">
+              <div class="meta-thumb b-a">✨</div>
+              <div class="meta-info">
+                <div class="meta-post-title">Before & After — 412 Chautauqua (with permission)</div>
+                <div class="meta-post-date">📅 Scheduled · May 25 · Facebook + Instagram</div>
+              </div>
+              <div class="meta-stats">
+                <div><div class="meta-stat-val">—</div><div class="meta-stat-label">Reach</div></div>
+              </div>
+              <span class="scheduled-pill">Scheduled</span>
+            </div>
+            <div class="meta-post-row">
+              <div class="meta-thumb promo">🌪️</div>
+              <div class="meta-info">
+                <div class="meta-post-title">Tornado Season Is Here — Is Your Shelter Ready?</div>
+                <div class="meta-post-date">✓ Published · May 18 · Paid Ad</div>
+              </div>
+              <div class="meta-stats">
+                <div><div class="meta-stat-val">4,812</div><div class="meta-stat-label">Reach</div></div>
+                <div><div class="meta-stat-val">38</div><div class="meta-stat-label">Clicks</div></div>
+              </div>
+            </div>
+            <div class="meta-post-row">
+              <div class="meta-thumb member">★</div>
+              <div class="meta-info">
+                <div class="meta-post-title">Storm Ready Membership — 2 Visits + Supply Kit</div>
+                <div class="meta-post-date">✓ Published · May 12 · Paid Ad</div>
+              </div>
+              <div class="meta-stats">
+                <div><div class="meta-stat-val">3,240</div><div class="meta-stat-label">Reach</div></div>
+                <div><div class="meta-stat-val">24</div><div class="meta-stat-label">Clicks</div></div>
+              </div>
+            </div>
+            <div class="meta-post-row">
+              <div class="meta-thumb b-a">🕳️</div>
+              <div class="meta-info">
+                <div class="meta-post-title">Before & After — 3 years of neglect, cleaned in 2 hrs</div>
+                <div class="meta-post-date">✓ Published · May 5 · Organic</div>
+              </div>
+              <div class="meta-stats">
+                <div><div class="meta-stat-val">2,180</div><div class="meta-stat-label">Reach</div></div>
+                <div><div class="meta-stat-val">187</div><div class="meta-stat-label">Likes</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Ad Performance</div></div>
+          <div class="panel-body" style="padding:0 18px;">
+            <div class="breakdown-row">
+              <div class="breakdown-label"><div class="breakdown-dot" style="background:var(--sky);"></div>Tornado Season Ad</div>
+              <div><span class="breakdown-val" style="color:var(--sky-light);">4 bookings</span></div>
+            </div>
+            <div class="breakdown-row">
+              <div class="breakdown-label"><div class="breakdown-dot" style="background:var(--wheat);"></div>Membership Ad</div>
+              <div><span class="breakdown-val" style="color:var(--wheat-light);">3 bookings</span></div>
+            </div>
+            <div class="breakdown-row">
+              <div class="breakdown-label"><div class="breakdown-dot" style="background:var(--green);"></div>Total Ad Spend</div>
+              <div><span class="breakdown-val">$320</span></div>
+            </div>
+            <div class="breakdown-row">
+              <div class="breakdown-label"><div class="breakdown-dot" style="background:var(--green-light);"></div>Revenue From Ads</div>
+              <div><span class="breakdown-val" style="color:var(--green-light);">$1,043</span></div>
+            </div>
+            <div class="breakdown-row">
+              <div class="breakdown-label"><div class="breakdown-dot" style="background:var(--purple);"></div>ROAS</div>
+              <div><span class="breakdown-val" style="color:var(--purple);">3.26×</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ JOBS (placeholder) ══ -->
+    <div class="view" id="view-jobs">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="search-bar" style="margin-bottom:0;flex:1;max-width:360px;">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" placeholder="Search jobs, customers, addresses...">
+        </div>
+        <div style="display:flex;gap:10px;margin-left:16px;">
+          <button class="tb-btn ghost">Status: All</button>
+          <button class="tb-btn ghost">This Month</button>
+          <button class="tb-btn primary">+ New Job</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">All Jobs · May 2026</div><button class="panel-action">Export</button></div>
+        <div class="panel-body" style="padding:0 18px;">
+          <table class="jobs-table">
+            <thead><tr><th>Customer</th><th>Date · Time</th><th>Services</th><th>Tech</th><th>Status</th><th>Value</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">LN</div><div><div class="job-cust-name">Linda Nguyen</div><div class="job-cust-addr">714 Lindsey St</div></div></div></td><td><div class="job-time">Today 10:30</div></td><td><div class="service-tags"><span class="s-tag">Full Package</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot" style="background:var(--green);">DM</div>Derek M.</div></td><td><span class="status-pill upcoming">Upcoming</span></td><td><div class="job-value">$312</div></td><td><span class="row-action">Edit</span></td></tr>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">MJ</div><div><div class="job-cust-name">Marcus Johnson ★</div><div class="job-cust-addr">412 Chautauqua</div></div></div></td><td><div class="job-time">Today 9:00</div></td><td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">LED</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div>Alex J.</div></td><td><span class="status-pill active">● Active</span></td><td><div class="job-value">$238</div></td><td><span class="row-action">Edit</span></td></tr>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">RT</div><div><div class="job-cust-name">Robert Tate</div><div class="job-cust-addr">1049 Flood Ave</div></div></div></td><td><div class="job-time">Today 7:30</div></td><td><div class="service-tags"><span class="s-tag">Clean</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div>Alex J.</div></td><td><span class="status-pill done">✓ Done</span></td><td><div class="job-value">$149</div></td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">GF</div><div><div class="job-cust-name">Greg Foster ★</div><div class="job-cust-addr">3302 Classen</div></div></div></td><td><div class="job-time">Wed 8:00</div></td><td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">LED</span><span class="s-tag member">Member</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div>Alex J.</div></td><td><span class="status-pill done">✓ Done</span></td><td><div class="job-value">$249</div></td><td><span class="row-action">View</span></td></tr>
+              <tr><td><div class="job-customer"><div class="job-cust-avatar">KM</div><div><div class="job-cust-name">Karen Mitchell ★</div><div class="job-cust-addr">Norman</div></div></div></td><td><div class="job-time">Mon 8:00</div></td><td><div class="service-tags"><span class="s-tag">Clean</span><span class="s-tag">Kit</span><span class="s-tag member">Member</span></div></td><td><div class="job-tech-chip"><div class="tech-mini-dot">AJ</div>Alex J.</div></td><td><span class="status-pill done">✓ Done</span></td><td><div class="job-value">$249</div></td><td><span class="row-action">View</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+const titles = {
+  overview: 'Dashboard',
+  schedule: 'Schedule',
+  jobs: 'All Jobs',
+  customers: 'Customers',
+  crew: 'Crew',
+  revenue: 'Revenue',
+  marketing: 'Marketing',
+};
+
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const view = document.getElementById('view-' + name);
+  if (view) view.classList.add('active');
+
+  document.querySelector('.content').scrollTop = 0;
+
+  document.getElementById('page-title').textContent = titles[name] || 'Dashboard';
+
+  // Highlight correct nav item
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes("'" + name + "'")) {
+      btn.classList.add('active');
+    }
+  });
+}
+</script>
+</body>
+</html>
