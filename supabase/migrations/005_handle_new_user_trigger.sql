@@ -1,21 +1,22 @@
 -- Migration: auto-create profiles row on auth.users insert
+-- Body is a plain quoted string (not dollar-quoted) so it survives copy/paste.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as '
 begin
   insert into public.profiles (id, role, full_name, phone)
   values (
     new.id,
-    'customer',
-    new.raw_user_meta_data ->> 'full_name',
-    new.raw_user_meta_data ->> 'phone'
+    ''customer'',
+    new.raw_user_meta_data ->> ''full_name'',
+    new.raw_user_meta_data ->> ''phone''
   );
   return new;
 end;
-$$;
+';
 
 create trigger on_auth_user_created
   after insert on auth.users

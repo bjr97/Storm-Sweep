@@ -17,15 +17,15 @@ create table if not exists public.profiles (
 -- Admin check used by every "admins can ..." policy. SECURITY DEFINER so it
 -- bypasses RLS. Querying profiles directly inside a profiles policy (as SPEC.md
 -- originally wrote it) fails with "infinite recursion detected in policy".
+-- Body is a plain quoted string (not dollar-quoted) so it survives copy/paste into the
+-- Supabase SQL editor from renderers that treat double dollar signs as math delimiters.
 create or replace function public.is_admin()
 returns boolean
 language sql
 stable
 security definer
 set search_path = public
-as $$
-  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
-$$;
+as 'select exists (select 1 from public.profiles where id = auth.uid() and role = ''admin'')';
 
 alter table public.profiles enable row level security;
 create policy "Users can view own profile" on public.profiles for select using (auth.uid() = id);
