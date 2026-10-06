@@ -27,8 +27,8 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: 'Overview',
     items: [
       { label: 'Dashboard', icon: LayoutDashboard, href: '/admin', built: true },
-      { label: 'Schedule', icon: CalendarDays, href: '/admin/schedule', built: false },
-      { label: 'All Jobs', icon: Wrench, href: '/admin/jobs', built: false },
+      { label: 'Schedule', icon: CalendarDays, href: '/admin/schedule', built: true },
+      { label: 'All Jobs', icon: Wrench, href: '/admin/jobs', built: true },
     ],
   },
   {

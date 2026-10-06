@@ -1,4 +1,5 @@
 import { ActivityFeed } from '@/components/admin/ActivityFeed'
+import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { CrewStatus } from '@/components/admin/CrewStatus'
 import { JobsTable } from '@/components/admin/JobsTable'
 import { KpiRow } from '@/components/admin/KpiRow'
@@ -17,14 +18,10 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
 
   return (
     <>
-      <header className="flex h-14 shrink-0 items-center gap-4 border-b border-white/[0.07] bg-[#141416] px-4 sm:px-7">
-        <h1 className="font-[family-name:var(--font-bebas)] text-[22px] tracking-wide text-white">
-          Dashboard
-        </h1>
-        <p className="text-xs font-medium text-[#8A8A8F]">
-          {formatBusinessDate(now, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-        </p>
-      </header>
+      <AdminTopbar
+        title="Dashboard"
+        subtitle={formatBusinessDate(now, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+      />
 
       <main className="flex-1 space-y-4 overflow-y-auto px-4 py-6 sm:px-7">
         <KpiRow kpis={data.kpis} />

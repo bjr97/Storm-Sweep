@@ -14,6 +14,7 @@ export type SmsTrigger =
   | 'tornado_season'
   | 'sweeper_welcome'
   | 'sweeper_new_job'
+  | 'sweeper_job_assigned'
   | 'sweeper_application_admin'
   | 'sweeper_declined'
 
@@ -54,6 +55,12 @@ export type SmsTemplateData = {
     tempPassword: string
   }
   sweeper_new_job: {
+    customerName: string
+    address: string
+    date: string
+  }
+  sweeper_job_assigned: {
+    name: string
     customerName: string
     address: string
     date: string
@@ -107,6 +114,9 @@ export const SMS_TEMPLATES = {
 
   sweeper_new_job: (customerName: string, address: string, date: string): string =>
     `New Storm Sweep job available: ${customerName} at ${address} on ${date}. Open your app to accept. Faster accept = higher pay! 🌪️`,
+
+  sweeper_job_assigned: (name: string, customerName: string, address: string, date: string): string =>
+    `Hi ${name} — you've been assigned a Storm Sweep job: ${customerName} at ${address} on ${date}. Details are in your Sweeper app. 🌪️`,
 
   sweeper_application_admin: (name: string, email: string, phone: string): string =>
     `🌪️ New Sweeper application: ${name} (${email}, ${phone}). Review in admin portal.`,
@@ -192,6 +202,10 @@ export function renderSmsTemplate<T extends SmsTrigger>(
     case 'sweeper_new_job': {
       const d = data as SmsTemplateData['sweeper_new_job']
       return SMS_TEMPLATES.sweeper_new_job(d.customerName, d.address, d.date)
+    }
+    case 'sweeper_job_assigned': {
+      const d = data as SmsTemplateData['sweeper_job_assigned']
+      return SMS_TEMPLATES.sweeper_job_assigned(d.name, d.customerName, d.address, d.date)
     }
     case 'sweeper_application_admin': {
       const d = data as SmsTemplateData['sweeper_application_admin']
@@ -436,6 +450,15 @@ export function buildTemplateDataFromContext(
       }
     case 'sweeper_new_job':
       return {
+        customerName:
+          (customData.customerName as string) ?? profile?.full_name ?? 'Customer',
+        address: (customData.address as string) ?? job?.address ?? '',
+        date:
+          (customData.date as string) ?? formatJobDate(job?.scheduled_at ?? null),
+      }
+    case 'sweeper_job_assigned':
+      return {
+        name: (customData.name as string) ?? sweeper?.full_name?.split(' ')[0] ?? 'there',
         customerName:
           (customData.customerName as string) ?? profile?.full_name ?? 'Customer',
         address: (customData.address as string) ?? job?.address ?? '',

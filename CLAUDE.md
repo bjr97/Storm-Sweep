@@ -358,9 +358,9 @@ Track progress here as phases complete:
 - [ ] Phase 2.2 — Job detail + checklist
 - [ ] Phase 2.3 — Sweeper schedule
 - [ ] Phase 2.4 — Sweeper earnings
-- [ ] Phase 2.5 — Admin dashboard
-- [ ] Phase 2.6 — Admin schedule
-- [ ] Phase 2.7 — Admin job management
+- [x] Phase 2.5 — Admin dashboard
+- [x] Phase 2.6 — Admin schedule
+- [x] Phase 2.7 — Admin job management
 - [ ] Phase 3.1 — Customer dashboard
 - [ ] Phase 3.2 — Job history
 - [ ] Phase 3.3 — Photos gallery

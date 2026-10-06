@@ -1,18 +1,12 @@
-import { Check, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
+import Link from 'next/link'
 
 import { EmptyState } from '@/components/admin/Panel'
+import { StatusPill } from '@/components/admin/StatusPill'
 import type { TodayJob } from '@/lib/admin/dashboard'
 import { formatBusinessTime } from '@/lib/admin/time'
-import { cn, formatCurrency } from '@/lib/utils'
-import type { JobStatus } from '@/types/database'
+import { formatCurrency } from '@/lib/utils'
 
-const STATUS: Record<JobStatus, { label: string; className: string }> = {
-  pending: { label: 'Pending', className: 'bg-[#E67E22]/15 text-[#F0B27A]' },
-  confirmed: { label: 'Upcoming', className: 'bg-white/[0.06] text-[#9A9A9F]' },
-  in_progress: { label: 'In progress', className: 'bg-sky/20 text-sky-light' },
-  complete: { label: 'Done', className: 'bg-[#27AE60]/15 text-[#2ECC71]' },
-  cancelled: { label: 'Cancelled', className: 'bg-white/[0.04] text-[#8A8A8F] line-through' },
-}
 
 function initials(name: string): string {
   return name
@@ -43,7 +37,6 @@ export function JobsTable({ jobs }: { jobs: TodayJob[] }): React.ReactElement {
         </thead>
         <tbody>
           {jobs.map((job) => {
-            const status = STATUS[job.status]
             return (
               <tr key={job.id} className="border-b border-white/[0.07] last:border-b-0">
                 <td className="py-3 pr-3">
@@ -53,7 +46,9 @@ export function JobsTable({ jobs }: { jobs: TodayJob[] }): React.ReactElement {
                     </div>
                     <div className="min-w-0">
                       <p className="flex items-center gap-1 truncate text-[13px] font-semibold text-[#F0F0F0]">
-                        {job.customerName}
+                        <Link href={`/admin/jobs/${job.id}`} className="hover:text-sky-light hover:underline">
+                          {job.customerName}
+                        </Link>
                         {job.isMember ? (
                           <Star className="size-3 shrink-0 fill-wheat-light text-wheat-light" aria-label="Storm Ready member" />
                         ) : null}
@@ -78,15 +73,7 @@ export function JobsTable({ jobs }: { jobs: TodayJob[] }): React.ReactElement {
                   {job.sweeperName ?? <span className="text-[#F0B27A]">Unassigned</span>}
                 </td>
                 <td className="py-3 pr-3">
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide',
-                      status.className
-                    )}
-                  >
-                    {job.status === 'complete' ? <Check className="size-3" aria-hidden="true" /> : null}
-                    {status.label}
-                  </span>
+                  <StatusPill status={job.status} />
                 </td>
                 <td className="py-3 text-right font-[family-name:var(--font-barlow-condensed)] text-[15px] font-semibold text-[#F0F0F0]">
                   {formatCurrency(job.value)}

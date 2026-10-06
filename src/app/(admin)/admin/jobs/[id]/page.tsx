@@ -1,0 +1,233 @@
+import { ArrowLeft, Check, ExternalLink, Mail, Phone, Star } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+
+import { AdminTopbar } from '@/components/admin/AdminTopbar'
+import { AssignSweeperSelect } from '@/components/admin/AssignSweeperSelect'
+import { JobActions } from '@/components/admin/JobActions'
+import { EmptyState, Panel } from '@/components/admin/Panel'
+import { StatusPill } from '@/components/admin/StatusPill'
+import { getJobDetail, listSweepers } from '@/lib/admin/jobs'
+import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
+import { cn, formatCurrency, PRICING } from '@/lib/utils'
+
+export const dynamic = 'force-dynamic'
+export const metadata = { title: 'Job · Storm Sweep Admin' }
+
+const PAYMENT_LABEL: Record<string, string> = {
+  unpaid: 'Unpaid',
+  deposit_paid: 'Deposit paid',
+  paid: 'Paid in full',
+  refunded: 'Refunded',
+}
+
+const PHOTO_TYPE_LABEL: Record<string, string> = {
+  booking_screen: 'Booking photo',
+  before: 'Before',
+  after: 'After',
+  upgrade: 'Upgrade',
+  signature: 'Signature',
+}
+
+const PHASE_LABEL: Record<number, string> = { 1: 'Arrival', 2: 'Deep clean', 3: 'Inspection', 4: 'Wrap-up' }
+
+function Row({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement {
+  return (
+    <div className="flex justify-between gap-4 border-b border-white/[0.07] py-2 text-[13px] last:border-b-0">
+      <dt className="shrink-0 text-[#8A8A8F]">{label}</dt>
+      <dd className="min-w-0 text-right text-[#F0F0F0]">{children}</dd>
+    </div>
+  )
+}
+
+export default async function AdminJobDetailPage({
+  params,
+}: {
+  params: { id: string }
+}): Promise<React.ReactElement> {
+  if (!/^[0-9a-f-]{36}$/i.test(params.id)) notFound()
+  const [detail, sweepers] = await Promise.all([getJobDetail(params.id), listSweepers()])
+  if (!detail) notFound()
+
+  const { job, customer, checklist, photos } = detail
+  const locked = job.status === 'in_progress' || job.status === 'complete'
+  const required = checklist.filter((c) => c.required)
+  const doneCount = checklist.filter((c) => c.done).length
+  const requiredDone = required.filter((c) => c.done).length
+  const pct = checklist.length ? Math.round((doneCount / checklist.length) * 100) : 0
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address)}`
+  const balance = job.total_amount - (job.deposit_amount ?? 0)
+
+  return (
+    <>
+      <AdminTopbar title={customer.name} subtitle={job.address}>
+        <StatusPill status={job.status} />
+      </AdminTopbar>
+
+      <main className="flex-1 space-y-4 overflow-y-auto px-4 py-6 sm:px-7">
+        <Link href="/admin/jobs" className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-light hover:underline">
+          <ArrowLeft className="size-3.5" aria-hidden="true" /> All jobs
+        </Link>
+
+        <div className="grid gap-4 xl:grid-cols-3">
+          <div className="space-y-4 xl:col-span-2">
+            <Panel title="Booking">
+              <dl>
+                <Row label="Scheduled">
+                  {job.scheduled_at
+                    ? `${formatBusinessDate(new Date(job.scheduled_at), { weekday: 'long', month: 'long', day: 'numeric' })} · ${formatBusinessTime(job.scheduled_at)}`
+                    : <span className="text-[#F0B27A]">Not scheduled (quote)</span>}
+                </Row>
+                <Row label="Address">
+                  <a href={mapsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sky-light hover:underline">
+                    {job.address} <ExternalLink className="size-3" aria-hidden="true" />
+                  </a>
+                </Row>
+                <Row label="Shelter size">{job.shelter_size}</Row>
+                <Row label="Services">
+                  <span className="flex flex-wrap justify-end gap-1">
+                    {job.service_type.map((s) => (
+                      <span key={s} className="rounded bg-sky/[0.12] px-1.5 py-0.5 text-[11px] font-semibold text-sky-light">{s}</span>
+                    ))}
+                  </span>
+                </Row>
+                <Row label="Customer notes">{job.notes ? <span className="whitespace-pre-wrap">{job.notes}</span> : '—'}</Row>
+                <Row label="Heard about us">
+                  {detail.partnerName ? `${detail.partnerName} (partner)` : job.referral_source ?? '—'}
+                </Row>
+                <Row label="Booked">{formatBusinessDate(new Date(job.created_at), { month: 'short', day: 'numeric', year: 'numeric' })}</Row>
+              </dl>
+            </Panel>
+
+            <Panel title="Photos" subtitle={`${photos.length} total`}>
+              {photos.length === 0 ? (
+                <EmptyState>No photos yet. Before/after photos are added by the Sweeper on site.</EmptyState>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {photos.map((p) => (
+                    <figure key={p.id} className="overflow-hidden rounded-lg border border-white/[0.07] bg-[#141416]">
+                      {p.url ? (
+                        <a href={p.url} target="_blank" rel="noreferrer">
+                          <Image src={p.url} alt={`${PHOTO_TYPE_LABEL[p.type] ?? p.type} photo`} width={320} height={240} unoptimized className="aspect-[4/3] w-full object-cover" />
+                        </a>
+                      ) : (
+                        <div className="flex aspect-[4/3] items-center justify-center text-[11px] text-[#8A8A8F]">Unavailable</div>
+                      )}
+                      <figcaption className="flex items-center justify-between px-2 py-1.5 text-[11px] text-[#9A9A9F]">
+                        {PHOTO_TYPE_LABEL[p.type] ?? p.type}
+                        {p.consent ? <span className="text-[#2ECC71]">Marketing OK</span> : null}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
+            </Panel>
+
+            <Panel title="Checklist" subtitle={`${requiredDone}/${required.length} required · ${pct}% overall`}>
+              <progress
+                value={pct}
+                max={100}
+                aria-label="Checklist progress"
+                className="mb-4 block h-1.5 w-full appearance-none overflow-hidden rounded-full bg-white/[0.08] [&::-moz-progress-bar]:bg-sky [&::-webkit-progress-bar]:bg-white/[0.08] [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-sky"
+              />
+              <div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
+                {[1, 2, 3, 4].map((phase) => (
+                  <div key={phase}>
+                    <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8A8F]">
+                      Phase {phase} · {PHASE_LABEL[phase]}
+                    </p>
+                    <ul className="space-y-1">
+                      {checklist.filter((c) => c.phase === phase).map((c) => (
+                        <li key={c.id} className="flex items-start gap-2 text-xs">
+                          <span className={cn('mt-0.5 flex size-3.5 shrink-0 items-center justify-center rounded-sm border', c.done ? 'border-[#27AE60] bg-[#27AE60]' : 'border-white/20')}>
+                            {c.done ? <Check className="size-2.5 text-white" aria-hidden="true" /> : null}
+                          </span>
+                          <span className={c.done ? 'text-[#9A9A9F]' : 'text-[#F0F0F0]'}>
+                            {c.label}
+                            {c.required ? <span className="text-[#8A8A8F]"> · required</span> : null}
+                            <span className="sr-only">{c.done ? ' (done)' : ' (not done)'}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </div>
+
+          <div className="space-y-4">
+            <Panel title="Actions">
+              <div className="space-y-4">
+                <div>
+                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8A8F]">Sweeper</p>
+                  <AssignSweeperSelect jobId={job.id} sweeperId={job.sweeper_id} sweepers={sweepers} locked={locked} />
+                  {sweepers.length === 0 ? (
+                    <p className="mt-1.5 text-[11px] text-[#8A8A8F]">Approve a Sweeper applicant to assign jobs.</p>
+                  ) : null}
+                </div>
+                <JobActions jobId={job.id} status={job.status} photoGrade={job.photo_grade} photoApproved={job.photo_approved} />
+              </div>
+            </Panel>
+
+            <Panel title="Customer">
+              <p className="flex items-center gap-1.5 text-sm font-semibold text-[#F0F0F0]">
+                {customer.name}
+                {customer.isMember ? <Star className="size-3.5 fill-wheat-light text-wheat-light" aria-label="Storm Ready member" /> : null}
+              </p>
+              {customer.isMember ? (
+                <p className="mt-0.5 text-[11px] text-wheat-light">
+                  Storm Ready · {customer.visitsUsed} of {PRICING.membership.visits_per_year} visits used
+                </p>
+              ) : null}
+              <div className="mt-3 space-y-1.5 text-[13px]">
+                {customer.phone ? (
+                  <a href={`tel:${customer.phone}`} className="flex items-center gap-2 text-sky-light hover:underline">
+                    <Phone className="size-3.5" aria-hidden="true" /> {customer.phone}
+                  </a>
+                ) : null}
+                {customer.email ? (
+                  <a href={`mailto:${customer.email}`} className="flex items-center gap-2 break-all text-sky-light hover:underline">
+                    <Mail className="size-3.5 shrink-0" aria-hidden="true" /> {customer.email}
+                  </a>
+                ) : null}
+              </div>
+            </Panel>
+
+            <Panel title="Payment">
+              <dl>
+                <Row label="Visit total">{formatCurrency(job.total_amount)}</Row>
+                <Row label="Deposit">{formatCurrency(job.deposit_amount ?? 0)}</Row>
+                <Row label="Balance after service">{formatCurrency(Math.max(0, balance))}</Row>
+                <Row label="Status">{PAYMENT_LABEL[job.payment_status] ?? job.payment_status}</Row>
+                <Row label="List value (sweeper pay basis)">{formatCurrency(job.service_value ?? job.total_amount)}</Row>
+                {job.membership_visit ? <Row label="Membership">Clean covered by Storm Ready</Row> : null}
+                <Row label="Paid via">{job.paypal_order_id ? 'PayPal' : job.stripe_payment_intent_id ? 'Stripe' : '—'}</Row>
+              </dl>
+            </Panel>
+
+            <Panel title="Photo screening">
+              {job.photo_grade ? (
+                <dl>
+                  <Row label="AI grade">
+                    <span className={job.photo_approved ? '' : 'font-semibold text-[#F0B27A]'}>{job.photo_grade}</span>
+                  </Row>
+                  <Row label="Reviewed">
+                    {job.admin_reviewed_at
+                      ? formatBusinessDate(new Date(job.admin_reviewed_at), { month: 'short', day: 'numeric' })
+                      : job.photo_approved ? 'Auto-approved' : <span className="text-[#F0B27A]">Needs review</span>}
+                  </Row>
+                  <Row label="Flags">{job.photo_flags.length ? job.photo_flags.join(', ').replace(/_/g, ' ') : 'None'}</Row>
+                  {job.photo_admin_note ? <Row label="AI note">{job.photo_admin_note}</Row> : null}
+                </dl>
+              ) : (
+                <EmptyState>No shelter photo was uploaded at booking.</EmptyState>
+              )}
+            </Panel>
+          </div>
+        </div>
+      </main>
+    </>
+  )
+}
