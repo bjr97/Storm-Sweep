@@ -31,7 +31,29 @@ type LoginFormValues = z.infer<typeof loginSchema>
 export function LoginForm(): React.ReactElement {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [authError, setAuthError] = useState<string | null>(null)
+  const [authError, setAuthError] = useState<string | null>(
+    searchParams.get('error') === 'confirmation_failed'
+      ? 'That confirmation link is invalid or expired. Sign in to get a new one.'
+      : null
+  )
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null)
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
+
+  async function resendConfirmation(): Promise<void> {
+    if (!unconfirmedEmail) return
+    setResendStatus('sending')
+    const { error } = await createClient().auth.resend({
+      type: 'signup',
+      email: unconfirmedEmail,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
+    })
+    if (error) {
+      setAuthError(error.message)
+      setResendStatus('idle')
+      return
+    }
+    setResendStatus('sent')
+  }
 
   const {
     register,
@@ -47,6 +69,8 @@ export function LoginForm(): React.ReactElement {
 
   async function onSubmit(values: LoginFormValues): Promise<void> {
     setAuthError(null)
+    setUnconfirmedEmail(null)
+    setResendStatus('idle')
     const supabase = createClient()
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -55,6 +79,11 @@ export function LoginForm(): React.ReactElement {
     })
 
     if (signInError) {
+      if (signInError.code === 'email_not_confirmed' || /not confirmed/i.test(signInError.message)) {
+        setUnconfirmedEmail(values.email)
+        setAuthError('Please confirm your email first — check your inbox (and spam) for the link from Storm Sweep.')
+        return
+      }
       setAuthError(signInError.message)
       return
     }
@@ -146,7 +175,7 @@ export function LoginForm(): React.ReactElement {
             <div className="flex justify-end">
               <Link
                 href="/forgot-password"
-                className="text-sm text-sky-DEFAULT hover:underline"
+                className="text-sm text-sky hover:underline"
               >
                 Forgot password?
               </Link>
@@ -158,10 +187,25 @@ export function LoginForm(): React.ReactElement {
               </p>
             ) : null}
 
+            {unconfirmedEmail ? (
+              <button
+                type="button"
+                onClick={resendConfirmation}
+                disabled={resendStatus !== 'idle'}
+                className="text-sm font-medium text-sky hover:underline disabled:no-underline disabled:opacity-70"
+              >
+                {resendStatus === 'sent'
+                  ? 'Confirmation email sent — check your inbox'
+                  : resendStatus === 'sending'
+                    ? 'Sending…'
+                    : 'Resend confirmation email'}
+              </button>
+            ) : null}
+
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-10 w-full bg-sky-DEFAULT text-base text-white hover:bg-sky-dark"
+              className="h-10 w-full bg-sky text-base text-white hover:bg-sky-dark"
             >
               {isSubmitting ? 'Signing in…' : 'Sign in'}
             </Button>
@@ -171,7 +215,7 @@ export function LoginForm(): React.ReactElement {
             Don&apos;t have an account?{' '}
             <Link
               href="/register"
-              className="font-medium text-sky-DEFAULT hover:underline"
+              className="font-medium text-sky hover:underline"
             >
               Create one
             </Link>

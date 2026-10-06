@@ -129,8 +129,11 @@ const roleRoutes = {
 ## BRAND & DESIGN — ALWAYS FOLLOW
 
 ### Colors (use Tailwind classes)
-- Primary actions: `bg-sky-DEFAULT` (#2E86C1) — book now, CTAs
-- Premium/membership: `bg-wheat-DEFAULT` (#D4A843) — Storm Ready
+- Primary actions: `bg-sky` (#2E86C1) — book now, CTAs
+- Premium/membership: `bg-wheat` (#D4A843) — Storm Ready
+- NEVER write `bg-sky-DEFAULT` / `text-wheat-DEFAULT`: Tailwind does not
+  generate `-DEFAULT` classes, so they silently do nothing (this made the
+  Create Account button invisible until hover). The DEFAULT shade is `bg-sky`.
 - Danger/urgency: `bg-tornado` (#C0392B) — alerts, warnings
 - Dark backgrounds (admin/sweeper): `bg-shelter` (#141416)
 - Light backgrounds (public/customer): `bg-white` or `bg-[#F7F7F4]`

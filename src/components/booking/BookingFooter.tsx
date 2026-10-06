@@ -95,7 +95,7 @@ export function BookingFooter({
                 ) : null}
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-shelter">Due today</span>
-                  <span className="font-semibold text-wheat-DEFAULT">
+                  <span className="font-semibold text-wheat">
                     {formatPriceDisplay(pricing.membershipPrice + pricing.deposit)}
                   </span>
                 </div>

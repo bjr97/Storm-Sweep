@@ -55,8 +55,8 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
                 className={cn(
                   'rounded-xl border p-4 text-left transition-all',
                   selected
-                    ? 'border-sky-DEFAULT bg-sky-pale ring-2 ring-sky-DEFAULT/30'
-                    : 'border-border bg-white hover:border-sky-DEFAULT/50'
+                    ? 'border-sky bg-sky-pale ring-2 ring-sky/30'
+                    : 'border-border bg-white hover:border-sky/50'
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -66,7 +66,7 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">{option.description}</p>
                   </div>
-                  <span className="shrink-0 font-semibold text-sky-DEFAULT">
+                  <span className="shrink-0 font-semibold text-sky">
                     {getShelterPriceLabel(option.value)}
                   </span>
                 </div>
@@ -80,7 +80,7 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
         <h2 className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-shelter">ADD SERVICES</h2>
         <div className="mt-4 space-y-3">
           <ServiceRow
-            icon={<Sparkles className="mt-0.5 size-5 text-sky-DEFAULT" />}
+            icon={<Sparkles className="mt-0.5 size-5 text-sky" />}
             title="Deep Clean"
             description="Included with every visit — full scrub, vacuum, mold treatment, and deodorizer."
             priceLabel="Included"
@@ -88,7 +88,7 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
             disabled
           />
           <ServiceRow
-            icon={<ShieldCheck className="mt-0.5 size-5 text-wheat-DEFAULT" />}
+            icon={<ShieldCheck className="mt-0.5 size-5 text-wheat" />}
             title="Full Package"
             description={`Deep clean + LED lighting + ${FULL_PACKAGE_KIT_NAME} prep kit. Upgrade the kit in the next step.`}
             priceLabel={formatCurrency(PRICING.bundles.full_package)}
@@ -97,7 +97,7 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
             highlight="wheat"
           />
           <ServiceRow
-            icon={<Lightbulb className="mt-0.5 size-5 text-sky-DEFAULT" />}
+            icon={<Lightbulb className="mt-0.5 size-5 text-sky" />}
             title="LED Package"
             description="Bright, reliable LED upgrade for your shelter."
             priceLabel={`+${formatCurrency(PRICING.addons.led_package)}`}
@@ -131,12 +131,12 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
                 className={cn(
                   'rounded-xl border p-4 text-left transition-all',
                   selected
-                    ? 'border-wheat-DEFAULT bg-wheat-pale ring-2 ring-wheat-DEFAULT/30'
-                    : 'border-border bg-white hover:border-wheat-DEFAULT/50'
+                    ? 'border-wheat bg-wheat-pale ring-2 ring-wheat/30'
+                    : 'border-border bg-white hover:border-wheat/50'
                 )}
               >
                 <p className="font-medium text-shelter">{option.label}</p>
-                <p className="mt-1 text-sm font-semibold text-wheat-DEFAULT">
+                <p className="mt-1 text-sm font-semibold text-wheat">
                   {option.price === null
                     ? 'Pay per visit'
                     : option.value === 'monthly'
@@ -178,10 +178,10 @@ function ServiceRow({
       className={cn(
         'flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all',
         checked && highlight === 'wheat'
-          ? 'border-wheat-DEFAULT bg-wheat-pale/40'
+          ? 'border-wheat bg-wheat-pale/40'
           : checked
-            ? 'border-sky-DEFAULT bg-sky-pale/50'
-            : 'border-border bg-white hover:border-sky-DEFAULT/50',
+            ? 'border-sky bg-sky-pale/50'
+            : 'border-border bg-white hover:border-sky/50',
         disabled && 'pointer-events-none opacity-60'
       )}
     >
@@ -190,7 +190,7 @@ function ServiceRow({
         checked={checked}
         disabled={disabled}
         onChange={(event) => onCheckedChange?.(event.target.checked)}
-        className={cn('mt-1 size-4', highlight === 'wheat' ? 'accent-wheat-DEFAULT' : 'accent-sky-DEFAULT')}
+        className={cn('mt-1 size-4', highlight === 'wheat' ? 'accent-wheat' : 'accent-sky')}
       />
       <div className="flex flex-1 items-start justify-between gap-3">
         <div className="flex gap-3">
@@ -203,7 +203,7 @@ function ServiceRow({
         <span
           className={cn(
             'font-semibold',
-            highlight === 'wheat' ? 'text-wheat-DEFAULT' : 'text-sky-DEFAULT',
+            highlight === 'wheat' ? 'text-wheat' : 'text-sky',
             priceLabel === 'Included' && 'text-sm font-medium text-muted-foreground'
           )}
         >

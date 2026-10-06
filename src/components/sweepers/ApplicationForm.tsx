@@ -175,7 +175,7 @@ export function ApplicationForm(): React.ReactElement {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-11 w-full bg-sky-DEFAULT font-semibold uppercase tracking-wide hover:bg-sky-dark"
+              className="h-11 w-full bg-sky font-semibold uppercase tracking-wide hover:bg-sky-dark"
             >
               {isSubmitting ? 'Submitting…' : 'Continue to Tool Photos'}
             </Button>

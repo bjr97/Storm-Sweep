@@ -25,7 +25,7 @@ export function BookingProgressNav({
                   <div
                     className={cn(
                       'h-0.5 flex-1',
-                      isComplete || isCurrent ? 'bg-sky-DEFAULT' : 'bg-border'
+                      isComplete || isCurrent ? 'bg-sky' : 'bg-border'
                     )}
                   />
                 ) : (
@@ -35,9 +35,9 @@ export function BookingProgressNav({
                   className={cn(
                     'flex size-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold transition-colors sm:size-8',
                     isComplete
-                      ? 'border-sky-DEFAULT bg-sky-DEFAULT text-white'
+                      ? 'border-sky bg-sky text-white'
                       : isCurrent
-                        ? 'border-sky-DEFAULT bg-white text-sky-DEFAULT'
+                        ? 'border-sky bg-white text-sky'
                         : 'border-border bg-white text-muted-foreground'
                   )}
                 >
@@ -47,7 +47,7 @@ export function BookingProgressNav({
                   <div
                     className={cn(
                       'h-0.5 flex-1',
-                      currentStep > step.id ? 'bg-sky-DEFAULT' : 'bg-border'
+                      currentStep > step.id ? 'bg-sky' : 'bg-border'
                     )}
                   />
                 ) : (
@@ -57,7 +57,7 @@ export function BookingProgressNav({
               <span
                 className={cn(
                   'hidden text-[10px] font-medium sm:block sm:text-xs',
-                  isCurrent ? 'text-sky-DEFAULT' : 'text-muted-foreground'
+                  isCurrent ? 'text-sky' : 'text-muted-foreground'
                 )}
               >
                 {step.label}

@@ -72,7 +72,7 @@ export function ConfirmationSummary(): React.ReactElement {
 
       <Card>
         <CardHeader className="text-center">
-          <CheckCircle2 className="mx-auto size-12 text-sky-DEFAULT" />
+          <CheckCircle2 className="mx-auto size-12 text-sky" />
           <CardTitle className="font-[family-name:var(--font-bebas)] text-4xl tracking-wide">
             Application Received!
           </CardTitle>
@@ -124,13 +124,13 @@ export function ConfirmationSummary(): React.ReactElement {
               <ul className="space-y-2 border-t border-border pt-4 text-sm">
                 <li className="flex items-center justify-between">
                   <span>Tool photos ({TOOL_PHOTO_REQUIREMENTS.length} required)</span>
-                  <span className={summary.all_tools_verified ? 'text-sky-DEFAULT' : 'text-tornado'}>
+                  <span className={summary.all_tools_verified ? 'text-sky' : 'text-tornado'}>
                     {summary.all_tools_verified ? 'Complete' : 'Incomplete'}
                   </span>
                 </li>
                 <li className="flex items-center justify-between">
                   <span>IC agreement signed</span>
-                  <span className={summary.agreement_signed ? 'text-sky-DEFAULT' : 'text-tornado'}>
+                  <span className={summary.agreement_signed ? 'text-sky' : 'text-tornado'}>
                     {summary.agreement_signed ? 'Yes' : 'No'}
                   </span>
                 </li>
@@ -139,7 +139,7 @@ export function ConfirmationSummary(): React.ReactElement {
           ) : null}
 
           <Button
-            className="h-11 w-full bg-sky-DEFAULT font-semibold uppercase tracking-wide hover:bg-sky-dark"
+            className="h-11 w-full bg-sky font-semibold uppercase tracking-wide hover:bg-sky-dark"
             onClick={() => {
               clearApplicantId()
               router.push('/')
@@ -150,7 +150,7 @@ export function ConfirmationSummary(): React.ReactElement {
 
           <p className="text-center text-sm text-muted-foreground">
             Questions? Email{' '}
-            <Link href="mailto:hello@stormsweep.com" className="text-sky-DEFAULT hover:underline">
+            <Link href="mailto:hello@stormsweep.com" className="text-sky hover:underline">
               hello@stormsweep.com
             </Link>
           </p>

@@ -112,7 +112,7 @@ export function ToolPhotosForm(): React.ReactElement {
             Upload photos of all 7 required tools. Each photo is reviewed before
             approval.
           </CardDescription>
-          <p className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold text-sky-DEFAULT">
+          <p className="font-[family-name:var(--font-barlow-condensed)] text-sm font-semibold text-sky">
             {uploadedCount} of {TOOL_PHOTO_REQUIREMENTS.length} uploaded
           </p>
         </CardHeader>
@@ -126,14 +126,14 @@ export function ToolPhotosForm(): React.ReactElement {
                 key={tool.key}
                 className={cn(
                   'rounded-lg border p-4',
-                  isUploaded ? 'border-sky-DEFAULT/40 bg-sky-DEFAULT/5' : 'border-border'
+                  isUploaded ? 'border-sky/40 bg-sky/5' : 'border-border'
                 )}
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       {isUploaded ? (
-                        <Check className="size-5 text-sky-DEFAULT" aria-hidden="true" />
+                        <Check className="size-5 text-sky" aria-hidden="true" />
                       ) : (
                         <Upload className="size-5 text-muted-foreground" aria-hidden="true" />
                       )}
@@ -168,8 +168,8 @@ export function ToolPhotosForm(): React.ReactElement {
                         className={cn(
                           'inline-flex h-10 items-center rounded-md px-4 text-sm font-semibold uppercase tracking-wide',
                           isUploaded
-                            ? 'bg-sky-DEFAULT/10 text-sky-dark hover:bg-sky-DEFAULT/20'
-                            : 'bg-sky-DEFAULT text-white hover:bg-sky-dark',
+                            ? 'bg-sky/10 text-sky-dark hover:bg-sky/20'
+                            : 'bg-sky text-white hover:bg-sky-dark',
                           isUploading && 'pointer-events-none opacity-60'
                         )}
                       >
@@ -209,7 +209,7 @@ export function ToolPhotosForm(): React.ReactElement {
             </Link>
             <Button
               disabled={!allVerified}
-              className="h-11 flex-1 bg-sky-DEFAULT font-semibold uppercase tracking-wide hover:bg-sky-dark"
+              className="h-11 flex-1 bg-sky font-semibold uppercase tracking-wide hover:bg-sky-dark"
               onClick={() => router.push('/sweepers/apply/agreement')}
             >
               Continue to Agreement

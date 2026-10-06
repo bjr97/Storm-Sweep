@@ -33,8 +33,8 @@ export function ApplyStepper({
                 href={step.href}
                 className={cn(
                   'flex items-center gap-2 rounded-full px-3 py-1.5 font-[family-name:var(--font-barlow-condensed)] text-xs font-semibold uppercase tracking-wide transition-colors sm:text-sm',
-                  isActive && 'bg-sky-DEFAULT text-white',
-                  isComplete && !isActive && 'bg-sky-DEFAULT/10 text-sky-dark',
+                  isActive && 'bg-sky text-white',
+                  isComplete && !isActive && 'bg-sky/10 text-sky-dark',
                   !isActive && !isComplete && 'bg-black/5 text-muted-foreground'
                 )}
                 aria-current={isActive ? 'step' : undefined}
@@ -43,7 +43,7 @@ export function ApplyStepper({
                   className={cn(
                     'flex size-6 items-center justify-center rounded-full text-xs',
                     isActive && 'bg-white/20',
-                    isComplete && !isActive && 'bg-sky-DEFAULT/20',
+                    isComplete && !isActive && 'bg-sky/20',
                     !isActive && !isComplete && 'bg-black/10'
                   )}
                 >

@@ -140,7 +140,7 @@ export function AgreementForm(): React.ReactElement {
           ) : null}
 
           {signed ? (
-            <div className="rounded-lg border border-sky-DEFAULT/30 bg-sky-DEFAULT/5 px-4 py-3 text-sm text-sky-dark">
+            <div className="rounded-lg border border-sky/30 bg-sky/5 px-4 py-3 text-sm text-sky-dark">
               Agreement signed. You can continue to confirmation.
             </div>
           ) : null}
@@ -157,7 +157,7 @@ export function AgreementForm(): React.ReactElement {
             </Link>
             <Button
               disabled={!signed}
-              className="h-11 flex-1 bg-sky-DEFAULT font-semibold uppercase tracking-wide hover:bg-sky-dark"
+              className="h-11 flex-1 bg-sky font-semibold uppercase tracking-wide hover:bg-sky-dark"
               onClick={() => router.push('/sweepers/apply/confirmation')}
             >
               Continue to Confirmation

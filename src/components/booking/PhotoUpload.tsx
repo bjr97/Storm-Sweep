@@ -213,8 +213,8 @@ export function PhotoUpload({
         className={cn(
           'relative flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white p-8 text-center transition-all',
           dragActive
-            ? 'border-sky-DEFAULT bg-sky-pale/50'
-            : 'border-border hover:border-sky-DEFAULT/60 hover:bg-sky-pale/20',
+            ? 'border-sky bg-sky-pale/50'
+            : 'border-border hover:border-sky/60 hover:bg-sky-pale/20',
           uploadState === 'uploading' && 'pointer-events-none opacity-80'
         )}
       >
@@ -228,7 +228,7 @@ export function PhotoUpload({
 
         {uploadState === 'uploading' ? (
           <>
-            <Loader2 className="size-10 animate-spin text-sky-DEFAULT" />
+            <Loader2 className="size-10 animate-spin text-sky" />
             <p className="mt-4 font-medium text-shelter">Analyzing your shelter photo…</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Uploading to storage and running AI screening
@@ -247,7 +247,7 @@ export function PhotoUpload({
         ) : (
           <>
             <div className="flex size-14 items-center justify-center rounded-full bg-sky-pale">
-              <ImagePlus className="size-7 text-sky-DEFAULT" />
+              <ImagePlus className="size-7 text-sky" />
             </div>
             <p className="mt-4 font-medium text-shelter">Drag and drop your shelter photo</p>
             <p className="mt-1 text-sm text-muted-foreground">or click to browse (JPG, PNG, WebP)</p>
@@ -279,7 +279,7 @@ export function PhotoUpload({
           className={cn(
             'rounded-xl border p-4',
             gradeDisplay.tone === 'success' && 'border-green-200 bg-green-50',
-            gradeDisplay.tone === 'warning' && 'border-wheat-DEFAULT/40 bg-wheat-pale/50',
+            gradeDisplay.tone === 'warning' && 'border-wheat/40 bg-wheat-pale/50',
             gradeDisplay.tone === 'danger' && 'border-tornado/30 bg-tornado/5'
           )}
         >
@@ -287,7 +287,7 @@ export function PhotoUpload({
             {gradeDisplay.tone === 'success' ? (
               <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-green-600" />
             ) : gradeDisplay.tone === 'warning' ? (
-              <Clock className="mt-0.5 size-5 shrink-0 text-wheat-DEFAULT" />
+              <Clock className="mt-0.5 size-5 shrink-0 text-wheat" />
             ) : (
               <AlertCircle className="mt-0.5 size-5 shrink-0 text-tornado" />
             )}

@@ -59,6 +59,8 @@ export function RegisterForm(): React.ReactElement {
       email: values.email,
       password: values.password,
       options: {
+        // Confirmation email links back to this site (not Supabase's default Site URL).
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         data: {
           full_name: values.fullName,
           phone: values.phone,
@@ -180,7 +182,7 @@ export function RegisterForm(): React.ReactElement {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-10 w-full bg-sky-DEFAULT text-base text-white hover:bg-sky-dark"
+              className="h-10 w-full bg-sky text-base text-white hover:bg-sky-dark"
             >
               {isSubmitting ? 'Creating account…' : 'Create account'}
             </Button>
@@ -190,7 +192,7 @@ export function RegisterForm(): React.ReactElement {
             Already have an account?{' '}
             <Link
               href="/login"
-              className="font-medium text-sky-DEFAULT hover:underline"
+              className="font-medium text-sky hover:underline"
             >
               Sign in
             </Link>
