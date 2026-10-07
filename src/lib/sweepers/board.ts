@@ -6,6 +6,7 @@ import {
   claimPct,
   isOnTime,
   JOB_BOARD,
+  lockedPct,
   sweeperScore,
   tierVisibleAt,
   type SweeperStats,
@@ -260,10 +261,7 @@ export async function getSweeperBoard(sweeperId: string, now: Date = new Date())
     notes: j.notes,
     status: j.status,
     serviceValue: valueOf(j),
-    pct:
-      j.assigned_via === 'claim' && j.claimed_at && j.claim_visible_at
-        ? claimPct(new Date(j.claimed_at).getTime() - new Date(j.claim_visible_at).getTime())
-        : claimPct(Number.POSITIVE_INFINITY),
+    pct: lockedPct(j),
     rescheduledByCustomer: Boolean(j.rescheduled_at && j.claimed_at && new Date(j.rescheduled_at) > new Date(j.claimed_at)),
     lateDropIfDroppedNow:
       !(j.rescheduled_at && j.claimed_at && new Date(j.rescheduled_at) > new Date(j.claimed_at)) &&

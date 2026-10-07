@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { SignOutButton } from '@/components/sweeper/SignOutButton'
+import { SweeperNav } from '@/components/sweeper/SweeperNav'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -30,7 +31,8 @@ export default async function SweeperLayout({
         </Link>
         <SignOutButton />
       </header>
-      <div className="mx-auto w-full max-w-2xl">{children}</div>
+      <div className="mx-auto w-full max-w-2xl pb-20">{children}</div>
+      <SweeperNav />
     </div>
   )
 }

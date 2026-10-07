@@ -398,8 +398,8 @@ Track progress here as phases complete:
 - [ ] Phase 1.8 — Email (Resend)
 - [x] Phase 2.1 — Sweeper dashboard (job board)
 - [x] Phase 2.2 — Job detail + checklist
-- [ ] Phase 2.3 — Sweeper schedule
-- [ ] Phase 2.4 — Sweeper earnings
+- [x] Phase 2.3 — Sweeper schedule
+- [x] Phase 2.4 — Sweeper earnings (+ YTD/1099 on admin Crew)
 - [x] Phase 2.5 — Admin dashboard
 - [x] Phase 2.6 — Admin schedule
 - [x] Phase 2.7 — Admin job management

@@ -3,9 +3,11 @@ import { Medal } from 'lucide-react'
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { EmptyState, Panel } from '@/components/admin/Panel'
 import { TierOverrideSelect } from '@/components/admin/TierOverrideSelect'
+import { formatBusinessDate } from '@/lib/admin/time'
 import { getCrewTiers } from '@/lib/sweepers/board'
+import { getCrewYearTotals, IRS_1099_THRESHOLD_CENTS } from '@/lib/sweepers/earnings'
 import { JOB_BOARD, TIER_LABEL, TIER_ORDER, TIER_RULES } from '@/lib/sweepers/jobBoard'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import type { SweeperTier } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +20,8 @@ const TIER_STYLE: Record<SweeperTier, string> = {
 }
 
 export default async function AdminCrewPage(): Promise<React.ReactElement> {
-  const { crew } = await getCrewTiers()
+  const [{ crew }, yearTotals] = await Promise.all([getCrewTiers(), getCrewYearTotals()])
+  const year = formatBusinessDate(new Date(), { year: 'numeric' })
   const members = Array.from(crew.values()).sort(
     (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier) || b.score - a.score || a.name.localeCompare(b.name)
   )
@@ -56,6 +59,7 @@ export default async function AdminCrewPage(): Promise<React.ReactElement> {
                     <th className="px-3 py-2.5 font-bold">On time</th>
                     <th className="px-3 py-2.5 font-bold">Rating</th>
                     <th className="px-3 py-2.5 font-bold">Late drops (90d)</th>
+                    <th className="px-3 py-2.5 font-bold">Earned {year}</th>
                     <th className="w-44 px-4 py-2.5 font-bold">Override</th>
                   </tr>
                 </thead>
@@ -89,6 +93,12 @@ export default async function AdminCrewPage(): Promise<React.ReactElement> {
                       </td>
                       <td className={cn('px-3 py-3', m.stats.lateDrops90d ? 'font-bold text-[#F1948A]' : 'text-[#F0F0F0]')}>
                         {m.stats.lateDrops90d}
+                      </td>
+                      <td className="px-3 py-3 text-[#F0F0F0]">
+                        {formatCurrency(yearTotals.get(m.id) ?? 0)}
+                        {(yearTotals.get(m.id) ?? 0) >= IRS_1099_THRESHOLD_CENTS ? (
+                          <span className="ml-1.5 rounded bg-wheat/15 px-1.5 py-0.5 text-[10px] font-bold text-wheat-light">1099</span>
+                        ) : null}
                       </td>
                       <td className="px-4 py-3">
                         <TierOverrideSelect sweeperId={m.id} override={m.override} autoTier={m.autoTier} />

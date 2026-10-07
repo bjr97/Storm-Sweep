@@ -82,6 +82,12 @@ export function monthRange(now: Date = new Date(), monthsAgo = 0): Range {
   }
 }
 
+/** Calendar year (business time) containing `now` — e.g. for 1099 totals. */
+export function yearRange(now: Date = new Date()): Range {
+  const d = localDate(now)
+  return { start: localMidnight(d.year, 1, 1), end: localMidnight(d.year + 1, 1, 1) }
+}
+
 export function formatBusinessTime(iso: string): string {
   return new Intl.DateTimeFormat('en-US', {
     timeZone: BUSINESS_TZ,

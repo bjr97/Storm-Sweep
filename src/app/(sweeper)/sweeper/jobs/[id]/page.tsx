@@ -12,7 +12,7 @@ import { SignaturePad } from '@/components/sweeper/run/SignaturePad'
 import { UpgradeSeller, type UpgradeOption } from '@/components/sweeper/run/UpgradeSeller'
 import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
 import { jobTimeLabel } from '@/lib/booking/timeWindows'
-import { calculateSweeperPay, claimPct } from '@/lib/sweepers/jobBoard'
+import { calculateSweeperPay, lockedPct } from '@/lib/sweepers/jobBoard'
 import {
   buildChecklist,
   isItemDone,
@@ -82,10 +82,7 @@ export default async function SweeperJobPage({ params }: { params: { id: string 
     return booked || !quote ? [] : [{ id, name, ...quote }]
   })
 
-  const pct =
-    job.assigned_via === 'claim' && job.claimed_at && job.claim_visible_at
-      ? claimPct(new Date(job.claimed_at).getTime() - new Date(job.claim_visible_at).getTime())
-      : PRICING.sweeper.base_pct
+  const pct = lockedPct(job)
   const hasVideos = media.some((m) => m.kind === 'video_before') && media.some((m) => m.kind === 'video_after')
   const pay = calculateSweeperPay({
     serviceValue: job.service_value ?? job.total_amount,

@@ -124,3 +124,15 @@ export function autoTier(stats: SweeperStats): SweeperTier {
 export function isOnTime(scheduledAt: Date, completedAt: Date): boolean {
   return businessDaysLate(scheduledAt, completedAt) <= 0
 }
+
+/** The speed % locked in for a job: claim speed for claimed jobs, base rate for admin assignments. */
+export function lockedPct(job: {
+  assigned_via: string | null
+  claimed_at: string | null
+  claim_visible_at: string | null
+}): number {
+  if (job.assigned_via === 'claim' && job.claimed_at && job.claim_visible_at) {
+    return claimPct(new Date(job.claimed_at).getTime() - new Date(job.claim_visible_at).getTime())
+  }
+  return s.base_pct
+}
