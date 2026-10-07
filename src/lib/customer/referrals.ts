@@ -26,10 +26,19 @@ export async function ensureReferralCode(customerId: string, name: string | null
   const stem = (name ?? '').split(/\s+/)[0].toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || 'FRIEND'
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = `${stem}${Array.from({ length: 4 }, () => ALPHABET[randomInt(ALPHABET.length)]).join('')}`
-    const { error } = await supabase.from('profiles').update({ referral_code: code }).eq('id', customerId).is('referral_code', null)
+    // Use the row returned by the update itself: re-running the identical
+    // SELECT inside a page render returns React's memoized (pre-update) result.
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ referral_code: code })
+      .eq('id', customerId)
+      .is('referral_code', null)
+      .select('referral_code')
     if (!error) {
-      const { data } = await supabase.from('profiles').select('referral_code').eq('id', customerId).maybeSingle()
-      if (data?.referral_code) return data.referral_code
+      if (data?.[0]?.referral_code) return data[0].referral_code
+      // Another request set it first; read it back with a different query shape.
+      const { data: again } = await supabase.from('profiles').select('id, referral_code').eq('id', customerId).maybeSingle()
+      if (again?.referral_code) return again.referral_code
     } else if (error.code !== '23505') {
       throw error
     }

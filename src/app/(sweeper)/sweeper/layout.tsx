@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   manifest: '/sweeper.webmanifest',
   appleWebApp: { capable: true, title: 'Sweeper', statusBarStyle: 'black-translucent' },
-  icons: { apple: '/sweeper-icon/180' },
+  icons: { apple: '/sweeper-icon-180.png' },
 }
 
 export const viewport: Viewport = { themeColor: '#141416' }
