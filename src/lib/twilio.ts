@@ -425,7 +425,7 @@ export function buildTemplateDataFromContext(
       return {
         googleUrl:
           (customData.googleUrl as string) ??
-          'https://g.page/r/stormsweep/review',
+          (job ? `${appUrl}/history/${job.id}` : `${appUrl}/dashboard`),
       }
     case 'membership_renewal':
       return {

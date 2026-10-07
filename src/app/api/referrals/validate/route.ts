@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 import { checkInvite } from '@/lib/customer/referrals'
 
+export const dynamic = 'force-dynamic'
+
 // Public: lets the booking page show the friend discount before checkout.
 // Checkout re-validates server-side, so this only drives the UI.
 const querySchema = z.object({ code: z.string().trim().min(1).max(24), email: z.string().trim().email() })
