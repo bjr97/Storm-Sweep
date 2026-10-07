@@ -78,6 +78,7 @@ export interface Database {
           visits_used: number
           membership_commitment_ends_at: string | null
           sweeper_tier_override: SweeperTier | null
+          marketing_photo_consent: boolean
           created_at: string
         }
         Insert: {
@@ -94,6 +95,7 @@ export interface Database {
           visits_used?: number
           membership_commitment_ends_at?: string | null
           sweeper_tier_override?: SweeperTier | null
+          marketing_photo_consent?: boolean
           created_at?: string
         }
         Update: {
@@ -110,6 +112,7 @@ export interface Database {
           visits_used?: number
           membership_commitment_ends_at?: string | null
           sweeper_tier_override?: SweeperTier | null
+          marketing_photo_consent?: boolean
           created_at?: string
         }
         Relationships: []
@@ -196,6 +199,10 @@ export interface Database {
           arrival_distance_m: number | null
           arrival_verified: boolean | null
           customer_signature_name: string | null
+          rescheduled_at: string | null
+          cancelled_at: string | null
+          cancelled_by: 'customer' | 'admin' | null
+          refund_due: boolean
           referral_source: string | null
           partner_id: string | null
           completed_at: string | null
@@ -242,6 +249,10 @@ export interface Database {
           arrival_distance_m?: number | null
           arrival_verified?: boolean | null
           customer_signature_name?: string | null
+          rescheduled_at?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: 'customer' | 'admin' | null
+          refund_due?: boolean
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -288,6 +299,10 @@ export interface Database {
           arrival_distance_m?: number | null
           arrival_verified?: boolean | null
           customer_signature_name?: string | null
+          rescheduled_at?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: 'customer' | 'admin' | null
+          refund_due?: boolean
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null

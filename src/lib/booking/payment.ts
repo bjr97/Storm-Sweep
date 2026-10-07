@@ -106,7 +106,7 @@ export function buildPaymentData(
     notes: customerValues.notes,
     referralSource,
     membershipPlan:
-      serviceSelection.membership === 'one_time'
+      serviceSelection.membership === 'one_time' || serviceSelection.membership === 'member'
         ? 'none'
         : serviceSelection.membership,
     photoGrade: photoResult?.grade,

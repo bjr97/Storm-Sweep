@@ -301,9 +301,12 @@ export async function registerMedia(
   if (!found?.some((f) => f.name === name)) return fail('Upload not found — try again', 'NOT_UPLOADED', 400)
 
   const before = await currentState(job)
+  // Marketing consent follows the customer's account-wide opt-in (before/after only).
+  const { data: customer } = await supabase.from('profiles').select('marketing_photo_consent').eq('id', job.customer_id).maybeSingle()
+  const consent = (kind === 'before' || kind === 'after') && customer?.marketing_photo_consent === true
   const { data, error } = await supabase
     .from('job_photos')
-    .insert({ job_id: jobId, photo_type: kind, storage_path: path, uploaded_by: sweeperId, checklist_item: checklistItem })
+    .insert({ job_id: jobId, photo_type: kind, storage_path: path, uploaded_by: sweeperId, checklist_item: checklistItem, customer_consent: consent })
     .select('id')
     .single()
   if (error) throw error

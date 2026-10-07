@@ -54,12 +54,21 @@ function membershipDetails(
   return { price: 0, label: null }
 }
 
+/**
+ * `membership: 'member'` = an existing Storm Ready member booking another visit:
+ * no new subscription; the clean is covered while `member.visitsUsed` is under
+ * the yearly allowance, and upgrades get the member discount either way.
+ */
 export function calculateBookingPrice(
-  selection: ServiceSelectionValues
+  selection: ServiceSelectionValues,
+  member: { visitsUsed: number } | null = null
 ): BookingPriceBreakdown {
   const shelterPrice = getShelterPrice(selection.shelter_size)
   const membership = membershipDetails(selection.membership)
-  const isMember = membership.price > 0
+  const existingMember = selection.membership === 'member'
+  const isMember = membership.price > 0 || existingMember
+  const visitNumber = existingMember ? (member?.visitsUsed ?? 0) + 1 : 1
+  const cleanCovered = isMember && visitNumber <= PRICING.membership.visits_per_year
   const isQuoteRequired =
     selection.shelter_size === 'xlarge' || shelterPrice === null
 
@@ -85,11 +94,11 @@ export function calculateBookingPrice(
   let cleanCharge: number
   let upgrades = 0
 
-  if (isMember) {
+  if (cleanCovered) {
     // Membership covers the clean up to standard size; larger pays the difference.
     const sizeDifference = Math.max(0, shelterPrice - coveredCleanPrice)
     lineItems.push({
-      label: `Deep Clean (${selection.shelter_size}) — Storm Ready visit 1 of ${PRICING.membership.visits_per_year}`,
+      label: `Deep Clean (${selection.shelter_size}) — Storm Ready visit ${visitNumber} of ${PRICING.membership.visits_per_year}`,
       amount: 0,
     })
     if (sizeDifference > 0) {
@@ -109,7 +118,7 @@ export function calculateBookingPrice(
 
   if (selection.full_package) {
     upgrades = fullPackageUpgrades
-    if (isMember) {
+    if (cleanCovered) {
       lineItems.push({
         label: `Full Package upgrades (LED + ${FULL_PACKAGE_KIT_NAME} kit)`,
         amount: upgrades,
@@ -146,7 +155,7 @@ export function calculateBookingPrice(
     serviceSubtotal: total,
     membershipPrice: membership.price,
     membershipLabel: membership.label,
-    isMemberVisit: isMember,
+    isMemberVisit: cleanCovered,
     total,
     deposit: calculateDeposit(total),
     isQuoteRequired: false,

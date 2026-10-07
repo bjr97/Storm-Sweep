@@ -46,7 +46,8 @@ export const shelterSizeSchema = z.enum([
   'xlarge',
 ])
 
-export const membershipTypeSchema = z.enum(['one_time', 'annual', 'monthly'])
+// 'member' = already a Storm Ready member (no new subscription).
+export const membershipTypeSchema = z.enum(['one_time', 'annual', 'monthly', 'member'])
 
 export const serviceSelectionSchema = z.object({
   shelter_size: shelterSizeSchema,

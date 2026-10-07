@@ -197,6 +197,12 @@ Customer Details (Step 3) specifics:
    - Media uploads use one-time signed upload URLs; never public bucket reads.
 
 2. **Photo consent:**
+   - Account-wide opt-in: `profiles.marketing_photo_consent` (Account page),
+     mirrored onto `job_photos.customer_consent` for before/after photos.
+   - Customers can reschedule/cancel online until 48h before (`src/lib/customer`);
+     cancel with a paid deposit sets `jobs.refund_due` for the admin.
+   - KNOWN GAP: checkout trusts the client-sent total — re-price server-side
+     before Stripe goes live.
    - Service documentation: auto-opted-in (disclosed in T&Cs)
    - Marketing use: explicit opt-in ONLY — default is false
    - Never publish content without `photo_consent: true` on job_photos record
@@ -393,11 +399,11 @@ Track progress here as phases complete:
 - [x] Phase 2.5 — Admin dashboard
 - [x] Phase 2.6 — Admin schedule
 - [x] Phase 2.7 — Admin job management
-- [ ] Phase 3.1 — Customer dashboard
-- [ ] Phase 3.2 — Job history
-- [ ] Phase 3.3 — Photos gallery
-- [ ] Phase 3.4 — Membership + Stripe subscriptions
-- [ ] Phase 3.5 — Account settings
+- [x] Phase 3.1 — Customer dashboard
+- [x] Phase 3.2 — Job history (+ /history/[id] service report)
+- [x] Phase 3.3 — Photos gallery
+- [ ] Phase 3.4 — Membership + Stripe subscriptions (portal view + member booking done; Stripe billing pending)
+- [x] Phase 3.5 — Account settings
 - [ ] Phase 4.1 — Revenue charts
 - [ ] Phase 4.2 — Partners management
 - [ ] Phase 4.3 — Supabase Realtime

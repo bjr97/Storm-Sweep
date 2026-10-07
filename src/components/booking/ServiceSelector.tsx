@@ -10,6 +10,8 @@ import type { ShelterSize } from '@/types/database'
 type ServiceSelectorProps = {
   values: ServiceSelectionValues
   onChange: (values: ServiceSelectionValues) => void
+  /** Already a Storm Ready member — hide plan options, show visit allowance. */
+  member?: { visitsUsed: number } | null
 }
 
 const ADDON_ICONS: Record<HardwareAddonId, LucideIcon> = {
@@ -21,7 +23,7 @@ const ADDON_ICONS: Record<HardwareAddonId, LucideIcon> = {
 const FULL_PACKAGE_KIT_NAME =
   PREP_KIT_BUNDLES.find((bundle) => bundle.id === PRICING.full_package_kit)?.name ?? 'prep kit'
 
-export function ServiceSelector({ values, onChange }: ServiceSelectorProps): React.ReactElement {
+export function ServiceSelector({ values, onChange, member = null }: ServiceSelectorProps): React.ReactElement {
   function updateField<K extends keyof ServiceSelectionValues>(
     field: K,
     value: ServiceSelectionValues[K]
@@ -149,6 +151,17 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
         </div>
       </section>
 
+      {member ? (
+        <section className="rounded-xl border border-wheat bg-wheat-pale/40 p-4">
+          <h2 className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-shelter">STORM READY MEMBER</h2>
+          <p className="mt-1 text-sm text-shelter">
+            {member.visitsUsed < PRICING.membership.visits_per_year
+              ? `This is your included visit ${member.visitsUsed + 1} of ${PRICING.membership.visits_per_year} this membership year — the clean is covered (large shelters pay the size difference).`
+              : `You've used both included visits this year, so this clean is priced normally.`}{' '}
+            You still get 10% off every upgrade.
+          </p>
+        </section>
+      ) : (
       <section>
         <h2 className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-shelter">MEMBERSHIP</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -189,6 +202,7 @@ export function ServiceSelector({ values, onChange }: ServiceSelectorProps): Rea
           })}
         </div>
       </section>
+      )}
     </div>
   )
 }

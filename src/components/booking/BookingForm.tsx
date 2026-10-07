@@ -43,6 +43,8 @@ type BookingFormProps = {
   initialCustomer?: BookingInitialCustomer | null
   referralCode?: string | null
   isLoggedIn?: boolean
+  /** Active Storm Ready member booking another visit. */
+  member?: { visitsUsed: number } | null
 }
 
 type BookingMembershipPlan = 'none' | 'annual' | 'monthly' | 'annual_2yr'
@@ -68,6 +70,10 @@ function mapMembershipPlan(
 ): BookingMembershipPlan {
   if (membership === 'one_time') {
     return 'none'
+  }
+  // Existing members: no new plan, but kits still get the member discount.
+  if (membership === 'member') {
+    return 'annual'
   }
   return membership
 }
@@ -99,14 +105,16 @@ export function BookingForm({
   initialCustomer,
   referralCode,
   isLoggedIn = false,
+  member = null,
 }: BookingFormProps): React.ReactElement {
+  const initialService: ServiceSelectionValues = { ...DEFAULT_SERVICE, membership: member ? 'member' : 'one_time' }
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [bookingId] = useState(() => crypto.randomUUID())
   const [quoteSubmitting, setQuoteSubmitting] = useState(false)
   const [quoteError, setQuoteError] = useState<string | null>(null)
   const [serviceSelection, setServiceSelection] =
-    useState<ServiceSelectionValues>(DEFAULT_SERVICE)
+    useState<ServiceSelectionValues>(initialService)
   const [kitSelection, setKitSelection] = useState<KitSelection>({
     selectedBundle: null,
     aLaCarteItems: [],
@@ -124,7 +132,7 @@ export function BookingForm({
 
   const serviceForm = useForm<ServiceSelectionValues>({
     resolver: zodResolver(serviceSelectionSchema),
-    defaultValues: DEFAULT_SERVICE,
+    defaultValues: initialService,
     mode: 'onChange',
   })
 
@@ -161,9 +169,7 @@ export function BookingForm({
   const customerValues = watch()
 
   const bookingState = useMemo<BookingState>(() => {
-    const basePricing = calculateBookingPrice({
-      ...serviceSelection,
-    })
+    const basePricing = calculateBookingPrice({ ...serviceSelection }, member)
 
     return {
       shelterSize: serviceSelection.shelter_size,
@@ -171,12 +177,12 @@ export function BookingForm({
       serviceTotal: basePricing.serviceSubtotal ?? 0,
       kitSelection,
     }
-  }, [serviceSelection, kitSelection])
+  }, [serviceSelection, kitSelection, member])
 
   const includedKitBundle = serviceSelection.full_package ? PRICING.full_package_kit : null
 
   const pricing = useMemo(() => {
-    const base = calculateBookingPrice(serviceSelection)
+    const base = calculateBookingPrice(serviceSelection, member)
     const kit = priceKitSelection(kitSelection, {
       membershipPlan: bookingState.membershipPlan,
       includedBundle: includedKitBundle,
@@ -196,7 +202,7 @@ export function BookingForm({
       deposit: calculateDeposit(total),
       lineItems: [...base.lineItems, ...kit.lines],
     }
-  }, [serviceSelection, kitSelection, bookingState.membershipPlan, includedKitBundle])
+  }, [serviceSelection, kitSelection, bookingState.membershipPlan, includedKitBundle, member])
 
   const paymentData = useMemo(
     () =>
@@ -298,6 +304,7 @@ export function BookingForm({
         return (
           <ServiceSelector
             values={serviceSelection}
+            member={member}
             onChange={(values) => {
               setServiceSelection(values)
               serviceForm.reset(values)

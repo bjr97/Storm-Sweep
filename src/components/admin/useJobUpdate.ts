@@ -7,6 +7,7 @@ export type JobPatch = {
   sweeperId?: string | null
   status?: 'pending' | 'confirmed' | 'cancelled'
   approvePhoto?: true
+  markRefunded?: true
 }
 
 /** PATCHes /api/jobs/[id] and refreshes the server-rendered page on success. */

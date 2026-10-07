@@ -307,3 +307,20 @@ export async function getPausedJobs(): Promise<PausedJob[]> {
   const address = new Map(jobs.map((j) => [j.id, j.address]))
   return issues.map((i) => ({ jobId: i.job_id, kind: i.kind, note: i.note, reportedAt: i.created_at, address: address.get(i.job_id) ?? '' }))
 }
+
+export type RefundDue = { jobId: string; customerName: string; amount: number; cancelledAt: string | null }
+
+/** Cancelled visits whose deposit still needs refunding (manual until Stripe is live). */
+export async function getRefundsDue(): Promise<RefundDue[]> {
+  const supabase = createClient()
+  const { data: jobs, error } = await supabase
+    .from('jobs')
+    .select('id, customer_id, deposit_amount, cancelled_at')
+    .eq('refund_due', true)
+    .order('cancelled_at')
+  if (error) fail('refunds due', error)
+  if (jobs.length === 0) return []
+  const { data: people } = await supabase.from('profiles').select('id, full_name').in('id', jobs.map((j) => j.customer_id))
+  const name = new Map((people ?? []).map((p) => [p.id, p.full_name ?? 'Customer']))
+  return jobs.map((j) => ({ jobId: j.id, customerName: name.get(j.customer_id) ?? 'Customer', amount: j.deposit_amount ?? 0, cancelledAt: j.cancelled_at }))
+}

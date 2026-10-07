@@ -13,8 +13,10 @@ const patchSchema = z
     sweeperId: z.string().uuid().nullable().optional(),
     status: z.enum(ADMIN_SETTABLE_STATUSES).optional(),
     approvePhoto: z.literal(true).optional(),
+    /** Admin refunded a cancelled visit's deposit outside the app. */
+    markRefunded: z.literal(true).optional(),
   })
-  .refine((v) => v.sweeperId !== undefined || v.status !== undefined || v.approvePhoto !== undefined, {
+  .refine((v) => v.sweeperId !== undefined || v.status !== undefined || v.approvePhoto !== undefined || v.markRefunded !== undefined, {
     message: 'Nothing to update',
   })
 
@@ -44,7 +46,7 @@ export async function PATCH(
     const supabase = createClient()
     const { data: job, error: loadError } = await supabase
       .from('jobs')
-      .select('id, status, sweeper_id, customer_id, address, scheduled_at, photo_approved')
+      .select('id, status, sweeper_id, customer_id, address, scheduled_at, photo_approved, refund_due')
       .eq('id', jobId)
       .maybeSingle()
 
@@ -59,6 +61,14 @@ export async function PATCH(
     }
 
     const update: JobUpdate = {}
+
+    if (input.markRefunded) {
+      if (!job.refund_due) {
+        return Response.json({ error: 'No refund is due on this job', code: 'NO_REFUND_DUE' }, { status: 409 })
+      }
+      update.refund_due = false
+      update.payment_status = 'refunded'
+    }
 
     if (input.approvePhoto) {
       update.photo_approved = true

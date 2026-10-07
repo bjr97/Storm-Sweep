@@ -7,6 +7,7 @@ import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { AssignSweeperSelect } from '@/components/admin/AssignSweeperSelect'
 import { IssueDecision } from '@/components/admin/IssueDecision'
 import { JobActions } from '@/components/admin/JobActions'
+import { MarkRefundedButton } from '@/components/admin/MarkRefundedButton'
 import { EmptyState, Panel } from '@/components/admin/Panel'
 import { StatusPill } from '@/components/admin/StatusPill'
 import { getJobDetail, listSweepers } from '@/lib/admin/jobs'
@@ -77,6 +78,17 @@ export default async function AdminJobDetailPage({
         <Link href="/admin/jobs" className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-light hover:underline">
           <ArrowLeft className="size-3.5" aria-hidden="true" /> All jobs
         </Link>
+
+        {job.refund_due ? (
+          <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-wheat/50 bg-wheat/10 p-4 text-sm text-[#F0F0F0]">
+            <p>
+              <b>Refund due.</b> {job.cancelled_by === 'customer' ? 'The customer cancelled' : 'This visit was cancelled'}
+              {job.cancelled_at ? ` on ${formatBusinessDate(new Date(job.cancelled_at), { month: 'short', day: 'numeric' })}` : ''} after paying{' '}
+              {formatCurrency(job.deposit_amount ?? 0)}. Refund it in Stripe/PayPal, then mark it here.
+            </p>
+            <MarkRefundedButton jobId={job.id} />
+          </div>
+        ) : null}
 
         {openIssue ? (
           <div role="alert" className="flex gap-3 rounded-xl border border-tornado/60 bg-tornado/15 p-4 text-sm text-[#F0F0F0]">

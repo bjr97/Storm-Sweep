@@ -10,6 +10,7 @@ type BookPageProps = {
 async function getInitialCustomer(): Promise<{
   customer: BookingInitialCustomer | null
   isLoggedIn: boolean
+  member: { visitsUsed: number } | null
 }> {
   const supabase = createClient()
   const {
@@ -17,17 +18,18 @@ async function getInitialCustomer(): Promise<{
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { customer: null, isLoggedIn: false }
+    return { customer: null, isLoggedIn: false, member: null }
   }
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, phone, address')
+    .select('full_name, phone, address, membership_status, visits_used')
     .eq('id', user.id)
     .single()
 
   return {
     isLoggedIn: true,
+    member: profile?.membership_status === 'active' ? { visitsUsed: profile.visits_used } : null,
     customer: {
       full_name: profile?.full_name ?? '',
       email: user.email ?? '',
@@ -42,12 +44,13 @@ async function BookPageContent({
 }: {
   referralCode?: string
 }): Promise<React.ReactElement> {
-  const { customer, isLoggedIn } = await getInitialCustomer()
+  const { customer, isLoggedIn, member } = await getInitialCustomer()
 
   return (
     <BookingForm
       initialCustomer={customer}
       isLoggedIn={isLoggedIn}
+      member={member}
       referralCode={referralCode ?? null}
     />
   )

@@ -106,7 +106,7 @@ export async function getCrewTiers(now: Date = new Date()): Promise<{
 }
 
 const BOARD_COLUMNS =
-  'id, scheduled_at, time_window, address, shelter_size, service_type, service_value, total_amount, board_opened_at, status, sweeper_id, notes, customer_id, claimed_at, claim_visible_at, assigned_via'
+  'id, scheduled_at, time_window, address, shelter_size, service_type, service_value, total_amount, board_opened_at, status, sweeper_id, notes, customer_id, claimed_at, claim_visible_at, assigned_via, rescheduled_at'
 
 type BoardRow = Pick<
   Job,
@@ -126,6 +126,7 @@ type BoardRow = Pick<
   | 'claimed_at'
   | 'claim_visible_at'
   | 'assigned_via'
+  | 'rescheduled_at'
 >
 
 export type OpenJob = {
@@ -157,6 +158,8 @@ export type MyJob = {
   /** Locked-in speed % (null for admin assignments — base rate applies). */
   pct: number
   lateDropIfDroppedNow: boolean
+  /** Customer moved the date after this Sweeper took the job — drop is free. */
+  rescheduledByCustomer: boolean
 }
 
 export type SweeperBoard = {
@@ -261,9 +264,10 @@ export async function getSweeperBoard(sweeperId: string, now: Date = new Date())
       j.assigned_via === 'claim' && j.claimed_at && j.claim_visible_at
         ? claimPct(new Date(j.claimed_at).getTime() - new Date(j.claim_visible_at).getTime())
         : claimPct(Number.POSITIVE_INFINITY),
-    lateDropIfDroppedNow: j.scheduled_at
-      ? new Date(j.scheduled_at).getTime() - now.getTime() < JOB_BOARD.FREE_DROP_HOURS * 3_600_000
-      : false,
+    rescheduledByCustomer: Boolean(j.rescheduled_at && j.claimed_at && new Date(j.rescheduled_at) > new Date(j.claimed_at)),
+    lateDropIfDroppedNow:
+      !(j.rescheduled_at && j.claimed_at && new Date(j.rescheduled_at) > new Date(j.claimed_at)) &&
+      (j.scheduled_at ? new Date(j.scheduled_at).getTime() - now.getTime() < JOB_BOARD.FREE_DROP_HOURS * 3_600_000 : false),
   }))
 
   return { me, open, upcoming: { count: laterCount, nextAt: nextAt?.toISOString() ?? null }, mine }
@@ -343,7 +347,7 @@ export async function dropJob(
   const supabase = createServiceClient()
   const { data: job, error } = await supabase
     .from('jobs')
-    .select('id, sweeper_id, status, scheduled_at')
+    .select('id, sweeper_id, status, scheduled_at, rescheduled_at, claimed_at')
     .eq('id', jobId)
     .maybeSingle()
   if (error) throw error
@@ -352,9 +356,13 @@ export async function dropJob(
     return { error: 'Jobs already started or finished can’t be dropped — contact the office', code: 'LOCKED', status: 409 }
   }
 
-  const late = job.scheduled_at
-    ? new Date(job.scheduled_at).getTime() - now.getTime() < JOB_BOARD.FREE_DROP_HOURS * 3_600_000
-    : false
+  // A customer reschedule after the claim makes any drop free.
+  const movedByCustomer = Boolean(job.rescheduled_at && job.claimed_at && new Date(job.rescheduled_at) > new Date(job.claimed_at))
+  const late =
+    !movedByCustomer &&
+    (job.scheduled_at
+      ? new Date(job.scheduled_at).getTime() - now.getTime() < JOB_BOARD.FREE_DROP_HOURS * 3_600_000
+      : false)
 
   // Trigger re-opens the job on the board (fresh drip) when sweeper_id clears.
   const { data: dropped, error: uErr } = await supabase
