@@ -25,7 +25,7 @@ export type JobEarning = {
   pay: PayBreakdown
 }
 
-type Row = {
+export type CompletedJobRow = {
   id: string
   sweeper_id: string | null
   customer_id: string
@@ -38,12 +38,14 @@ type Row = {
   assigned_via: string | null
   claimed_at: string | null
   claim_visible_at: string | null
+  referral_source: string | null
+  partner_id: string | null
 }
 
-async function completedJobs(range: Range, sweeperId?: string): Promise<Row[]> {
+async function completedJobs(range: Range, sweeperId?: string): Promise<CompletedJobRow[]> {
   let query = createServiceClient()
     .from('jobs')
-    .select('id, sweeper_id, customer_id, address, service_type, service_value, total_amount, scheduled_at, completed_at, assigned_via, claimed_at, claim_visible_at')
+    .select('id, sweeper_id, customer_id, address, service_type, service_value, total_amount, scheduled_at, completed_at, assigned_via, claimed_at, claim_visible_at, referral_source, partner_id')
     .eq('status', 'complete')
     .not('sweeper_id', 'is', null)
     .gte('completed_at', range.start.toISOString())
@@ -55,7 +57,7 @@ async function completedJobs(range: Range, sweeperId?: string): Promise<Row[]> {
   return data
 }
 
-async function payFor(rows: Row[]): Promise<Map<string, { pay: PayBreakdown; upgrades: number; video: boolean }>> {
+async function payFor(rows: CompletedJobRow[]): Promise<Map<string, { pay: PayBreakdown; upgrades: number; video: boolean }>> {
   const result = new Map<string, { pay: PayBreakdown; upgrades: number; video: boolean }>()
   if (rows.length === 0) return result
   const supabase = createServiceClient()
@@ -130,4 +132,11 @@ export async function getCrewYearTotals(now: Date = new Date()): Promise<Map<str
     totals.set(r.sweeper_id, (totals.get(r.sweeper_id) ?? 0) + (pays.get(r.id)?.pay.total ?? 0))
   }
   return totals
+}
+
+/** Completed jobs in a range with their Sweeper pay (admin revenue / margin). */
+export async function getCompletedJobPay(range: Range): Promise<{ row: CompletedJobRow; pay: PayBreakdown }[]> {
+  const rows = await completedJobs(range)
+  const pays = await payFor(rows)
+  return rows.map((row) => ({ row, pay: pays.get(row.id)!.pay }))
 }

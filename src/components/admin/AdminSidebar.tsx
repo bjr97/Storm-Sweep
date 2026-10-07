@@ -42,9 +42,9 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Business',
     items: [
-      { label: 'Revenue', icon: DollarSign, href: '/admin/revenue', built: false },
+      { label: 'Revenue', icon: DollarSign, href: '/admin/revenue', built: true },
       { label: 'Marketing', icon: Megaphone, href: '/admin/marketing', built: false },
-      { label: 'Partners', icon: Handshake, href: '/admin/partners', built: false },
+      { label: 'Partners', icon: Handshake, href: '/admin/partners', built: true },
     ],
   },
 ]

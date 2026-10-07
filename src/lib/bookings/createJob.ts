@@ -90,7 +90,7 @@ async function resolvePartnerId(
   const { data } = await supabase
     .from('partners')
     .select('id')
-    .eq('referral_code', referralSource)
+    .eq('referral_code', referralSource.trim().toUpperCase()) // codes are stored uppercase
     .eq('active', true)
     .maybeSingle()
 

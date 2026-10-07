@@ -264,6 +264,9 @@ Customer Details (Step 3) specifics:
 
 7. **Partner referrals:** When `?ref=CODE` param present at booking,
    look up partner by referral_code, set partner_id on job record.
+   Codes are stored uppercase and matched case-insensitively. A referral is
+   earned when the referred job is COMPLETED; owed = completed x
+   payout_per_referral - total_paid_out (computed, see `src/lib/admin/partners.ts`).
 
 8. **Membership visits:** Storm Ready = 2 cleanings/yr INCLUDED in the fee.
    The visit booked at signup is #1 (clean = $0; covers up to standard size,
@@ -408,8 +411,8 @@ Track progress here as phases complete:
 - [x] Phase 3.3 — Photos gallery
 - [ ] Phase 3.4 — Membership + Stripe subscriptions (portal view + member booking done; Stripe billing pending)
 - [x] Phase 3.5 — Account settings
-- [ ] Phase 4.1 — Revenue charts
-- [ ] Phase 4.2 — Partners management
+- [x] Phase 4.1 — Revenue charts (/admin/revenue)
+- [x] Phase 4.2 — Partners management (/admin/partners)
 - [ ] Phase 4.3 — Supabase Realtime
 - [ ] Phase 4.4 — Google Maps routes
 - [ ] Phase 4.5 — Referral program
