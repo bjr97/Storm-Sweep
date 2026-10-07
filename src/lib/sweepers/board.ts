@@ -7,6 +7,7 @@ import {
   isOnTime,
   JOB_BOARD,
   lockedPct,
+  potentialPay,
   sweeperScore,
   tierVisibleAt,
   type SweeperStats,
@@ -24,6 +25,7 @@ export type CrewMemberTier = {
   id: string
   name: string
   phone: string | null
+  available: boolean
   tier: SweeperTier
   autoTier: SweeperTier
   override: SweeperTier | null
@@ -38,7 +40,7 @@ export async function getCrewTiers(now: Date = new Date()): Promise<{
   const supabase = createServiceClient()
   const { data: sweepers, error } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, sweeper_tier_override')
+    .select('id, full_name, phone, sweeper_tier_override, sweeper_available')
     .eq('role', 'sweeper')
   if (error) throw error
 
@@ -96,6 +98,7 @@ export async function getCrewTiers(now: Date = new Date()): Promise<{
       id: s.id,
       name: s.full_name ?? 'Sweeper',
       phone: s.phone,
+      available: s.sweeper_available,
       tier,
       autoTier: auto,
       override: s.sweeper_tier_override,
@@ -169,6 +172,8 @@ export type SweeperBoard = {
   /** Jobs on the board that open to this Sweeper's tier later. */
   upcoming: { count: number; nextAt: string | null }
   mine: MyJob[]
+  /** Today (business day): scheduled jobs, completed, and estimated pay if all finish on time. */
+  today: { jobs: number; done: number; estimated: number }
 }
 
 const valueOf = (j: Pick<Job, 'service_value' | 'total_amount'>): number => j.service_value ?? j.total_amount
@@ -268,7 +273,17 @@ export async function getSweeperBoard(sweeperId: string, now: Date = new Date())
       (j.scheduled_at ? new Date(j.scheduled_at).getTime() - now.getTime() < JOB_BOARD.FREE_DROP_HOURS * 3_600_000 : false),
   }))
 
-  return { me, open, upcoming: { count: laterCount, nextAt: nextAt?.toISOString() ?? null }, mine }
+  const todayRange = dayRange(now)
+  const todays = mineRows.filter(
+    (j) => j.scheduled_at && new Date(j.scheduled_at) >= todayRange.start && new Date(j.scheduled_at) < todayRange.end
+  )
+  const todayStats = {
+    jobs: todays.length,
+    done: todays.filter((j) => j.status === 'complete').length,
+    estimated: todays.reduce((n, j) => n + potentialPay(valueOf(j), lockedPct(j)), 0),
+  }
+
+  return { me, open, upcoming: { count: laterCount, nextAt: nextAt?.toISOString() ?? null }, mine, today: todayStats }
 }
 
 // ---- Actions ----------------------------------------------------------------

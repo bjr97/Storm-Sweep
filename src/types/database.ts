@@ -79,6 +79,9 @@ export interface Database {
           membership_commitment_ends_at: string | null
           sweeper_tier_override: SweeperTier | null
           marketing_photo_consent: boolean
+          sweeper_available: boolean
+          referral_code: string | null
+          referral_credit: number
           created_at: string
         }
         Insert: {
@@ -96,6 +99,9 @@ export interface Database {
           membership_commitment_ends_at?: string | null
           sweeper_tier_override?: SweeperTier | null
           marketing_photo_consent?: boolean
+          sweeper_available?: boolean
+          referral_code?: string | null
+          referral_credit?: number
           created_at?: string
         }
         Update: {
@@ -113,6 +119,9 @@ export interface Database {
           membership_commitment_ends_at?: string | null
           sweeper_tier_override?: SweeperTier | null
           marketing_photo_consent?: boolean
+          sweeper_available?: boolean
+          referral_code?: string | null
+          referral_credit?: number
           created_at?: string
         }
         Relationships: []
@@ -203,6 +212,10 @@ export interface Database {
           cancelled_at: string | null
           cancelled_by: 'customer' | 'admin' | null
           refund_due: boolean
+          referred_by: string | null
+          referral_discount: number
+          credit_applied: number
+          referral_rewarded_at: string | null
           referral_source: string | null
           partner_id: string | null
           completed_at: string | null
@@ -253,6 +266,10 @@ export interface Database {
           cancelled_at?: string | null
           cancelled_by?: 'customer' | 'admin' | null
           refund_due?: boolean
+          referred_by?: string | null
+          referral_discount?: number
+          credit_applied?: number
+          referral_rewarded_at?: string | null
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -303,6 +320,10 @@ export interface Database {
           cancelled_at?: string | null
           cancelled_by?: 'customer' | 'admin' | null
           refund_due?: boolean
+          referred_by?: string | null
+          referral_discount?: number
+          credit_applied?: number
+          referral_rewarded_at?: string | null
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null

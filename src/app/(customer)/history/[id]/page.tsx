@@ -9,7 +9,7 @@ import { StatusBadge, VisitFacts } from '@/components/customer/VisitSummary'
 import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
 import { currentCustomerId, getVisitReport, type ReportMedia } from '@/lib/customer/portal'
 import { visitSteps } from '@/lib/customer/rules'
-import { ISSUE_KINDS, PHASE_LABEL } from '@/lib/sweepers/jobRun'
+import { ISSUE_KINDS, parseRecommendations, PHASE_LABEL, RECOMMENDATIONS } from '@/lib/sweepers/jobRun'
 import { formatCurrency } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -36,6 +36,8 @@ export default async function VisitReportPage({ params }: { params: { id: string
   const report = await getVisitReport((await currentCustomerId())!, params.id)
   if (!report) notFound()
   const { visit, job, media, checklist, installs, upgrades, findings, review } = report
+  const flags = parseRecommendations(job.upgrade_flags)
+  const recommendations = RECOMMENDATIONS.filter((r) => flags[r.key]).map((r) => ({ ...r, note: flags[r.key]?.note ?? null }))
 
   const before = media.filter((m) => m.kind === 'before')
   const after = media.filter((m) => m.kind === 'after')
@@ -150,6 +152,7 @@ export default async function VisitReportPage({ params }: { params: { id: string
         </section>
       ) : null}
 
+{visit.status === 'complete' && recommendations.length > 0 ? (        <section className={card} aria-labelledby="recs">          <h2 id="recs" className={h2}>Your Sweeper recommends</h2>          <p className="mt-1 text-sm text-[#6B6B70]">Things we noticed that would make your shelter safer or more comfortable — no pressure.</p>          <ul className="mt-3 space-y-1.5">            {recommendations.map((r) => (              <li key={r.key} className="text-sm">                <span className="font-semibold">{r.label}</span>                {r.note ? <span className="text-[#4A4A50]"> — {r.note}</span> : null}              </li>            ))}          </ul>          <Link href="/book" className="mt-4 inline-flex h-10 items-center rounded-lg bg-sky px-4 text-sm font-semibold text-white hover:bg-sky-dark">            Book an upgrade visit          </Link>        </section>      ) : null}
       <section className={card} aria-labelledby="charges">
         <h2 id="charges" className={h2}>Charges</h2>
         <dl className="mt-2 space-y-1.5 text-sm">

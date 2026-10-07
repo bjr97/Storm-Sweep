@@ -136,3 +136,33 @@ export function distanceMeters(a: { lat: number; lng: number }, b: { lat: number
 
 export const MEDIA_KINDS = ['before', 'after', 'inspection', 'issue', 'upgrade', 'signature', 'video_before', 'video_after'] as const
 export type MediaKind = (typeof MEDIA_KINDS)[number]
+
+// ---- Upgrade opportunities ("recommendations") ------------------------------
+
+/** Things the customer could add later — logged on site, shown on their report. Stored in jobs.upgrade_flags. */
+export const RECOMMENDATIONS = [
+  { key: 'led', label: 'LED lighting' },
+  { key: 'handle', label: 'Interior handle' },
+  { key: 'hinge', label: 'Hinge / roller service' },
+  { key: 'carpet', label: 'Shelter carpet' },
+  { key: 'kit', label: 'Emergency prep kit' },
+  { key: 'door_repair', label: 'Door repair or replacement (quote)' },
+  { key: 'other', label: 'Other' },
+] as const
+export type RecommendationKey = (typeof RECOMMENDATIONS)[number]['key']
+export const RECOMMENDATION_KEYS = RECOMMENDATIONS.map((r) => r.key) as [RecommendationKey, ...RecommendationKey[]]
+export type Recommendations = Partial<Record<RecommendationKey, { note: string | null; at: string }>>
+
+export function parseRecommendations(value: unknown): Recommendations {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const out: Recommendations = {}
+  for (const r of RECOMMENDATIONS) {
+    const v = (value as Record<string, unknown>)[r.key]
+    if (v && typeof v === 'object') {
+      const note = (v as { note?: unknown }).note
+      const at = (v as { at?: unknown }).at
+      out[r.key] = { note: typeof note === 'string' ? note : null, at: typeof at === 'string' ? at : '' }
+    }
+  }
+  return out
+}

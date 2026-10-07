@@ -9,6 +9,7 @@ import { CompleteButton } from '@/components/sweeper/run/CompleteButton'
 import { IssueReporter } from '@/components/sweeper/run/IssueReporter'
 import { PhotoButton } from '@/components/sweeper/run/PhotoButton'
 import { SignaturePad } from '@/components/sweeper/run/SignaturePad'
+import { RecommendationFlags } from '@/components/sweeper/run/RecommendationFlags'
 import { UpgradeSeller, type UpgradeOption } from '@/components/sweeper/run/UpgradeSeller'
 import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
 import { jobTimeLabel } from '@/lib/booking/timeWindows'
@@ -20,6 +21,7 @@ import {
   isManualItem,
   MAX_VIDEO_SECONDS,
   MIN_PHOTOS,
+  parseRecommendations,
   PHOTO_ITEM_TYPE,
   SELLABLE_UPGRADE_IDS,
   upgradeName,
@@ -218,6 +220,10 @@ export default async function SweeperJobPage({ params }: { params: { id: string 
               isMember={isMember}
               locked={locked}
             />
+          </Card>
+
+          <Card title="Recommendations" subtitle="Upgrade opportunities for later">
+            <RecommendationFlags jobId={job.id} initial={parseRecommendations(job.upgrade_flags)} locked={locked} />
           </Card>
 
           <Card title="Customer signature">

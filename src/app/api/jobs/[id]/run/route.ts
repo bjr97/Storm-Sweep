@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { requireRole } from '@/lib/auth/requireRole'
-import { MEDIA_KINDS, SELLABLE_UPGRADE_IDS } from '@/lib/sweepers/jobRun'
+import { MEDIA_KINDS, RECOMMENDATION_KEYS, SELLABLE_UPGRADE_IDS } from '@/lib/sweepers/jobRun'
 import {
   completeJob,
   createMediaUpload,
@@ -14,6 +14,7 @@ import {
   reportIssue,
   sellUpgrade,
   setChecklistItem,
+  setRecommendation,
 } from '@/lib/sweepers/jobRunServer'
 
 // Sweeper on-site actions for one job. Ownership is enforced in jobRunServer.
@@ -56,6 +57,12 @@ const actionSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('remove_upgrade'), upgradeId: z.string().uuid() }),
   z.object({ action: z.literal('sign'), name: z.string().trim().min(2).max(80), path: z.string().min(1).max(200) }),
   z.object({ action: z.literal('complete') }),
+  z.object({
+    action: z.literal('recommend'),
+    key: z.enum(RECOMMENDATION_KEYS),
+    on: z.boolean(),
+    note: z.string().trim().max(300).nullable(),
+  }),
 ])
 
 const paramsSchema = z.object({ id: z.string().uuid() })
@@ -102,6 +109,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           return recordSignature(me, jobId, a.name, a.path)
         case 'complete':
           return completeJob(me, jobId)
+        case 'recommend':
+          return setRecommendation(me, jobId, a.key, a.on, a.note || null)
       }
     })()
 

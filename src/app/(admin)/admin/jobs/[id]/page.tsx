@@ -13,7 +13,7 @@ import { StatusPill } from '@/components/admin/StatusPill'
 import { getJobDetail, listSweepers } from '@/lib/admin/jobs'
 import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
 import { jobTimeLabel } from '@/lib/booking/timeWindows'
-import { ISSUE_KINDS } from '@/lib/sweepers/jobRun'
+import { ISSUE_KINDS, parseRecommendations, RECOMMENDATIONS } from '@/lib/sweepers/jobRun'
 import { cn, formatCurrency, PRICING } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -60,6 +60,7 @@ export default async function AdminJobDetailPage({
 
   const { job, customer, checklist, photos, issues, upgrades, blockers } = detail
   const openIssue = issues.find((i) => i.status === 'open')
+  const recs = parseRecommendations(job.upgrade_flags)
   const locked = job.status === 'in_progress' || job.status === 'complete'
   const required = checklist.filter((c) => c.required)
   const doneCount = checklist.filter((c) => c.done).length
@@ -148,6 +149,7 @@ export default async function AdminJobDetailPage({
               </Panel>
             ) : null}
 
+{RECOMMENDATIONS.some((r) => recs[r.key]) ? (              <Panel title="Recommendations" subtitle="Upgrade opportunities the Sweeper logged — follow up">                <dl>                  {RECOMMENDATIONS.filter((r) => recs[r.key]).map((r) => (                    <Row key={r.key} label={r.label}>{recs[r.key]?.note ?? '—'}</Row>                  ))}                </dl>              </Panel>            ) : null}
             {upgrades.length > 0 ? (
               <Panel title="Upgrades sold on site" subtitle="Added to the balance due">
                 <dl>

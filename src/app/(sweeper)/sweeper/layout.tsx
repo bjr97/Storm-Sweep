@@ -1,11 +1,21 @@
+import type { Metadata, Viewport } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { SignOutButton } from '@/components/sweeper/SignOutButton'
 import { SweeperNav } from '@/components/sweeper/SweeperNav'
+import { SweeperPwa } from '@/components/sweeper/SweeperPwa'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  manifest: '/sweeper.webmanifest',
+  appleWebApp: { capable: true, title: 'Sweeper', statusBarStyle: 'black-translucent' },
+  icons: { apple: '/sweeper-icon/180' },
+}
+
+export const viewport: Viewport = { themeColor: '#141416' }
 
 export default async function SweeperLayout({
   children,
@@ -31,6 +41,7 @@ export default async function SweeperLayout({
         </Link>
         <SignOutButton />
       </header>
+      <SweeperPwa />
       <div className="mx-auto w-full max-w-2xl pb-20">{children}</div>
       <SweeperNav />
     </div>

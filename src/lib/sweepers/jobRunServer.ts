@@ -14,7 +14,9 @@ import {
   upgradeName,
   upgradeQuote,
   type RunState,
+  parseRecommendations,
   type MediaKind,
+  type RecommendationKey,
   type SellableUpgradeId,
 } from '@/lib/sweepers/jobRun'
 import { sendAdminJobIssueSms, sendJobSms } from '@/lib/twilio'
@@ -508,4 +510,22 @@ export async function completeJob(sweeperId: string, jobId: string): Promise<{ c
 
   await bestEffort('job_complete SMS', sendJobSms('job_complete', jobId))
   return { completedAt }
+}
+
+export async function setRecommendation(
+  sweeperId: string,
+  jobId: string,
+  key: RecommendationKey,
+  on: boolean,
+  note: string | null
+): Promise<{ ok: true } | ActionError> {
+  const job = await loadOwnJob(sweeperId, jobId)
+  if (isErr(job)) return job
+  if (job.status !== 'in_progress') return fail('Start the job first', 'BAD_STATUS')
+  const flags = parseRecommendations(job.upgrade_flags)
+  if (on) flags[key] = { note, at: new Date().toISOString() }
+  else delete flags[key]
+  const { error } = await createServiceClient().from('jobs').update({ upgrade_flags: flags }).eq('id', jobId)
+  if (error) throw error
+  return { ok: true }
 }

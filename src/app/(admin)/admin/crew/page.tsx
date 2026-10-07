@@ -67,7 +67,12 @@ export default async function AdminCrewPage(): Promise<React.ReactElement> {
                   {members.map((m) => (
                     <tr key={m.id} className="border-b border-white/[0.07] last:border-b-0">
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-[#F0F0F0]">{m.name}</p>
+                        <p className="font-semibold text-[#F0F0F0]">
+                          {m.name}
+                          <span className={m.available ? 'ml-2 text-[10px] font-bold uppercase text-[#2ECC71]' : 'ml-2 text-[10px] font-bold uppercase text-[#8A8A8F]'}>
+                            {m.available ? 'Available' : 'Off'}
+                          </span>
+                        </p>
                         {m.phone ? (
                           <a href={`tel:${m.phone}`} className="text-[11px] text-sky-light hover:underline">
                             {m.phone}

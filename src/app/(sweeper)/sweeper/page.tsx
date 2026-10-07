@@ -1,6 +1,7 @@
-import { CalendarDays, Clock, Lock, MapPin, Medal, Ruler } from 'lucide-react'
+import { CalendarDays, Clock, Lock, MapPin, Medal, Navigation, Ruler } from 'lucide-react'
 import Link from 'next/link'
 
+import { AvailabilityToggle } from '@/components/sweeper/AvailabilityToggle'
 import { BoardAutoRefresh } from '@/components/sweeper/BoardAutoRefresh'
 import { ClaimButton } from '@/components/sweeper/ClaimButton'
 import { DropButton } from '@/components/sweeper/DropButton'
@@ -50,7 +51,8 @@ export default async function SweeperBoardPage(): Promise<React.ReactElement> {
     return <p className="px-4 py-10 text-center text-sm text-[#8A8A8F]">Your Sweeper profile isn&apos;t set up yet. Contact the office.</p>
   }
 
-  const { me, open, upcoming, mine } = board
+  const { me, open, upcoming, mine, today } = board
+  const nextUp = mine.find((j) => j.status === 'in_progress') ?? mine[0]
   const firstName = me.name.split(/\s+/)[0]
 
   return (
@@ -77,7 +79,50 @@ export default async function SweeperBoardPage(): Promise<React.ReactElement> {
                 me.tier === 'silver' ? `Gold with ${TIER_RULES.gold.minJobs}+ jobs and a ${TIER_RULES.gold.minScore}+ score` : `Silver with ${TIER_RULES.silver.minJobs}+ jobs and a ${TIER_RULES.silver.minScore}+ score`
               } — great reviews, on-time reports, no late drops.`}
         </p>
+        <AvailabilityToggle initial={me.available} />
       </section>
+
+      {/* Today */}
+      <section aria-label="Today" className="grid grid-cols-3 gap-2">
+        {[
+          { label: "Today's jobs", value: String(today.jobs) },
+          { label: 'Done', value: `${today.done}/${today.jobs}` },
+          { label: 'Est. earnings', value: formatCurrency(today.estimated) },
+        ].map((k) => (
+          <div key={k.label} className="rounded-xl border border-white/[0.07] bg-[#1C1C1F] p-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8A8A8F]">{k.label}</p>
+            <p className="font-[family-name:var(--font-bebas)] text-2xl leading-tight tracking-wide text-white">{k.value}</p>
+          </div>
+        ))}
+      </section>
+
+      {nextUp ? (
+        <section aria-labelledby="next-up" className="space-y-3 rounded-xl border-2 border-sky/60 bg-sky/[0.08] p-4">
+          <p id="next-up" className="text-[10px] font-bold uppercase tracking-[0.2em] text-sky-light">
+            {nextUp.status === 'in_progress' ? 'In progress' : 'Next up'}
+          </p>
+          <When iso={nextUp.scheduledAt} window={nextUp.timeWindow} />
+          <p className="text-sm text-white">
+            {nextUp.customerFirstName} · {nextUp.address}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(nextUp.address)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-12 items-center justify-center gap-1.5 rounded-lg bg-white/[0.08] text-sm font-bold text-white hover:bg-white/[0.12]"
+            >
+              <Navigation className="size-4" aria-hidden="true" /> Navigate
+            </a>
+            <Link
+              href={`/sweeper/jobs/${nextUp.id}`}
+              className="flex h-12 items-center justify-center rounded-lg bg-sky text-sm font-bold text-white hover:bg-sky-light"
+            >
+              {nextUp.status === 'in_progress' ? 'Continue job' : 'Open job'}
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       {/* My jobs */}
       <section aria-labelledby="mine-heading" className="space-y-3">

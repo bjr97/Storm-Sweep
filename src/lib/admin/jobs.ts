@@ -115,11 +115,12 @@ export async function listSweepers(): Promise<SweeperOption[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name')
+    .select('id, full_name, sweeper_available')
     .eq('role', 'sweeper')
     .order('full_name')
   if (error) throw new Error('Failed to load sweepers')
-  return data.map((s) => ({ id: s.id, name: s.full_name ?? 'Sweeper' }))
+  // Off-duty Sweepers stay assignable but are labeled so the admin can tell.
+  return data.map((s) => ({ id: s.id, name: s.sweeper_available ? s.full_name ?? 'Sweeper' : `${s.full_name ?? 'Sweeper'} (off)` }))
 }
 
 // ---------- Schedule ----------

@@ -34,7 +34,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: 'People',
     items: [
-      { label: 'Customers', icon: Users, href: '/admin/customers', built: false },
+      { label: 'Customers', icon: Users, href: '/admin/customers', built: true },
       { label: 'Crew', icon: HardHat, href: '/admin/crew', built: true },
       { label: 'Applicants', icon: UserPlus, href: '/admin/sweepers', built: true },
     ],
