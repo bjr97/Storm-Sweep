@@ -19,6 +19,7 @@ import {
   type RecommendationKey,
   type SellableUpgradeId,
 } from '@/lib/sweepers/jobRun'
+import { rewardReferrer } from '@/lib/customer/referrals'
 import { sendAdminJobIssueSms, sendJobSms } from '@/lib/twilio'
 import type { Job, JobIssue, JobIssueKind, JobUpgrade, PhotoType } from '@/types/database'
 
@@ -509,6 +510,8 @@ export async function completeJob(sweeperId: string, jobId: string): Promise<{ c
   if (!done?.length) return fail('This job is no longer in progress', 'BAD_STATUS')
 
   await bestEffort('job_complete SMS', sendJobSms('job_complete', jobId))
+  // Friend's first visit done -> the inviter earns their referral credit (once).
+  await bestEffort('referral reward', rewardReferrer(jobId))
   return { completedAt }
 }
 

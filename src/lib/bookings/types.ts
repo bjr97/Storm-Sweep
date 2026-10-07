@@ -25,6 +25,10 @@ export const bookingSelectionSchema = z.object({
       aLaCarteItems: z.array(z.custom<PrepKitItemId>(isItemId)).max(20),
     })
     .nullable(),
+  /** Friend's invite code (?invite=) — verified server-side. */
+  inviteCode: z.string().trim().max(24).optional(),
+  /** Spend the signed-in customer's referral credit. */
+  useCredit: z.boolean().optional(),
 })
 export type BookingSelection = z.infer<typeof bookingSelectionSchema>
 
@@ -53,6 +57,10 @@ export const bookingPayloadSchema = z.object({
   photoFlags: z.array(z.string()).optional(),
   /** What the customer chose. The server re-prices from this and ignores client amounts. */
   selection: bookingSelectionSchema.optional(),
+  // Set by the server (repriceBooking) only — never trusted from the browser.
+  referredBy: z.string().uuid().optional(),
+  referralDiscount: z.number().int().nonnegative().optional(),
+  creditApplied: z.number().int().nonnegative().optional(),
 })
 
 export type BookingPayload = z.infer<typeof bookingPayloadSchema>

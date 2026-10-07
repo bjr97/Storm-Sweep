@@ -55,9 +55,14 @@ export function buildPaymentData(
   customerValues: CustomerDetailsValues,
   photoResult: PhotoScreenResult | null,
   kitSelection: KitSelection | null = null,
-  member: { visitsUsed: number } | null = null
+  member: { visitsUsed: number } | null = null,
+  referral: { inviteCode: string | null; credit: number } = { inviteCode: null, credit: 0 }
 ): BookingPaymentData | null {
-  const quote = priceBooking(serviceSelection, kitSelection, member)
+  // The server re-verifies the invite and credit; these only mirror its math.
+  const quote = priceBooking(serviceSelection, kitSelection, member, {
+    friendDiscount: Boolean(referral.inviteCode),
+    credit: referral.credit,
+  })
   if (quote.breakdown.total === null) return null
 
   return {
@@ -71,7 +76,11 @@ export function buildPaymentData(
     serviceTypes: quote.serviceTypes,
     notes: customerValues.notes,
     membershipPlan: quote.membershipPlan,
-    selection: selectionOf(serviceSelection, kitSelection),
+    selection: {
+      ...selectionOf(serviceSelection, kitSelection),
+      ...(referral.inviteCode ? { inviteCode: referral.inviteCode } : {}),
+      ...(referral.credit > 0 ? { useCredit: true } : {}),
+    },
   }
 }
 

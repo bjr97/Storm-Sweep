@@ -24,8 +24,10 @@ export async function POST(req: Request): Promise<Response> {
     const isQuote = booking.shelterSize === 'xlarge'
     const isIncludedMemberVisit =
       booking.membershipVisit && booking.membershipPlan === 'none' && booking.totalAmount === 0
+    // Referral credit can cover a whole visit — nothing left to charge.
+    const isFullyCredited = !isQuote && booking.totalAmount === 0 && (booking.creditApplied ?? 0) > 0
 
-    if (!isQuote && !isIncludedMemberVisit) {
+    if (!isQuote && !isIncludedMemberVisit && !isFullyCredited) {
       return Response.json(
         { error: 'This booking needs a deposit — please pay at checkout', code: 'PAYMENT_REQUIRED' },
         { status: 400 }
@@ -35,8 +37,8 @@ export async function POST(req: Request): Promise<Response> {
     const job = await createJobFromBooking({
       payload: booking,
       // Nothing is owed on an included member visit; quotes are priced later.
-      paymentStatus: isIncludedMemberVisit ? 'paid' : 'unpaid',
-      sendSms: isIncludedMemberVisit,
+      paymentStatus: isIncludedMemberVisit || isFullyCredited ? 'paid' : 'unpaid',
+      sendSms: isIncludedMemberVisit || isFullyCredited,
     })
 
     return Response.json({

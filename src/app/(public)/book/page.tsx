@@ -4,13 +4,14 @@ import { BookingForm, type BookingInitialCustomer } from '@/components/booking/B
 import { createClient } from '@/lib/supabase/server'
 
 type BookPageProps = {
-  searchParams: { ref?: string }
+  searchParams: { ref?: string; invite?: string }
 }
 
 async function getInitialCustomer(): Promise<{
   customer: BookingInitialCustomer | null
   isLoggedIn: boolean
   member: { visitsUsed: number } | null
+  credit: number
 }> {
   const supabase = createClient()
   const {
@@ -18,17 +19,18 @@ async function getInitialCustomer(): Promise<{
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { customer: null, isLoggedIn: false, member: null }
+    return { customer: null, isLoggedIn: false, member: null, credit: 0 }
   }
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, phone, address, membership_status, visits_used')
+    .select('full_name, phone, address, membership_status, visits_used, referral_credit')
     .eq('id', user.id)
     .single()
 
   return {
     isLoggedIn: true,
+    credit: Math.max(0, profile?.referral_credit ?? 0),
     member: profile?.membership_status === 'active' ? { visitsUsed: profile.visits_used } : null,
     customer: {
       full_name: profile?.full_name ?? '',
@@ -41,10 +43,12 @@ async function getInitialCustomer(): Promise<{
 
 async function BookPageContent({
   referralCode,
+  inviteCode,
 }: {
   referralCode?: string
+  inviteCode?: string
 }): Promise<React.ReactElement> {
-  const { customer, isLoggedIn, member } = await getInitialCustomer()
+  const { customer, isLoggedIn, member, credit } = await getInitialCustomer()
 
   return (
     <BookingForm
@@ -52,6 +56,8 @@ async function BookPageContent({
       isLoggedIn={isLoggedIn}
       member={member}
       referralCode={referralCode ?? null}
+      inviteCode={inviteCode ?? null}
+      credit={credit}
     />
   )
 }
@@ -60,6 +66,8 @@ export default async function BookPage({
   searchParams,
 }: BookPageProps): Promise<React.ReactElement> {
   const referralCode = searchParams.ref?.trim()
+  // Friend invite (customer referral) — distinct from ?ref= partner codes.
+  const inviteCode = searchParams.invite?.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24) || undefined
 
   return (
     <section className="min-h-[calc(100vh-4rem)] bg-[#F7F7F4] py-10 font-body text-shelter sm:py-14">
@@ -83,7 +91,7 @@ export default async function BookPage({
             </div>
           }
         >
-          <BookPageContent referralCode={referralCode} />
+          <BookPageContent referralCode={referralCode} inviteCode={inviteCode} />
         </Suspense>
       </div>
     </section>

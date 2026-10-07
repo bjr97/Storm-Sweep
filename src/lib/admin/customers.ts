@@ -121,24 +121,26 @@ export async function listCustomers(
 export type CustomerDetail = {
   profile: Pick<
     Profile,
-    'id' | 'full_name' | 'phone' | 'address' | 'membership_status' | 'membership_plan' | 'membership_renews_at' | 'visits_used' | 'membership_commitment_ends_at' | 'marketing_photo_consent' | 'created_at'
+    'id' | 'full_name' | 'phone' | 'address' | 'membership_status' | 'membership_plan' | 'membership_renews_at' | 'visits_used' | 'membership_commitment_ends_at' | 'marketing_photo_consent' | 'created_at' | 'referral_code' | 'referral_credit'
   >
   email: string | null
   jobs: Pick<Job, 'id' | 'status' | 'scheduled_at' | 'time_window' | 'service_type' | 'total_amount' | 'payment_status' | 'referral_source' | 'membership_visit'>[]
   reviews: Pick<Review, 'job_id' | 'rating' | 'body' | 'created_at'>[]
+  /** Friends this customer referred (distinct customers, non-cancelled visits). */
+  friendsReferred: number
 }
 
 export async function getCustomerDetail(id: string): Promise<CustomerDetail | null> {
   const supabase = createServiceClient()
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, address, membership_status, membership_plan, membership_renews_at, visits_used, membership_commitment_ends_at, marketing_photo_consent, created_at, role')
+    .select('id, full_name, phone, address, membership_status, membership_plan, membership_renews_at, visits_used, membership_commitment_ends_at, marketing_photo_consent, created_at, role, referral_code, referral_credit')
     .eq('id', id)
     .maybeSingle()
   if (error) throw error
   if (!profile || profile.role !== 'customer') return null
 
-  const [jobsRes, reviewsRes, authRes] = await Promise.all([
+  const [jobsRes, reviewsRes, authRes, referredRes] = await Promise.all([
     supabase
       .from('jobs')
       .select('id, status, scheduled_at, time_window, service_type, total_amount, payment_status, referral_source, membership_visit')
@@ -146,9 +148,16 @@ export async function getCustomerDetail(id: string): Promise<CustomerDetail | nu
       .order('scheduled_at', { ascending: false, nullsFirst: true }),
     supabase.from('reviews').select('job_id, rating, body, created_at').eq('customer_id', id).order('created_at', { ascending: false }),
     supabase.auth.admin.getUserById(id),
+    supabase.from('jobs').select('customer_id').eq('referred_by', id).neq('status', 'cancelled'),
   ])
   if (jobsRes.error) throw jobsRes.error
   const { role: _role, ...rest } = profile
   void _role
-  return { profile: rest, email: authRes.data.user?.email ?? null, jobs: jobsRes.data, reviews: reviewsRes.data ?? [] }
+  return {
+    profile: rest,
+    email: authRes.data.user?.email ?? null,
+    jobs: jobsRes.data,
+    reviews: reviewsRes.data ?? [],
+    friendsReferred: new Set((referredRes.data ?? []).map((j) => j.customer_id)).size,
+  }
 }

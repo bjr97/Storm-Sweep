@@ -149,7 +149,15 @@ export default async function AdminJobDetailPage({
               </Panel>
             ) : null}
 
-{RECOMMENDATIONS.some((r) => recs[r.key]) ? (              <Panel title="Recommendations" subtitle="Upgrade opportunities the Sweeper logged — follow up">                <dl>                  {RECOMMENDATIONS.filter((r) => recs[r.key]).map((r) => (                    <Row key={r.key} label={r.label}>{recs[r.key]?.note ?? '—'}</Row>                  ))}                </dl>              </Panel>            ) : null}
+            {RECOMMENDATIONS.some((r) => recs[r.key]) ? (
+              <Panel title="Recommendations" subtitle="Upgrade opportunities the Sweeper logged — follow up">
+                <dl>
+                  {RECOMMENDATIONS.filter((r) => recs[r.key]).map((r) => (
+                    <Row key={r.key} label={r.label}>{recs[r.key]?.note ?? '—'}</Row>
+                  ))}
+                </dl>
+              </Panel>
+            ) : null}
             {upgrades.length > 0 ? (
               <Panel title="Upgrades sold on site" subtitle="Added to the balance due">
                 <dl>

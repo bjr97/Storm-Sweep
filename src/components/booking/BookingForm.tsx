@@ -30,7 +30,7 @@ import {
   type CustomerDetailsValues,
   type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
-import { cn, PRICING } from '@/lib/utils'
+import { cn, formatCurrency, PRICING } from '@/lib/utils'
 
 export type BookingInitialCustomer = {
   full_name: string
@@ -45,6 +45,10 @@ type BookingFormProps = {
   isLoggedIn?: boolean
   /** Active Storm Ready member booking another visit. */
   member?: { visitsUsed: number } | null
+  /** Friend's invite code from /book?invite=CODE. */
+  inviteCode?: string | null
+  /** Signed-in customer's referral credit balance (cents). */
+  credit?: number
 }
 
 type BookingMembershipPlan = 'none' | 'annual' | 'monthly' | 'annual_2yr'
@@ -78,6 +82,9 @@ function mapMembershipPlan(
   return membership
 }
 
+/** Loose check before asking the server whether an invite applies to this email. */
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const STEP_TITLES: Record<number, { title: string; description: string }> = {
   1: {
     title: 'BOOK YOUR SWEEP',
@@ -106,6 +113,8 @@ export function BookingForm({
   referralCode,
   isLoggedIn = false,
   member = null,
+  inviteCode = null,
+  credit = 0,
 }: BookingFormProps): React.ReactElement {
   const initialService: ServiceSelectionValues = { ...DEFAULT_SERVICE, membership: member ? 'member' : 'one_time' }
   const router = useRouter()
@@ -179,15 +188,43 @@ export function BookingForm({
     }
   }, [serviceSelection, kitSelection, member])
 
+  // Friend invite: checked against the email once it's entered (checkout re-checks).
+  const [invite, setInvite] = useState<{ status: 'none' | 'checking' | 'valid' | 'invalid'; reason?: string }>(
+    () => ({ status: inviteCode ? 'checking' : 'none' })
+  )
+  const bookingEmail = customerValues.email?.trim() ?? ''
+  useEffect(() => {
+    if (!inviteCode) return
+    if (!EMAIL_PATTERN.test(bookingEmail)) {
+      setInvite({ status: 'checking' })
+      return
+    }
+    const controller = new AbortController()
+    const timer = window.setTimeout(() => {
+      void fetch(`/api/referrals/validate?code=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(bookingEmail)}`, { signal: controller.signal })
+        .then((r) => r.json() as Promise<{ data?: { valid: boolean; reason?: string } }>)
+        .then((r) => setInvite(r.data?.valid ? { status: 'valid' } : { status: 'invalid', reason: r.data?.reason }))
+        .catch(() => undefined)
+    }, 400)
+    return () => {
+      controller.abort()
+      window.clearTimeout(timer)
+    }
+  }, [inviteCode, bookingEmail])
+  const referral = useMemo(
+    () => ({ inviteCode: invite.status === 'valid' ? inviteCode : null, credit }),
+    [invite.status, inviteCode, credit]
+  )
+
   // Same function the server re-runs at checkout (src/lib/booking/quote.ts).
   const pricing = useMemo(
-    () => priceBooking(serviceSelection, kitSelection, member).breakdown,
-    [serviceSelection, kitSelection, member]
+    () => priceBooking(serviceSelection, kitSelection, member, { friendDiscount: Boolean(referral.inviteCode), credit: referral.credit }).breakdown,
+    [serviceSelection, kitSelection, member, referral]
   )
 
   const paymentData = useMemo(
-    () => buildPaymentData(serviceSelection, customerValues, photoResult, kitSelection, member),
-    [serviceSelection, customerValues, photoResult, kitSelection, member]
+    () => buildPaymentData(serviceSelection, customerValues, photoResult, kitSelection, member, referral),
+    [serviceSelection, customerValues, photoResult, kitSelection, member, referral]
   )
 
   useEffect(() => {
@@ -590,6 +627,27 @@ export function BookingForm({
   return (
     <div className="mx-auto w-full max-w-3xl">
       <BookingProgressNav currentStep={currentStep} />
+
+      {inviteCode && invite.status !== 'none' ? (
+        <p
+          role="status"
+          className={cn(
+            'mb-4 rounded-lg px-4 py-3 text-sm',
+            invite.status === 'invalid' ? 'bg-black/5 text-[#4A4A50]' : 'bg-[#27AE60]/10 text-[#1E7D46]'
+          )}
+        >
+          {invite.status === 'valid'
+            ? `🎉 Friend invite applied — ${formatCurrency(PRICING.referral.customer_credit)} off your first visit.`
+            : invite.status === 'invalid'
+              ? `${invite.reason ?? 'This invite can’t be used'} — no discount applied.`
+              : `You were invited by a friend: ${formatCurrency(PRICING.referral.customer_credit)} off your first visit once you enter your email.`}
+        </p>
+      ) : null}
+      {credit > 0 ? (
+        <p role="status" className="mb-4 rounded-lg bg-wheat-pale px-4 py-3 text-sm text-shelter">
+          Your {formatCurrency(credit)} referral credit is applied to this booking.
+        </p>
+      ) : null}
 
       <div className="rounded-xl border border-border/60 bg-white shadow-sm">
         {stepMeta ? (

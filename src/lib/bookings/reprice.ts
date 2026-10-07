@@ -1,5 +1,6 @@
 import { calculateDeposit } from '@/lib/utils'
 import { priceBooking } from '@/lib/booking/quote'
+import { checkInvite, getCreditBalance } from '@/lib/customer/referrals'
 import type { BookingItem, BookingPayload } from '@/lib/bookings/types'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
@@ -42,7 +43,26 @@ export async function repriceBooking(input: BookingPayload): Promise<RepricedBoo
     member = { visitsUsed: profile.visits_used }
   }
 
-  const quote = priceBooking(service, selection.kit, member)
+  // Friend invite: only a first-time customer, never their own code.
+  let referredBy: string | undefined
+  if (selection.inviteCode) {
+    const invite = await checkInvite(selection.inviteCode, input.customerEmail)
+    if (!invite.valid) return { error: invite.reason, code: 'INVITE_INVALID', status: 409 }
+    referredBy = invite.referrerId
+  }
+
+  // Referral credit: only the signed-in customer's own balance, on their own booking.
+  let credit = 0
+  if (selection.useCredit) {
+    const {
+      data: { user },
+    } = await createClient().auth.getUser()
+    if (user && user.email?.toLowerCase() === input.customerEmail.toLowerCase()) {
+      credit = await getCreditBalance(user.id)
+    }
+  }
+
+  const quote = priceBooking(service, selection.kit, member, { friendDiscount: Boolean(referredBy), credit })
   const total = quote.breakdown.total ?? 0 // X-Large: quoted later by the office
 
   const payload: BookingPayload = {
@@ -53,6 +73,10 @@ export async function repriceBooking(input: BookingPayload): Promise<RepricedBoo
     serviceValue: quote.breakdown.isQuoteRequired ? undefined : quote.serviceValue,
     membershipVisit: quote.membershipVisit,
     membershipPlan: quote.membershipPlan,
+    // Server-owned fields — whatever the browser sent is replaced here.
+    referredBy: quote.referralDiscount > 0 ? referredBy : undefined,
+    referralDiscount: quote.referralDiscount,
+    creditApplied: quote.creditApplied,
   }
   return { payload, items: quote.items, depositAmount: calculateDeposit(total) }
 }

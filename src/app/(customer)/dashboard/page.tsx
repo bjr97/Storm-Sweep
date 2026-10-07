@@ -1,12 +1,14 @@
 import { ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
+import { ReferralCard } from '@/components/customer/ReferralCard'
 import { ReviewForm } from '@/components/customer/ReviewForm'
 import { VisitChanger } from '@/components/customer/VisitChanger'
 import { VisitProgress } from '@/components/customer/VisitProgress'
 import { StatusBadge, VisitFacts } from '@/components/customer/VisitSummary'
 import { formatBusinessDate } from '@/lib/admin/time'
 import { currentCustomerId, getCustomerProfile, listCustomerVisits } from '@/lib/customer/portal'
+import { getReferralSummary, REFERRAL_REWARD } from '@/lib/customer/referrals'
 import { visitSteps } from '@/lib/customer/rules'
 import { formatCurrency, PRICING } from '@/lib/utils'
 
@@ -20,6 +22,8 @@ const primary = 'inline-flex h-11 items-center justify-center gap-1.5 rounded-lg
 export default async function CustomerDashboardPage(): Promise<React.ReactElement> {
   const userId = (await currentCustomerId())!
   const [profile, visits] = await Promise.all([getCustomerProfile(userId), listCustomerVisits(userId)])
+  const referral = await getReferralSummary(userId, profile?.full_name ?? null)
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://stormsweep.com').replace(/\/$/, '')
   const firstName = (profile?.full_name ?? '').split(/\s+/)[0] || 'there'
   const isMember = profile?.membership_status === 'active'
 
@@ -148,6 +152,14 @@ export default async function CustomerDashboardPage(): Promise<React.ReactElemen
           )}
         </section>
       </div>
+
+      <ReferralCard
+        link={`${appUrl}/book?invite=${referral.code}`}
+        reward={REFERRAL_REWARD}
+        credit={referral.credit}
+        invited={referral.invited}
+        rewarded={referral.rewarded}
+      />
     </div>
   )
 }

@@ -152,7 +152,25 @@ export default async function VisitReportPage({ params }: { params: { id: string
         </section>
       ) : null}
 
-{visit.status === 'complete' && recommendations.length > 0 ? (        <section className={card} aria-labelledby="recs">          <h2 id="recs" className={h2}>Your Sweeper recommends</h2>          <p className="mt-1 text-sm text-[#6B6B70]">Things we noticed that would make your shelter safer or more comfortable — no pressure.</p>          <ul className="mt-3 space-y-1.5">            {recommendations.map((r) => (              <li key={r.key} className="text-sm">                <span className="font-semibold">{r.label}</span>                {r.note ? <span className="text-[#4A4A50]"> — {r.note}</span> : null}              </li>            ))}          </ul>          <Link href="/book" className="mt-4 inline-flex h-10 items-center rounded-lg bg-sky px-4 text-sm font-semibold text-white hover:bg-sky-dark">            Book an upgrade visit          </Link>        </section>      ) : null}
+      {visit.status === 'complete' && recommendations.length > 0 ? (
+        <section className={card} aria-labelledby="recs">
+          <h2 id="recs" className={h2}>Your Sweeper recommends</h2>
+          <p className="mt-1 text-sm text-[#6B6B70]">
+            Things we noticed that would make your shelter safer or more comfortable — no pressure.
+          </p>
+          <ul className="mt-3 space-y-1.5">
+            {recommendations.map((r) => (
+              <li key={r.key} className="text-sm">
+                <span className="font-semibold">{r.label}</span>
+                {r.note ? <span className="text-[#4A4A50]"> — {r.note}</span> : null}
+              </li>
+            ))}
+          </ul>
+          <Link href="/book" className="mt-4 inline-flex h-10 items-center rounded-lg bg-sky px-4 text-sm font-semibold text-white hover:bg-sky-dark">
+            Book an upgrade visit
+          </Link>
+        </section>
+      ) : null}
       <section className={card} aria-labelledby="charges">
         <h2 id="charges" className={h2}>Charges</h2>
         <dl className="mt-2 space-y-1.5 text-sm">

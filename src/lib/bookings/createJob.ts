@@ -1,5 +1,7 @@
 import { sendBookingConfirmationEmail } from '@/lib/resend'
 import { calculateDeposit } from '@/lib/utils'
+import { getUserIdByEmail } from '@/lib/auth/users'
+import { spendCredit } from '@/lib/customer/referrals'
 import { createServiceClient } from '@/lib/supabase/server'
 import {
   formatJobDate,
@@ -10,32 +12,6 @@ import type { Job } from '@/types/database'
 
 import type { BookingPayload } from './types'
 
-async function getUserIdByEmail(email: string): Promise<string | null> {
-  const supabase = createServiceClient()
-  let page = 1
-  const perPage = 1000
-
-  while (true) {
-    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage })
-    if (error) {
-      throw error
-    }
-
-    const match = data.users.find(
-      (user) => user.email?.toLowerCase() === email.toLowerCase()
-    )
-    if (match) {
-      return match.id
-    }
-
-    if (data.users.length < perPage) {
-      break
-    }
-    page += 1
-  }
-
-  return null
-}
 
 async function resolveCustomerId(payload: BookingPayload): Promise<string> {
   const supabase = createServiceClient()
@@ -142,6 +118,9 @@ export async function createJobFromBooking(
       referral_source: payload.referralSource ?? null,
       partner_id: partnerId,
       membership_visit: payload.membershipVisit,
+      referred_by: payload.referredBy ?? null,
+      referral_discount: payload.referralDiscount ?? 0,
+      credit_applied: payload.creditApplied ?? 0,
       service_value: payload.serviceValue ?? payload.totalAmount,
     })
     .select()
@@ -149,6 +128,11 @@ export async function createJobFromBooking(
 
   if (error || !job) {
     throw error ?? new Error('Failed to create job')
+  }
+
+  // Referral credit used on this booking is spent once it's paid for.
+  if ((payload.creditApplied ?? 0) > 0 && paymentStatus !== 'unpaid') {
+    await spendCredit(customerId, payload.creditApplied ?? 0)
   }
 
   if (payload.membershipVisit && paymentStatus !== 'unpaid') {

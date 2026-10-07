@@ -23,6 +23,18 @@ export type BookingQuote = {
   membershipVisit: boolean
   /** New subscription to start at checkout ('none' for one-time or existing members). */
   membershipPlan: 'none' | 'annual' | 'monthly'
+  /** Friend-invite discount applied (cents, >= 0). */
+  referralDiscount: number
+  /** Booker's own referral credit spent (cents, >= 0). */
+  creditApplied: number
+}
+
+/** Referral extras — verified server-side before they reach priceBooking. */
+export type QuoteExtras = {
+  /** First-time customer invited by a friend: $25 off this visit. */
+  friendDiscount?: boolean
+  /** Referral credit available to spend (cents). */
+  credit?: number
 }
 
 /** Kit discount plan: existing members get the member kit discount without buying a plan. */
@@ -41,7 +53,8 @@ function kitLabel(kit: KitChoice | null, kitTotal: number): string | null {
 export function priceBooking(
   service: ServiceSelectionValues,
   kit: KitChoice | null,
-  member: { visitsUsed: number } | null = null
+  member: { visitsUsed: number } | null = null,
+  extras: QuoteExtras = {}
 ): BookingQuote {
   const includedBundle = service.full_package ? PRICING.full_package_kit : null
   const base = calculateBookingPrice(service, member)
@@ -49,7 +62,7 @@ export function priceBooking(
     ? priceKitSelection(kit, { membershipPlan: kitPlanFor(service.membership), includedBundle })
     : { lines: [], total: 0 }
 
-  const breakdown: BookingPriceBreakdown =
+  const withKit: BookingPriceBreakdown =
     base.isQuoteRequired || base.total === null || kitPriced.total <= 0
       ? base
       : {
@@ -60,6 +73,28 @@ export function priceBooking(
           deposit: calculateDeposit(base.total + kitPriced.total),
           lineItems: [...base.lineItems, ...kitPriced.lines],
         }
+
+  // Referral savings come off the visit total last and never take it below $0.
+  let referralDiscount = 0
+  let creditApplied = 0
+  let breakdown = withKit
+  if (withKit.total !== null && withKit.total > 0) {
+    let total = withKit.total
+    const lines = [...withKit.lineItems]
+    if (extras.friendDiscount) {
+      referralDiscount = Math.min(PRICING.referral.customer_credit, total)
+      total -= referralDiscount
+      lines.push({ label: 'Friend referral discount', amount: -referralDiscount })
+    }
+    if (extras.credit && extras.credit > 0 && total > 0) {
+      creditApplied = Math.min(extras.credit, total)
+      total -= creditApplied
+      lines.push({ label: 'Your referral credit', amount: -creditApplied })
+    }
+    if (referralDiscount || creditApplied) {
+      breakdown = { ...withKit, total, deposit: calculateDeposit(total), serviceSubtotal: total, lineItems: lines }
+    }
+  }
 
   const listBase = calculateBookingPrice({ ...service, membership: 'one_time' }).total ?? 0
   const listKit = kit ? priceKitSelection(kit, { membershipPlan: 'none', includedBundle }).total : 0
@@ -89,5 +124,7 @@ export function priceBooking(
     serviceTypes,
     membershipVisit: breakdown.isMemberVisit,
     membershipPlan: service.membership === 'annual' || service.membership === 'monthly' ? service.membership : 'none',
+    referralDiscount,
+    creditApplied,
   }
 }

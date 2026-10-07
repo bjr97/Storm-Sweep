@@ -28,7 +28,7 @@ export default async function AdminCustomerPage({ params }: { params: { id: stri
   if (!/^[0-9a-f-]{36}$/i.test(params.id)) notFound()
   const detail = await getCustomerDetail(params.id)
   if (!detail) notFound()
-  const { profile: p, email, jobs, reviews } = detail
+  const { profile: p, email, jobs, reviews, friendsReferred } = detail
   const spend = jobs.filter((j) => j.status !== 'cancelled').reduce((n, j) => n + j.total_amount, 0)
   const isMember = p.membership_status === 'active'
 
@@ -129,6 +129,9 @@ export default async function AdminCustomerPage({ params }: { params: { id: stri
                   {p.marketing_photo_consent ? <span className="text-[#2ECC71]">Opted in</span> : 'Not allowed'}
                 </Row>
                 <Row label="First heard via">{jobs.at(-1)?.referral_source ?? '—'}</Row>
+                <Row label="Invite code">{p.referral_code ?? '—'}</Row>
+                <Row label="Friends referred">{friendsReferred}</Row>
+                <Row label="Referral credit">{formatCurrency(p.referral_credit)}</Row>
               </dl>
             </Panel>
           </div>

@@ -1,6 +1,7 @@
 import { addDays, startOfDay } from 'date-fns'
 
 import { windowStartIso } from '@/lib/booking/timeWindows'
+import { refundCredit } from '@/lib/customer/referrals'
 import { canCustomerChange, CHANGE_CUTOFF_HOURS } from '@/lib/customer/rules'
 import { createServiceClient } from '@/lib/supabase/server'
 import type { TimeWindow } from '@/types/database'
@@ -59,6 +60,11 @@ export async function cancelVisit(customerId: string, jobId: string, now: Date =
     .select('id')
   if (error) throw error
   if (!updated?.length) return tooLate()
+
+  // Referral credit spent on this visit goes back to the customer.
+  if (job.credit_applied > 0 && job.payment_status !== 'unpaid') {
+    await refundCredit(customerId, job.credit_applied)
+  }
 
   // A cancelled Storm Ready visit gives the included visit back.
   if (job.membership_visit) {

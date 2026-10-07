@@ -49,7 +49,7 @@ export function PaymentStep({
         : 0
   const dueToday = membershipPrice + booking.depositAmount
   /** Existing member, clean covered, no paid add-ons — nothing to charge. */
-  const freeMemberVisit = booking.depositAmount === 0 && booking.membershipPlan === 'none' && booking.membershipVisit
+  const freeMemberVisit = booking.depositAmount === 0 && booking.membershipPlan === 'none' && booking.totalAmount === 0
   const [confirming, setConfirming] = useState(false)
 
   async function handleConfirmIncludedVisit(): Promise<void> {
@@ -80,7 +80,7 @@ export function PaymentStep({
         <div>
           <h2 className="font-['Bebas_Neue'] text-3xl tracking-wide text-shelter">CONFIRM YOUR VISIT</h2>
           <p className="mt-1 font-['Barlow'] text-muted-foreground">
-            This visit is included in your Storm Ready membership — nothing to pay today.
+            {booking.membershipVisit ? 'This visit is included in your Storm Ready membership' : 'Your referral credit covers this visit'} — nothing to pay today.
           </p>
         </div>
         <Card className="border-wheat/40 bg-white">
@@ -103,7 +103,7 @@ export function PaymentStep({
           disabled={confirming}
         >
           {confirming ? <Loader2 className="mr-2 animate-spin" /> : null}
-          Confirm my included visit
+          {booking.membershipVisit ? 'Confirm my included visit' : 'Confirm my visit'}
         </Button>
       </div>
     )

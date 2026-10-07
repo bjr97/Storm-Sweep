@@ -268,6 +268,13 @@ Customer Details (Step 3) specifics:
    earned when the referred job is COMPLETED; owed = completed x
    payout_per_referral - total_paid_out (computed, see `src/lib/admin/partners.ts`).
 
+7b. **Customer referrals** (`src/lib/customer/referrals.ts`): share link
+   `/book?invite=CODE` (separate from partner `?ref=`). First-time customers
+   only, never own code: $25 off (`PRICING.referral.customer_credit`). The
+   inviter gets $25 credit when the friend's visit COMPLETES (once,
+   `referral_rewarded_at`); credit auto-applies to their next booking, is
+   spent when paid, refunded on cancel. All verified in `repriceBooking()`.
+
 8. **Membership visits:** Storm Ready = 2 cleanings/yr INCLUDED in the fee.
    The visit booked at signup is #1 (clean = $0; covers up to standard size,
    large pays the $30 difference). Track `visits_used` on profiles.
@@ -415,10 +422,10 @@ Track progress here as phases complete:
 - [x] Phase 4.2 — Partners management (/admin/partners)
 - [ ] Phase 4.3 — Supabase Realtime
 - [ ] Phase 4.4 — Google Maps routes
-- [ ] Phase 4.5 — Referral program
+- [x] Phase 4.5 — Referral program (customer "Give $25, get $25")
 - [ ] Phase 4.6 — Review system
 - [ ] Phase 4.7 — TikTok integration
-- [ ] Phase 4.8 — PWA sweeper app
+- [x] Phase 4.8 — PWA sweeper app (manifest, icons, offline page)
 - [ ] Phase 4.9 — Tornado season automation
 
 ---
