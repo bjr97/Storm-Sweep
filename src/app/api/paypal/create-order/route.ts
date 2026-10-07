@@ -1,10 +1,11 @@
 import { z } from 'zod'
 
 import { createJobFromBooking } from '@/lib/bookings/createJob'
+import { isRepriceError, repriceBooking } from '@/lib/bookings/reprice'
 import { bookingPayloadSchema, readBookingMetadataJson } from '@/lib/bookings/types'
 import { createPayPalOrder } from '@/lib/paypal'
 import { createServiceClient } from '@/lib/supabase/server'
-import { calculateDeposit, PRICING } from '@/lib/utils'
+import { PRICING } from '@/lib/utils'
 
 const createOrderSchema = z.object({
   amount: z.number().int().positive(), // deposit, cents
@@ -43,17 +44,22 @@ export async function POST(req: Request): Promise<Response> {
       )
     }
 
-    const booking = bookingResult.data
-    const depositAmount = calculateDeposit(booking.totalAmount)
+    // Server-side pricing — client amounts are ignored.
+    const repriced = await repriceBooking(bookingResult.data)
+    if (isRepriceError(repriced)) {
+      return Response.json({ error: repriced.error, code: repriced.code }, { status: repriced.status })
+    }
+    const booking = repriced.payload
+    const depositAmount = repriced.depositAmount
 
     if (amount !== depositAmount) {
       return Response.json(
-        {
-          error: `Deposit must be ${PRICING.deposit_pct * 100}% of total (${depositAmount})`,
-          code: 'INVALID_DEPOSIT',
-        },
-        { status: 400 }
+        { error: 'Prices were updated — please go back one step and review your total', code: 'PRICE_CHANGED' },
+        { status: 409 }
       )
+    }
+    if (depositAmount <= 0) {
+      return Response.json({ error: 'Nothing to charge for this booking', code: 'EMPTY_CHECKOUT' }, { status: 400 })
     }
 
     if (booking.membershipPlan !== 'none') {

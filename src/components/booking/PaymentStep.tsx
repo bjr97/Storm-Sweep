@@ -23,43 +23,12 @@ type PaymentStepProps = {
 }
 
 function toBookingPayload(booking: BookingPaymentData): BookingPayload {
-  const {
-    customerName,
-    customerEmail,
-    customerPhone,
-    address,
-    scheduledAt,
-    shelterSize,
-    serviceTypes,
-    notes,
-    referralSource,
-    totalAmount,
-    serviceValue,
-    membershipVisit,
-    membershipPlan,
-    photoGrade,
-    photoUrls,
-    photoFlags,
-  } = booking
-
-  return {
-    customerName,
-    customerEmail,
-    customerPhone,
-    address,
-    scheduledAt,
-    shelterSize,
-    serviceTypes,
-    notes,
-    referralSource,
-    totalAmount,
-    serviceValue,
-    membershipVisit,
-    membershipPlan,
-    photoGrade,
-    photoUrls,
-    photoFlags,
-  }
+  // Everything except the display-only summary. The server re-prices from
+  // `selection`; amounts here are only used to detect a stale page.
+  const { items: _items, depositAmount: _deposit, ...payload } = booking
+  void _items
+  void _deposit
+  return payload
 }
 
 export function PaymentStep({
@@ -79,6 +48,66 @@ export function PaymentStep({
         ? PRICING.membership.monthly
         : 0
   const dueToday = membershipPrice + booking.depositAmount
+  /** Existing member, clean covered, no paid add-ons — nothing to charge. */
+  const freeMemberVisit = booking.depositAmount === 0 && booking.membershipPlan === 'none' && booking.membershipVisit
+  const [confirming, setConfirming] = useState(false)
+
+  async function handleConfirmIncludedVisit(): Promise<void> {
+    setError(null)
+    setConfirming(true)
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(toBookingPayload(booking)),
+      })
+      const result = (await response.json()) as { error?: string; data?: { job?: { id: string } } }
+      if (!response.ok || !result.data?.job) {
+        setError(result.error ?? 'Unable to book your visit')
+        return
+      }
+      window.location.href = `/history/${result.data.job.id}`
+    } catch {
+      setError('Unable to reach the server — please try again')
+    } finally {
+      setConfirming(false)
+    }
+  }
+
+  if (freeMemberVisit) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="font-['Bebas_Neue'] text-3xl tracking-wide text-shelter">CONFIRM YOUR VISIT</h2>
+          <p className="mt-1 font-['Barlow'] text-muted-foreground">
+            This visit is included in your Storm Ready membership — nothing to pay today.
+          </p>
+        </div>
+        <Card className="border-wheat/40 bg-white">
+          <CardContent className="space-y-2 pt-6 font-['Barlow'] text-sm">
+            {booking.items.map((item) => (
+              <div key={`${item.name}-${item.price}`} className="flex justify-between">
+                <span>{item.name}</span>
+                <span className="font-medium">{formatCurrency(item.price)}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+        {error ? (
+          <p className="rounded-lg border border-tornado/30 bg-tornado/5 px-4 py-3 text-sm text-tornado">{error}</p>
+        ) : null}
+        <Button
+          type="button"
+          className="w-full bg-sky text-white hover:bg-sky-dark"
+          onClick={() => void handleConfirmIncludedVisit()}
+          disabled={confirming}
+        >
+          {confirming ? <Loader2 className="mr-2 animate-spin" /> : null}
+          Confirm my included visit
+        </Button>
+      </div>
+    )
+  }
 
   async function handleStripeCheckout(): Promise<void> {
     setError(null)

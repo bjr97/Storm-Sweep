@@ -18,8 +18,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { parseServiceAddress } from '@/lib/booking/address'
 import { buildPaymentData, buildQuoteBookingPayload } from '@/lib/booking/payment'
-import { priceKitSelection } from '@/lib/booking/prepKits'
 import { calculateBookingPrice } from '@/lib/booking/pricing'
+import { priceBooking } from '@/lib/booking/quote'
 import { TIME_WINDOWS } from '@/lib/booking/timeWindows'
 import {
   BOOKING_STEPS,
@@ -30,7 +30,7 @@ import {
   type CustomerDetailsValues,
   type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
-import { calculateDeposit, cn, PRICING } from '@/lib/utils'
+import { cn, PRICING } from '@/lib/utils'
 
 export type BookingInitialCustomer = {
   full_name: string
@@ -179,41 +179,15 @@ export function BookingForm({
     }
   }, [serviceSelection, kitSelection, member])
 
-  const includedKitBundle = serviceSelection.full_package ? PRICING.full_package_kit : null
-
-  const pricing = useMemo(() => {
-    const base = calculateBookingPrice(serviceSelection, member)
-    const kit = priceKitSelection(kitSelection, {
-      membershipPlan: bookingState.membershipPlan,
-      includedBundle: includedKitBundle,
-    })
-
-    if (base.isQuoteRequired || base.total === null || kit.total <= 0) {
-      return base
-    }
-
-    const total = base.total + kit.total
-
-    return {
-      ...base,
-      addonsPrice: base.addonsPrice + kit.total,
-      serviceSubtotal: (base.serviceSubtotal ?? 0) + kit.total,
-      total,
-      deposit: calculateDeposit(total),
-      lineItems: [...base.lineItems, ...kit.lines],
-    }
-  }, [serviceSelection, kitSelection, bookingState.membershipPlan, includedKitBundle, member])
+  // Same function the server re-runs at checkout (src/lib/booking/quote.ts).
+  const pricing = useMemo(
+    () => priceBooking(serviceSelection, kitSelection, member).breakdown,
+    [serviceSelection, kitSelection, member]
+  )
 
   const paymentData = useMemo(
-    () =>
-      buildPaymentData(
-        serviceSelection,
-        customerValues,
-        pricing,
-        photoResult,
-        kitSelection
-      ),
-    [serviceSelection, customerValues, pricing, photoResult, kitSelection]
+    () => buildPaymentData(serviceSelection, customerValues, photoResult, kitSelection, member),
+    [serviceSelection, customerValues, photoResult, kitSelection, member]
   )
 
   useEffect(() => {
@@ -317,7 +291,7 @@ export function BookingForm({
           <KitSelector
             shelterSize={bookingState.shelterSize}
             membershipPlan={bookingState.membershipPlan}
-            includedBundle={includedKitBundle}
+            includedBundle={serviceSelection.full_package ? PRICING.full_package_kit : null}
             onSelect={setKitSelection}
             onSkip={() => setCurrentStep(3)}
           />

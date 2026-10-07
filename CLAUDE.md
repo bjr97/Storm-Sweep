@@ -201,8 +201,6 @@ Customer Details (Step 3) specifics:
      mirrored onto `job_photos.customer_consent` for before/after photos.
    - Customers can reschedule/cancel online until 48h before (`src/lib/customer`);
      cancel with a paid deposit sets `jobs.refund_due` for the admin.
-   - KNOWN GAP: checkout trusts the client-sent total — re-price server-side
-     before Stripe goes live.
    - Service documentation: auto-opted-in (disclosed in T&Cs)
    - Marketing use: explicit opt-in ONLY — default is false
    - Never publish content without `photo_consent: true` on job_photos record
@@ -213,6 +211,12 @@ Customer Details (Step 3) specifics:
    - Sweeper never removes large items without admin approval
 
 4. **Payment flow:**
+   - Prices are computed ONLY by `priceBooking()` (`src/lib/booking/quote.ts`).
+     Checkout routes re-run it server-side via `repriceBooking()` from the
+     booking's `selection`; client-sent amounts are ignored (mismatch = 409
+     PRICE_CHANGED). Existing-member pricing requires being signed in as them.
+   - `/api/bookings` (no payment) accepts only X-Large quotes and $0 included
+     member visits.
    - Always use Stripe for memberships (subscriptions)
    - PayPal available for one-time payments only
    - Deposit = 50% at booking, balance charged after job complete

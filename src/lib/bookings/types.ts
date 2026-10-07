@@ -1,7 +1,9 @@
 import { z } from 'zod'
 
 import { SERVICE_ADDRESS_PATTERN } from '@/lib/booking/address'
+import { serviceSelectionSchema } from '@/lib/booking/schemas'
 import { TIME_WINDOW_VALUES } from '@/lib/booking/timeWindows'
+import { PREP_KIT_BUNDLES, PREP_KIT_ITEMS, type PrepKitBundleId, type PrepKitItemId } from '@/lib/utils'
 import type { ShelterSize } from '@/types/database'
 
 // All amounts are integer cents. Item prices may be negative (kit credits);
@@ -11,6 +13,20 @@ export const bookingItemSchema = z.object({
   price: z.number().int(),
   quantity: z.number().int().positive().default(1),
 })
+
+const isBundleId = (v: unknown): v is PrepKitBundleId => PREP_KIT_BUNDLES.some((b) => b.id === v)
+const isItemId = (v: unknown): v is PrepKitItemId => PREP_KIT_ITEMS.some((i) => i.id === v)
+
+export const bookingSelectionSchema = z.object({
+  service: serviceSelectionSchema,
+  kit: z
+    .object({
+      selectedBundle: z.custom<PrepKitBundleId>(isBundleId).nullable(),
+      aLaCarteItems: z.array(z.custom<PrepKitItemId>(isItemId)).max(20),
+    })
+    .nullable(),
+})
+export type BookingSelection = z.infer<typeof bookingSelectionSchema>
 
 export const bookingPayloadSchema = z.object({
   customerName: z.string().min(1),
@@ -35,6 +51,8 @@ export const bookingPayloadSchema = z.object({
   photoGrade: z.string().optional(),
   photoUrls: z.array(z.string()).optional(),
   photoFlags: z.array(z.string()).optional(),
+  /** What the customer chose. The server re-prices from this and ignores client amounts. */
+  selection: bookingSelectionSchema.optional(),
 })
 
 export type BookingPayload = z.infer<typeof bookingPayloadSchema>

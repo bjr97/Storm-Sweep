@@ -5,8 +5,9 @@ import {
   readBookingMetadataJson,
   serializeBookingMetadata,
 } from '@/lib/bookings/types'
+import { isRepriceError, repriceBooking } from '@/lib/bookings/reprice'
 import { getAppUrl, getStripe } from '@/lib/stripe'
-import { calculateDeposit, formatCurrency, PRICING } from '@/lib/utils'
+import { formatCurrency, PRICING } from '@/lib/utils'
 
 function buildDepositLineItem(
   depositAmount: number,
@@ -59,7 +60,7 @@ export async function POST(req: Request): Promise<Response> {
       )
     }
 
-    const { amount, items, customerEmail, customerName, metadata } =
+    const { amount, customerEmail, customerName, metadata } =
       parsed.data
 
     const bookingResult = bookingPayloadSchema.safeParse(
@@ -73,23 +74,26 @@ export async function POST(req: Request): Promise<Response> {
       )
     }
 
-    const booking = bookingResult.data
-    const depositAmount = calculateDeposit(booking.totalAmount)
+    // Server-side pricing: total, deposit and items come from the selection,
+    // never from amounts the browser sent.
+    const repriced = await repriceBooking(bookingResult.data)
+    if (isRepriceError(repriced)) {
+      return Response.json({ error: repriced.error, code: repriced.code }, { status: repriced.status })
+    }
+    const booking = repriced.payload
+    const depositAmount = repriced.depositAmount
 
     if (amount !== depositAmount) {
       return Response.json(
-        {
-          error: `Deposit must be ${PRICING.deposit_pct * 100}% of total (${depositAmount})`,
-          code: 'INVALID_DEPOSIT',
-        },
-        { status: 400 }
+        { error: 'Prices were updated — please go back one step and review your total', code: 'PRICE_CHANGED' },
+        { status: 409 }
       )
     }
 
     const stripe = getStripe()
     const appUrl = getAppUrl()
     const membershipPlan = booking.membershipPlan
-    const orderSummary = items
+    const orderSummary = repriced.items
       .map((item) =>
         item.quantity > 1 ? `${item.name} × ${item.quantity}` : item.name
       )

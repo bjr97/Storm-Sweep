@@ -1,98 +1,38 @@
 import type { PhotoScreenResult } from '@/components/booking/PhotoUpload'
 import type { KitSelection } from '@/components/booking/KitSelector'
-import type { BookingPayload, BookingPaymentData } from '@/lib/bookings/types'
-import { getHardwareAddon } from '@/lib/booking/addons'
+import type { BookingPayload, BookingPaymentData, BookingSelection } from '@/lib/bookings/types'
 import { formatServiceAddress } from '@/lib/booking/address'
+import { getPrepKitBundle } from '@/lib/booking/prepKits'
+import { priceBooking } from '@/lib/booking/quote'
 import { windowStartIso } from '@/lib/booking/timeWindows'
 import {
   formatCustomerFullName,
   type CustomerDetailsValues,
   type ServiceSelectionValues,
 } from '@/lib/booking/schemas'
-import { getPrepKitBundle, priceKitSelection } from '@/lib/booking/prepKits'
-import { calculateBookingPrice, type BookingPriceBreakdown } from '@/lib/booking/pricing'
-import { formatCurrency, PRICING } from '@/lib/utils'
+import { calculateDeposit, formatCurrency } from '@/lib/utils'
 
 /**
- * List value of what's being delivered — the same services priced as a
- * one-time visit (no membership coverage or member discounts). Sweeper pay
- * is calculated on this so member visits pay the same as paid ones.
+ * Builds the booking sent to checkout. Prices shown here come from
+ * priceBooking() — the same function the server re-runs on every checkout,
+ * which ignores these amounts and charges only what it computes itself.
  */
-function calculateServiceValue(
-  serviceSelection: ServiceSelectionValues,
-  kitSelection: KitSelection | null
-): number {
-  const base = calculateBookingPrice({ ...serviceSelection, membership: 'one_time' }).total ?? 0
-  const kit = kitSelection
-    ? priceKitSelection(kitSelection, {
-        membershipPlan: 'none',
-        includedBundle: serviceSelection.full_package ? PRICING.full_package_kit : null,
-      }).total
-    : 0
-  return base + kit
-}
 
-function kitServiceTypeLabel(kitSelection: KitSelection | null): string | null {
-  if (!kitSelection || kitSelection.kitTotal <= 0) {
-    return null
-  }
-  if (kitSelection.selectedBundle) {
-    return `Prep Kit — ${getPrepKitBundle(kitSelection.selectedBundle).name}`
-  }
-  if (kitSelection.aLaCarteItems.length > 0) {
-    return 'Prep Kit — Custom'
-  }
-  return null
-}
-
-export function buildPaymentData(
-  serviceSelection: ServiceSelectionValues,
-  customerValues: CustomerDetailsValues,
-  pricing: BookingPriceBreakdown,
-  photoResult: PhotoScreenResult | null,
-  kitSelection: KitSelection | null = null
-): BookingPaymentData | null {
-  if (pricing.total === null || pricing.deposit === null) {
-    return null
-  }
-
-  const referralSource = customerValues.referral_source.startsWith('partner:')
-    ? customerValues.referral_source.replace('partner:', '')
-    : customerValues.referral_source
-
-  const serviceTypes: string[] = []
-
-  if (serviceSelection.full_package) {
-    serviceTypes.push('Full Package')
-  } else {
-    if (serviceSelection.deep_clean) {
-      serviceTypes.push('Deep Clean')
-    }
-    if (serviceSelection.led_package) {
-      serviceTypes.push('LED Package')
-    }
-  }
-  for (const id of serviceSelection.hardware_addons) {
-    serviceTypes.push(getHardwareAddon(id).name)
-  }
-
-  const kitLabel = kitServiceTypeLabel(kitSelection)
-  if (kitLabel) {
-    serviceTypes.push(kitLabel)
-  }
-
+function selectionOf(service: ServiceSelectionValues, kit: KitSelection | null): BookingSelection {
   return {
-    items: pricing.lineItems
-      .filter((item) => item.amount !== null)
-      .map((item) => ({
-        name: item.label,
-        price: item.amount as number,
-        quantity: 1,
-      })),
-    totalAmount: pricing.total,
-    depositAmount: pricing.deposit,
-    serviceValue: calculateServiceValue(serviceSelection, kitSelection),
-    membershipVisit: pricing.isMemberVisit,
+    service,
+    kit: kit ? { selectedBundle: kit.selectedBundle, aLaCarteItems: kit.aLaCarteItems } : null,
+  }
+}
+
+function customerFields(
+  customerValues: CustomerDetailsValues,
+  photoResult: PhotoScreenResult | null
+): Pick<
+  BookingPayload,
+  'customerName' | 'customerEmail' | 'customerPhone' | 'address' | 'scheduledAt' | 'timeWindow' | 'referralSource' | 'photoGrade' | 'photoUrls' | 'photoFlags'
+> {
+  return {
     customerName: formatCustomerFullName(customerValues),
     customerEmail: customerValues.email,
     customerPhone: customerValues.phone,
@@ -101,17 +41,37 @@ export function buildPaymentData(
       ? windowStartIso(customerValues.preferred_date, customerValues.time_window)
       : null,
     timeWindow: customerValues.time_window,
-    shelterSize: serviceSelection.shelter_size,
-    serviceTypes,
-    notes: customerValues.notes,
-    referralSource,
-    membershipPlan:
-      serviceSelection.membership === 'one_time' || serviceSelection.membership === 'member'
-        ? 'none'
-        : serviceSelection.membership,
+    referralSource: customerValues.referral_source.startsWith('partner:')
+      ? customerValues.referral_source.replace('partner:', '')
+      : customerValues.referral_source,
     photoGrade: photoResult?.grade,
     photoUrls: photoResult?.storage_path ? [photoResult.storage_path] : [],
     photoFlags: photoResult?.flags ?? [],
+  }
+}
+
+export function buildPaymentData(
+  serviceSelection: ServiceSelectionValues,
+  customerValues: CustomerDetailsValues,
+  photoResult: PhotoScreenResult | null,
+  kitSelection: KitSelection | null = null,
+  member: { visitsUsed: number } | null = null
+): BookingPaymentData | null {
+  const quote = priceBooking(serviceSelection, kitSelection, member)
+  if (quote.breakdown.total === null) return null
+
+  return {
+    ...customerFields(customerValues, photoResult),
+    items: quote.items,
+    totalAmount: quote.breakdown.total,
+    depositAmount: calculateDeposit(quote.breakdown.total),
+    serviceValue: quote.serviceValue,
+    membershipVisit: quote.membershipVisit,
+    shelterSize: serviceSelection.shelter_size,
+    serviceTypes: quote.serviceTypes,
+    notes: customerValues.notes,
+    membershipPlan: quote.membershipPlan,
+    selection: selectionOf(serviceSelection, kitSelection),
   }
 }
 
@@ -122,44 +82,21 @@ export function buildQuoteBookingPayload(
   photoResult: PhotoScreenResult | null,
   kitSelection: KitSelection | null = null
 ): BookingPayload {
-  const referralSource = customerValues.referral_source.startsWith('partner:')
-    ? customerValues.referral_source.replace('partner:', '')
-    : customerValues.referral_source
-
-  const quoteNote = 'X-Large shelter — custom quote requested. Team will contact customer to confirm pricing.'
+  const quote = priceBooking(serviceSelection, kitSelection)
   const kitNote =
-    kitSelection && kitSelection.kitTotal > 0
-      ? `Prep kit interest: ${kitServiceTypeLabel(kitSelection) ?? 'Custom kit'} (${formatCurrency(kitSelection.kitTotal)})`
+    quote.kitTotal > 0 && kitSelection
+      ? `Prep kit interest: ${kitSelection.selectedBundle ? getPrepKitBundle(kitSelection.selectedBundle).name : 'Custom kit'} (${formatCurrency(quote.kitTotal)})`
       : null
-  const notes = [customerValues.notes, kitNote, quoteNote].filter(Boolean).join('\n\n')
-
-  const quoteServiceTypes = [
-    'Custom quote — X-Large shelter',
-    ...serviceSelection.hardware_addons.map((id) => `${getHardwareAddon(id).name} (quote)`),
-  ]
-  const kitLabel = kitServiceTypeLabel(kitSelection)
-  if (kitLabel) {
-    quoteServiceTypes.push(kitLabel)
-  }
+  const quoteNote = 'X-Large shelter — custom quote requested. Team will contact customer to confirm pricing.'
 
   return {
-    customerName: formatCustomerFullName(customerValues),
-    customerEmail: customerValues.email,
-    customerPhone: customerValues.phone,
-    address: formatServiceAddress(customerValues),
-    scheduledAt: customerValues.preferred_date
-      ? windowStartIso(customerValues.preferred_date, customerValues.time_window)
-      : null,
-    timeWindow: customerValues.time_window,
+    ...customerFields(customerValues, photoResult),
     shelterSize: serviceSelection.shelter_size,
-    serviceTypes: quoteServiceTypes,
-    notes,
-    referralSource,
+    serviceTypes: quote.serviceTypes,
+    notes: [customerValues.notes, kitNote, quoteNote].filter(Boolean).join('\n\n'),
     totalAmount: 0, // quoted later by admin
     membershipVisit: false,
     membershipPlan: 'none',
-    photoGrade: photoResult?.grade,
-    photoUrls: photoResult?.storage_path ? [photoResult.storage_path] : [],
-    photoFlags: photoResult?.flags ?? [],
+    selection: selectionOf(serviceSelection, kitSelection),
   }
 }
