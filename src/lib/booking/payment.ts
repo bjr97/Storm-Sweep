@@ -30,12 +30,13 @@ function customerFields(
   photoResult: PhotoScreenResult | null
 ): Pick<
   BookingPayload,
-  'customerName' | 'customerEmail' | 'customerPhone' | 'address' | 'scheduledAt' | 'timeWindow' | 'referralSource' | 'photoGrade' | 'photoUrls' | 'photoFlags'
+  'customerName' | 'customerEmail' | 'customerPhone' | 'address' | 'scheduledAt' | 'timeWindow' | 'referralSource' | 'photoGrade' | 'photoUrls' | 'photoFlags' | 'marketingPhotoConsent'
 > {
   return {
     customerName: formatCustomerFullName(customerValues),
     customerEmail: customerValues.email,
     customerPhone: customerValues.phone,
+    marketingPhotoConsent: customerValues.photo_consent,
     address: formatServiceAddress(customerValues),
     scheduledAt: customerValues.preferred_date
       ? windowStartIso(customerValues.preferred_date, customerValues.time_window)

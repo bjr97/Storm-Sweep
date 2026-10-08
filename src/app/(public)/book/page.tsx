@@ -25,7 +25,7 @@ async function getInitialCustomer(): Promise<{
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, phone, address, membership_status, visits_used, referral_credit')
+    .select('full_name, phone, address, membership_status, visits_used, referral_credit, marketing_photo_consent')
     .eq('id', user.id)
     .single()
 
@@ -38,6 +38,7 @@ async function getInitialCustomer(): Promise<{
       email: user.email ?? '',
       phone: profile?.phone ?? '',
       address: profile?.address ?? '',
+      marketing_photo_consent: profile?.marketing_photo_consent ?? true,
     },
   }
 }

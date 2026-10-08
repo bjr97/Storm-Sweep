@@ -81,6 +81,8 @@ export const customerDetailsSchema = addressPartsSchema.extend({
   time_window: z.enum(TIME_WINDOW_VALUES, { message: 'Pick a time window' }),
   notes: z.string().max(500, 'Notes must be 500 characters or less').optional(),
   referral_source: z.string().min(1, 'Select how you heard about us'),
+  /** May we share before/after photos of the shelter on social? Pre-checked; never shows the address. */
+  photo_consent: z.boolean(),
 })
 
 export type CustomerDetailsValues = z.infer<typeof customerDetailsSchema>

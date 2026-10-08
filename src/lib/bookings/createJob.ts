@@ -24,6 +24,8 @@ async function resolveCustomerId(payload: BookingPayload): Promise<string> {
         full_name: payload.customerName,
         phone: payload.customerPhone,
         address: payload.address,
+        // Unticking the photo box always opts out; ticking never overrides an earlier opt-out.
+        ...(payload.marketingPhotoConsent === false ? { marketing_photo_consent: false } : {}),
       })
       .eq('id', existingUserId)
 
@@ -48,6 +50,7 @@ async function resolveCustomerId(payload: BookingPayload): Promise<string> {
     .update({
       full_name: payload.customerName,
       phone: payload.customerPhone,
+      marketing_photo_consent: payload.marketingPhotoConsent ?? true,
       address: payload.address,
     })
     .eq('id', data.user.id)

@@ -202,7 +202,10 @@ Customer Details (Step 3) specifics:
    - Customers can reschedule/cancel online until 48h before (`src/lib/customer`);
      cancel with a paid deposit sets `jobs.refund_due` for the admin.
    - Service documentation: auto-opted-in (disclosed in T&Cs)
-   - Marketing use: explicit opt-in ONLY — default is false
+   - Marketing use: ON by default for new accounts (owner decision 2026-10-08),
+     shown as a PRE-CHECKED box at sign-up (RegisterForm) and booking Step 3;
+     unticking always opts out, ticking never overrides an earlier opt-out.
+     Posts never show name or street address.
    - Never publish content without `photo_consent: true` on job_photos record
 
 3. **Junk policy:**

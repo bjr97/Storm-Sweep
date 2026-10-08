@@ -57,6 +57,8 @@ export const bookingPayloadSchema = z.object({
   photoGrade: z.string().optional(),
   photoUrls: z.array(z.string()).optional(),
   photoFlags: z.array(z.string()).optional(),
+  /** Social photo sharing choice from the booking form (unchecked always wins). */
+  marketingPhotoConsent: z.boolean().optional(),
   /** What the customer chose. The server re-prices from this and ignores client amounts. */
   selection: bookingSelectionSchema.optional(),
   // Set by the server (repriceBooking) only — never trusted from the browser.

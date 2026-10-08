@@ -27,6 +27,8 @@ const registerSchema = z.object({
     .string()
     .min(10, 'Enter a valid phone number')
     .regex(/^[\d\s()+-]+$/, 'Enter a valid phone number'),
+  /** Social photo sharing — pre-checked, can be unticked here or later in Account. */
+  photoConsent: z.boolean(),
 })
 
 type RegisterFormValues = z.infer<typeof registerSchema>
@@ -47,6 +49,7 @@ export function RegisterForm(): React.ReactElement {
       email: '',
       password: '',
       phone: '',
+      photoConsent: true,
     },
   })
 
@@ -64,6 +67,7 @@ export function RegisterForm(): React.ReactElement {
         data: {
           full_name: values.fullName,
           phone: values.phone,
+          marketing_photo_consent: values.photoConsent,
         },
       },
     })
@@ -166,6 +170,16 @@ export function RegisterForm(): React.ReactElement {
                 </p>
               ) : null}
             </div>
+
+            <label className="flex items-start gap-2.5 text-sm text-shelter">
+              <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-sky" {...register('photoConsent')} />
+              <span>
+                Storm Sweep may share before &amp; after photos of my shelter on social media.
+                <span className="block text-xs text-muted-foreground">
+                  Never your name or street address. Change it anytime in your account.
+                </span>
+              </span>
+            </label>
 
             {authError ? (
               <p className="rounded-lg bg-tornado/10 px-3 py-2 text-sm text-tornado">
