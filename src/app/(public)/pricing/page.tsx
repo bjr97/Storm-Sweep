@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Check, Minus } from 'lucide-react'
 import Link from 'next/link'
 
@@ -96,6 +97,13 @@ function FeatureIcon({ included }: { included: boolean }): React.ReactElement {
     return <Check className="size-5 text-[var(--color-primary)]" aria-hidden="true" />
   }
   return <Minus className="size-5 text-[var(--color-text)]/30" aria-hidden="true" />
+}
+
+export const metadata: Metadata = {
+  title: 'Prices & Storm Ready Membership',
+  description:
+    'Clear prices for storm shelter cleaning in Norman, OK, plus Storm Ready membership: two cleanings a year and 10% off every upgrade.',
+  alternates: { canonical: '/pricing' },
 }
 
 export default function PricingPage(): React.ReactElement {

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import {
   CalendarCheck,
   Camera,
@@ -12,6 +13,7 @@ import Link from 'next/link'
 
 import { HomeHero } from '@/components/home/HomeHeroSwitcher'
 import { SectionDivider } from '@/components/home/SectionDivider'
+import { LocalBusinessJsonLd } from '@/components/seo/LocalBusinessJsonLd'
 import { buttonVariants } from '@/components/ui/button'
 import {
   Card,
@@ -90,9 +92,17 @@ type Testimonial = { name: string; location: string; quote: string; rating: numb
 // hidden until this has entries — add reviews here as they come in.
 const TESTIMONIALS: Testimonial[] = []
 
+export const metadata: Metadata = {
+  title: 'Storm Shelter Cleaning in Norman, OK',
+  description:
+    'Deep cleaning, LED lighting, door hardware and prep kits for underground garage storm shelters in Norman, Oklahoma. Before & after photos every visit. Book online.',
+  alternates: { canonical: '/' },
+}
+
 export default function HomePage(): React.ReactElement {
   return (
     <>
+      <LocalBusinessJsonLd />
       <HomeHero />
       <SectionDivider />
 

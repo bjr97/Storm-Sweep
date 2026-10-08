@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import {
   Heart,
   MapPin,
@@ -66,6 +67,13 @@ const WHY_STORM_SWEEP = [
       'From baby-proofing supply kits to bright LED lighting, we design every service around keeping Oklahoma families safe underground.',
   },
 ] as const
+
+export const metadata: Metadata = {
+  title: 'About Storm Sweep',
+  description:
+    'A Norman, Oklahoma service that cleans, lights and stocks underground storm shelters so families are ready before storm season.',
+  alternates: { canonical: '/about' },
+}
 
 export default function AboutPage(): React.ReactElement {
   return (

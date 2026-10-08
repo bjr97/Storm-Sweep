@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import {
   Check,
   DoorOpen,
@@ -86,6 +87,13 @@ const DOOR_HARDWARE_UPGRADES = HARDWARE_ADDONS.map((addon) => {
   const price = hardwareAddonPrice(addon.id, 'small')
   return { ...addon, priceLabel: addon.id === 'flooring' && price !== null ? `from ${formatCurrency(price)}` : formatCurrency(price ?? 0) }
 })
+
+export const metadata: Metadata = {
+  title: 'Shelter Cleaning Services & Upgrades',
+  description:
+    'Deep cleans by shelter size, LED lighting, interior handles, hinge and roller service, shelter carpet and emergency prep kits for Norman storm shelters.',
+  alternates: { canonical: '/services' },
+}
 
 export default function ServicesPage(): React.ReactElement {
   return (

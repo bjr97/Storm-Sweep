@@ -1,6 +1,9 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { LoginForm } from '@/components/auth/LoginForm'
+
+export const metadata: Metadata = { title: 'Log in', robots: { index: false, follow: true } }
 
 export default function LoginPage(): React.ReactElement {
   return (

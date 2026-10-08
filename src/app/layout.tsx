@@ -10,6 +10,7 @@ import {
 import localFont from 'next/font/local'
 
 import { DevThemeToggle } from '@/components/dev/DevThemeToggle'
+import { SITE } from '@/lib/site'
 import { ACTIVE_THEME } from '@/lib/theme'
 
 import './globals.css'
@@ -63,9 +64,24 @@ const spaceMono = Space_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Storm Sweep | Underground Storm Shelter Cleaning · Norman, OK',
-  description:
-    'Professional underground storm shelter cleaning, LED upgrades, and emergency supply kits in Norman, Oklahoma.',
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: 'Storm Shelter Cleaning in Norman, OK | Storm Sweep',
+    template: '%s | Storm Sweep',
+  },
+  description: SITE.description,
+  applicationName: SITE.name,
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    siteName: SITE.name,
+    locale: 'en_US',
+    url: '/',
+    title: 'Storm Shelter Cleaning in Norman, OK | Storm Sweep',
+    description: SITE.description,
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Storm Sweep' }],
+  },
+  twitter: { card: 'summary_large_image', images: ['/og.png'] },
 }
 
 export default function RootLayout({

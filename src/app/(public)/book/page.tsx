@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { BookingForm, type BookingInitialCustomer } from '@/components/booking/BookingForm'
@@ -60,6 +61,13 @@ async function BookPageContent({
       credit={credit}
     />
   )
+}
+
+export const metadata: Metadata = {
+  title: 'Book a Storm Shelter Cleaning',
+  description:
+    'Pick your shelter size, services and an arrival window in six quick steps. Norman, OK.',
+  alternates: { canonical: '/book' },
 }
 
 export default async function BookPage({

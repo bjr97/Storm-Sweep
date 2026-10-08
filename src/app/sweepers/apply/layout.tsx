@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Barlow, Barlow_Condensed, Bebas_Neue } from 'next/font/google'
 import Link from 'next/link'
 
@@ -18,6 +19,13 @@ const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
   variable: '--font-barlow-condensed',
 })
+
+export const metadata: Metadata = {
+  title: 'Become a Sweeper — Flexible Work in Norman, OK',
+  description:
+    'Clean and upgrade storm shelters around Norman on your own schedule as an independent contractor. Claim jobs in the app, get paid per job plus bonuses.',
+  alternates: { canonical: '/sweepers/apply' },
+}
 
 export default function SweeperApplyLayout({
   children,
