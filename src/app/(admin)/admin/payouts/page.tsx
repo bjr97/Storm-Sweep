@@ -76,7 +76,7 @@ export default async function AdminPayoutsPage(): Promise<React.ReactElement> {
                       </td>
                       <td className="px-3 py-3 text-[#C9C9CE]">{short(b.lastPaidAt)}</td>
                       <td className="px-4 py-3">
-                        <PayoutButton sweeperId={b.sweeperId} name={b.name} owed={b.owed} jobs={b.jobs.length} />
+                        <PayoutButton sweeperId={b.sweeperId} name={b.name} owed={b.owed} jobs={b.jobs.length} w9OnFile={b.w9OnFile} />
                       </td>
                     </tr>
                   ))}

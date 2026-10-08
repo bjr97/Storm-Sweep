@@ -8,7 +8,7 @@ import { formatCurrency } from '@/lib/utils'
 import type { PayoutMethod } from '@/types/database'
 
 /** Record that you paid a Sweeper (outside the app) for everything they're owed. */
-export function PayoutButton({ sweeperId, name, owed, jobs }: { sweeperId: string; name: string; owed: number; jobs: number }): React.ReactElement {
+export function PayoutButton({ sweeperId, name, owed, jobs, w9OnFile }: { sweeperId: string; name: string; owed: number; jobs: number; w9OnFile: boolean }): React.ReactElement {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [method, setMethod] = useState<PayoutMethod>('zelle')
@@ -49,6 +49,11 @@ export function PayoutButton({ sweeperId, name, owed, jobs }: { sweeperId: strin
   }
   return (
     <div className="space-y-2 rounded-md border border-wheat/40 bg-wheat/[0.06] p-2.5">
+      {!w9OnFile ? (
+        <p className="rounded bg-tornado/15 px-2 py-1 text-[11px] font-semibold text-[#F1948A]">
+          No W-9 on file — collect one before paying (needed for their 1099).
+        </p>
+      ) : null}
       <p className="text-xs text-[#F0F0F0]">
         Paid {name} <b>{formatCurrency(owed)}</b> for {jobs} job{jobs === 1 ? '' : 's'}?
       </p>

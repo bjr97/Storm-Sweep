@@ -2,10 +2,12 @@ import { Medal } from 'lucide-react'
 
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { EmptyState, Panel } from '@/components/admin/Panel'
+import { SweeperPaperwork } from '@/components/admin/SweeperPaperwork'
 import { TierOverrideSelect } from '@/components/admin/TierOverrideSelect'
 import { formatBusinessDate } from '@/lib/admin/time'
 import { getCrewTiers } from '@/lib/sweepers/board'
 import { getCrewYearTotals, IRS_1099_THRESHOLD_CENTS } from '@/lib/sweepers/earnings'
+import { getCrewPaperwork } from '@/lib/sweepers/paperwork'
 import { JOB_BOARD, TIER_LABEL, TIER_ORDER, TIER_RULES } from '@/lib/sweepers/jobBoard'
 import { cn, formatCurrency } from '@/lib/utils'
 import type { SweeperTier } from '@/types/database'
@@ -20,7 +22,7 @@ const TIER_STYLE: Record<SweeperTier, string> = {
 }
 
 export default async function AdminCrewPage(): Promise<React.ReactElement> {
-  const [{ crew }, yearTotals] = await Promise.all([getCrewTiers(), getCrewYearTotals()])
+  const [{ crew }, yearTotals, paperwork] = await Promise.all([getCrewTiers(), getCrewYearTotals(), getCrewPaperwork()])
   const year = formatBusinessDate(new Date(), { year: 'numeric' })
   const members = Array.from(crew.values()).sort(
     (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier) || b.score - a.score || a.name.localeCompare(b.name)
@@ -49,7 +51,7 @@ export default async function AdminCrewPage(): Promise<React.ReactElement> {
             <EmptyState>No Sweepers yet — approve applicants to build your crew.</EmptyState>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-[13px]">
+              <table className="w-full min-w-[960px] text-left text-[13px]">
                 <thead className="text-[10px] uppercase tracking-[0.15em] text-[#8A8A8F]">
                   <tr className="border-b border-white/[0.07]">
                     <th className="px-4 py-2.5 font-bold">Sweeper</th>
@@ -60,6 +62,7 @@ export default async function AdminCrewPage(): Promise<React.ReactElement> {
                     <th className="px-3 py-2.5 font-bold">Rating</th>
                     <th className="px-3 py-2.5 font-bold">Late drops (90d)</th>
                     <th className="px-3 py-2.5 font-bold">Earned {year}</th>
+                    <th className="w-56 px-3 py-2.5 font-bold">Paperwork</th>
                     <th className="w-44 px-4 py-2.5 font-bold">Override</th>
                   </tr>
                 </thead>
@@ -103,6 +106,18 @@ export default async function AdminCrewPage(): Promise<React.ReactElement> {
                         {formatCurrency(yearTotals.get(m.id) ?? 0)}
                         {(yearTotals.get(m.id) ?? 0) >= IRS_1099_THRESHOLD_CENTS ? (
                           <span className="ml-1.5 rounded bg-wheat/15 px-1.5 py-0.5 text-[10px] font-bold text-wheat-light">1099</span>
+                        ) : null}
+                      </td>
+                      <td className="px-3 py-3">
+                        {paperwork.get(m.id) ? (
+                          <SweeperPaperwork
+                            sweeperId={m.id}
+                            w9={Boolean(paperwork.get(m.id)!.w9ReceivedAt)}
+                            agreementSigned={paperwork.get(m.id)!.agreementSigned}
+                            insuranceExpiresOn={paperwork.get(m.id)!.insuranceExpiresOn}
+                            insurance={paperwork.get(m.id)!.insurance}
+                            notes={paperwork.get(m.id)!.notes}
+                          />
                         ) : null}
                       </td>
                       <td className="px-4 py-3">

@@ -19,9 +19,9 @@ export async function GET(req: Request): Promise<Response> {
 
     const rows = await tenNinetyNineRows(year)
     const lines = [
-      ['Sweeper', 'Email', 'Phone', `Total paid ${year} (USD)`, 'Payouts', '1099-NEC required ($600+)'].map(cell).join(','),
+      ['Sweeper', 'Email', 'Phone', `Total paid ${year} (USD)`, 'Payouts', '1099-NEC required ($600+)', 'W-9 on file'].map(cell).join(','),
       ...rows.map((r) =>
-        [r.name, r.email, r.phone, (r.total / 100).toFixed(2), r.payouts, r.total >= IRS_1099_THRESHOLD_CENTS ? 'Yes' : 'No'].map(cell).join(',')
+        [r.name, r.email, r.phone, (r.total / 100).toFixed(2), r.payouts, r.total >= IRS_1099_THRESHOLD_CENTS ? 'Yes' : 'No', r.w9 ? 'Yes' : 'No'].map(cell).join(',')
       ),
     ]
     return new Response(`${lines.join('\r\n')}\r\n`, {

@@ -16,13 +16,13 @@ export { PAYOUT_METHODS } from '@/lib/sweepers/payoutMethods'
 const ALL_TIME = { start: new Date('2024-01-01T00:00:00Z'), end: new Date('2100-01-01T00:00:00Z') }
 
 export type OwedJob = { id: string; completedAt: string; pay: number }
-export type CrewBalance = { sweeperId: string; name: string; owed: number; jobs: OwedJob[]; paidThisYear: number; lastPaidAt: string | null }
+export type CrewBalance = { sweeperId: string; name: string; owed: number; jobs: OwedJob[]; paidThisYear: number; lastPaidAt: string | null; w9OnFile: boolean }
 
 export async function getCrewBalances(now: Date = new Date()): Promise<CrewBalance[]> {
   const supabase = createServiceClient()
   const [completed, sweepersRes, payoutsRes] = await Promise.all([
     getCompletedJobPay(ALL_TIME),
-    supabase.from('profiles').select('id, full_name').eq('role', 'sweeper').order('full_name'),
+    supabase.from('profiles').select('id, full_name, w9_received_at').eq('role', 'sweeper').order('full_name'),
     supabase.from('sweeper_payouts').select('sweeper_id, amount, paid_at').order('paid_at', { ascending: false }),
   ])
   if (sweepersRes.error) throw sweepersRes.error
@@ -41,6 +41,7 @@ export async function getCrewBalances(now: Date = new Date()): Promise<CrewBalan
       jobs,
       paidThisYear: mine.filter((p) => new Date(p.paid_at) >= year.start && new Date(p.paid_at) < year.end).reduce((n, p) => n + p.amount, 0),
       lastPaidAt: mine[0]?.paid_at ?? null,
+      w9OnFile: Boolean(s.w9_received_at),
     }
   })
 }
@@ -97,7 +98,7 @@ export async function listPayouts(limit = 50): Promise<PayoutRow[]> {
 }
 
 /** Rows for the 1099-NEC summary: payments made in `year` (business calendar). */
-export async function tenNinetyNineRows(year: number): Promise<{ name: string; email: string; phone: string; total: number; payouts: number }[]> {
+export async function tenNinetyNineRows(year: number): Promise<{ name: string; email: string; phone: string; w9: boolean; total: number; payouts: number }[]> {
   const supabase = createServiceClient()
   const range = yearRange(new Date(Date.UTC(year, 6, 1)))
   const { data, error } = await supabase
@@ -114,10 +115,10 @@ export async function tenNinetyNineRows(year: number): Promise<{ name: string; e
   const rows = await Promise.all(
     Array.from(totals.entries()).map(async ([id, t]) => {
       const [{ data: prof }, { data: auth }] = await Promise.all([
-        supabase.from('profiles').select('full_name, phone').eq('id', id).maybeSingle(),
+        supabase.from('profiles').select('full_name, phone, w9_received_at').eq('id', id).maybeSingle(),
         supabase.auth.admin.getUserById(id),
       ])
-      return { name: prof?.full_name ?? 'Sweeper', email: auth.user?.email ?? '', phone: prof?.phone ?? '', ...t }
+      return { name: prof?.full_name ?? 'Sweeper', email: auth.user?.email ?? '', phone: prof?.phone ?? '', w9: Boolean(prof?.w9_received_at), ...t }
     })
   )
   return rows.sort((a, b) => b.total - a.total)
