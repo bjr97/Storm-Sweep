@@ -1,6 +1,7 @@
 import type { VisitUpdateEmailProps } from '@/emails/VisitUpdateEmail'
 import { formatBusinessDate } from '@/lib/admin/time'
 import { jobTimeLabel } from '@/lib/booking/timeWindows'
+import { FOLLOW_UP_MAX_RATING } from '@/lib/admin/reviews'
 import { helpTopicLabel } from '@/lib/help'
 import { emailConfigured, sendJobCompleteEmail, sendVisitUpdateEmail } from '@/lib/resend'
 import { createServiceClient } from '@/lib/supabase/server'
@@ -248,5 +249,49 @@ export async function notifyHelpRequest(requestId: string): Promise<void> {
         ctaUrl: link,
       })
     )
+  }
+}
+
+/**
+ * New review. Low ratings (<= FOLLOW_UP_MAX_RATING) alert the office so they can
+ * follow up; 4-5 stars text the Sweeper a thank-you. Every rating also shows in
+ * the Sweeper's app (My reviews).
+ */
+export async function notifyNewReview(jobId: string): Promise<void> {
+  const supabase = createServiceClient()
+  const [{ data: review }, job] = await Promise.all([
+    supabase.from('reviews').select('rating, body, customer_id').eq('job_id', jobId).maybeSingle(),
+    loadJob(jobId),
+  ])
+  if (!review || !job) return
+  const [customer, sweeper] = await Promise.all([person(review.customer_id), person(job.sweeper_id)])
+  if (!customer) return // demo accounts never trigger alerts
+  const firstName = customer.name.split(/\s+/)[0]
+  const stars = `${review.rating}★`
+  const quote = review.body ? ` “${review.body.slice(0, 160)}”` : ''
+
+  if (review.rating <= FOLLOW_UP_MAX_RATING) {
+    const link = `${getAppUrl()}/admin/reviews?filter=follow_up`
+    const summary = `${stars} review from ${customer.name}${sweeper ? ` (Sweeper: ${sweeper.name})` : ''}.${quote}`
+    await text(process.env.ADMIN_PHONE_NUMBER, `Low rating: ${summary} Follow up: ${link}`, 'admin_alert', null, jobId)
+    for (const to of await adminEmails()) {
+      await email(to, `Low rating (${stars}) — please follow up`, {
+        preview: summary,
+        title: `${stars} review needs follow-up`,
+        greeting: 'Heads up,',
+        message: `${summary} Call the customer, make it right, then mark it followed up on the Reviews page.`,
+        rows: [
+          { label: 'Customer phone', value: customer.phone ?? '—' },
+          { label: 'Customer email', value: customer.email ?? '—' },
+        ],
+        ctaLabel: 'Open reviews to follow up',
+        ctaUrl: link,
+      })
+    }
+    return
+  }
+
+  if (sweeper && review.rating >= 4) {
+    await text(sweeper.phone, `⭐ ${firstName} gave your Storm Sweep visit ${stars}!${quote} Nice work. See all your reviews in the app.`, 'sweeper_review', sweeper.id, jobId)
   }
 }

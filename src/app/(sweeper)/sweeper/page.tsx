@@ -1,4 +1,4 @@
-import { CalendarDays, Clock, GraduationCap, Lock, MapPin, Medal, Navigation, Ruler } from 'lucide-react'
+import { CalendarDays, Clock, GraduationCap, Lock, MapPin, Medal, Navigation, Ruler, Star } from 'lucide-react'
 import Link from 'next/link'
 
 import { AvailabilityToggle } from '@/components/sweeper/AvailabilityToggle'
@@ -95,6 +95,12 @@ export default async function SweeperBoardPage(): Promise<React.ReactElement> {
                 me.tier === 'silver' ? `Gold with ${TIER_RULES.gold.minJobs}+ jobs and a ${TIER_RULES.gold.minScore}+ score` : `Silver with ${TIER_RULES.silver.minJobs}+ jobs and a ${TIER_RULES.silver.minScore}+ score`
               } — great reviews, on-time reports, no late drops.`}
         </p>
+        <Link href="/sweeper/reviews" className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-wheat-light hover:underline">
+          <Star className="size-3.5 fill-wheat text-wheat" aria-hidden="true" />
+          {me.stats.ratingCount > 0
+            ? `${(me.stats.ratingSum / me.stats.ratingCount).toFixed(1)} from ${me.stats.ratingCount} review${me.stats.ratingCount === 1 ? '' : 's'} · See what customers said`
+            : 'No reviews yet · My reviews'}
+        </Link>
         <AvailabilityToggle initial={me.available} />
       </section>
 

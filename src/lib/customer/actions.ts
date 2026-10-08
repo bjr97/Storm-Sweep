@@ -2,7 +2,7 @@ import { addDays, startOfDay } from 'date-fns'
 
 import { windowStartIso } from '@/lib/booking/timeWindows'
 import { refundCredit } from '@/lib/customer/referrals'
-import { notifyCancelled, notifyRescheduled } from '@/lib/notify'
+import { notifyCancelled, notifyNewReview, notifyRescheduled } from '@/lib/notify'
 import { canCustomerChange, CHANGE_CUTOFF_HOURS } from '@/lib/customer/rules'
 import { createServiceClient } from '@/lib/supabase/server'
 import type { TimeWindow } from '@/types/database'
@@ -95,6 +95,8 @@ export async function submitReview(
     if (error.code === '23505') return fail('You already reviewed this visit — thank you!', 'ALREADY_REVIEWED')
     throw error
   }
+  // Best-effort: low ratings alert the office, good ones thank the Sweeper.
+  await notifyNewReview(jobId).catch((e: unknown) => console.error('[review] notify failed', e))
   return { askGoogle: rating >= 4 }
 }
 

@@ -380,6 +380,10 @@ Customer Details (Step 3) specifics:
   (Vercel then sends it as a Bearer token) — keep it set in production. `runDailyAutomations()`
   (`src/lib/automation/daily.ts`): day-before reminders, review requests,
   membership renewal notices (~30 days out), tornado-season campaign.
+- Reviews (`notifyNewReview`, called from `submitReview`): ratings <=
+  `FOLLOW_UP_MAX_RATING` (3) alert the office and appear on the dashboard until
+  marked followed up on /admin/reviews; 4-5 stars text the Sweeper. Sweepers see
+  every review (customer first name only) on /sweeper/reviews.
 
 ## SEO + PUBLIC PAGES
 

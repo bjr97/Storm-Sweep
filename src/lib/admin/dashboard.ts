@@ -1,4 +1,5 @@
 import { balanceDue } from '@/lib/admin/balance'
+import { FOLLOW_UP_MAX_RATING } from '@/lib/admin/reviews'
 import { dayRange, formatBusinessDate, monthRange, weekRange, type Range } from '@/lib/admin/time'
 import { createClient } from '@/lib/supabase/server'
 import type { HelpTopic, Job, JobStatus } from '@/types/database'
@@ -419,4 +420,29 @@ export async function getOpenHelpRequests(): Promise<OpenHelpRequest[]> {
       message: r.message,
       createdAt: r.created_at,
     }))
+}
+
+export type LowRating = { jobId: string; customerName: string; rating: number; body: string | null; createdAt: string }
+
+/** 1-3 star reviews not yet followed up (demo visits excluded), oldest first. */
+export async function getLowRatingsToFollowUp(): Promise<LowRating[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('job_id, customer_id, rating, body, created_at')
+    .lte('rating', FOLLOW_UP_MAX_RATING)
+    .is('followed_up_at', null)
+    .order('created_at')
+    .limit(50)
+  if (error) fail('low ratings', error)
+  if (data.length === 0) return []
+  const [{ data: jobs }, { data: people }] = await Promise.all([
+    supabase.from('jobs').select('id, is_demo').in('id', data.map((r) => r.job_id)),
+    supabase.from('profiles').select('id, full_name').in('id', Array.from(new Set(data.map((r) => r.customer_id)))),
+  ])
+  const demo = new Set((jobs ?? []).filter((j) => j.is_demo).map((j) => j.id))
+  const name = new Map((people ?? []).map((p) => [p.id, p.full_name ?? 'Customer']))
+  return data
+    .filter((r) => !demo.has(r.job_id))
+    .map((r) => ({ jobId: r.job_id, customerName: name.get(r.customer_id) ?? 'Customer', rating: r.rating, body: r.body, createdAt: r.created_at }))
 }

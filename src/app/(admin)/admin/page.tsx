@@ -9,7 +9,7 @@ import { JobsTable } from '@/components/admin/JobsTable'
 import { KpiRow } from '@/components/admin/KpiRow'
 import { Panel } from '@/components/admin/Panel'
 import { RevenueChart } from '@/components/admin/RevenueChart'
-import { getBalancesToCollect, getDashboardData, getOpenHelpRequests, getPausedJobs, getQuotesToPrice, getRecentInboundTexts, getRefundsDue } from '@/lib/admin/dashboard'
+import { getBalancesToCollect, getDashboardData, getLowRatingsToFollowUp, getOpenHelpRequests, getPausedJobs, getQuotesToPrice, getRecentInboundTexts, getRefundsDue } from '@/lib/admin/dashboard'
 import { formatBusinessDate, formatRelative } from '@/lib/admin/time'
 import { helpTopicLabel } from '@/lib/help'
 import { ISSUE_KINDS } from '@/lib/sweepers/jobRun'
@@ -21,7 +21,7 @@ export const metadata = { title: 'Dashboard · Storm Sweep Admin' }
 
 export default async function AdminDashboardPage(): Promise<React.ReactElement> {
   const now = new Date()
-  const [data, paused, refunds, texts, quotes, balances, help] = await Promise.all([
+  const [data, paused, refunds, texts, quotes, balances, help, lowRatings] = await Promise.all([
     getDashboardData(now),
     getPausedJobs(),
     getRefundsDue(),
@@ -29,6 +29,7 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
     getQuotesToPrice(),
     getBalancesToCollect(),
     getOpenHelpRequests(),
+    getLowRatingsToFollowUp(),
   ])
 
   return (
@@ -52,6 +53,27 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
                     {ISSUE_KINDS.find((k) => k.value === p.kind)?.label ?? p.kind} · {p.address}
                   </Link>
                   <span className="text-[#9A9A9F]"> · {formatRelative(p.reportedAt, now)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+        {lowRatings.length > 0 ? (
+          <section aria-label="Low ratings to follow up" className="space-y-2 rounded-xl border border-tornado/40 bg-tornado/10 p-4">
+            <p className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-[#F0F0F0]">
+              {lowRatings.length} low rating{lowRatings.length === 1 ? '' : 's'} to follow up
+              <Link href="/admin/reviews?filter=follow_up" className="text-xs font-semibold text-sky-light hover:underline">
+                Open reviews
+              </Link>
+            </p>
+            <ul className="space-y-1.5 text-[13px]">
+              {lowRatings.map((r) => (
+                <li key={r.jobId}>
+                  <Link href={`/admin/jobs/${r.jobId}`} className="text-sky-light hover:underline">
+                    {r.customerName} · {r.rating}★
+                  </Link>
+                  <span className="text-[#9A9A9F]"> · {formatRelative(r.createdAt, now)}</span>
+                  {r.body ? <span className="block truncate text-[#C9C9CE]">“{r.body}”</span> : null}
                 </li>
               ))}
             </ul>
