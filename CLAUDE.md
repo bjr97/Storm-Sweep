@@ -345,6 +345,7 @@ Customer Details (Step 3) specifics:
 - **Never** skip input validation on API routes
 - **Never** use service role key in client-side code
 - **Never** expose `SUPABASE_SERVICE_ROLE_KEY` to the browser
+- **Never** create a server Supabase client without `noStoreFetch` (`src/lib/supabase/server.ts`): Next caches fetch() and served stale rows (a turned-off promo code still validated)
 - **Never** publish social content without verifying `photo_consent: true`
 - **Never** make Anthropic API calls from client components — server/API only
 - **Never** give a booking step its own footer/nav — always use `<BookingFooter>`

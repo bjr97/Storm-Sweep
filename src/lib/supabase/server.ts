@@ -4,6 +4,12 @@ import { cookies } from 'next/headers'
 
 import type { Database } from '@/types/database'
 
+/**
+ * Database reads must never come from Next's fetch Data Cache (it can serve a
+ * stale row, e.g. a promo code that was just turned off).
+ */
+const noStoreFetch: typeof fetch = (input, init) => fetch(input, { ...init, cache: 'no-store' })
+
 export function createClient(): ReturnType<
   typeof createServerClient<Database>
 > {
@@ -13,6 +19,7 @@ export function createClient(): ReturnType<
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: { fetch: noStoreFetch },
       cookies: {
         getAll(): { name: string; value: string }[] {
           return cookieStore.getAll()
@@ -48,6 +55,7 @@ export function createServiceClient(): ReturnType<
         autoRefreshToken: false,
         persistSession: false,
       },
+      global: { fetch: noStoreFetch },
     }
   )
 }

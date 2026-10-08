@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 import { checkPromo, describePromo } from '@/lib/promos'
 
+export const dynamic = 'force-dynamic'
+
 // Public: preview a promo code at checkout. Checkout re-checks everything.
 const querySchema = z.object({
   code: z.string().trim().min(1).max(40),
