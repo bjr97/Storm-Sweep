@@ -1,5 +1,7 @@
 import { dayRange, localMidnight, localDate } from '@/lib/admin/time'
 import { TIME_WINDOWS } from '@/lib/booking/timeWindows'
+import { geocodeAddress } from '@/lib/sweepers/jobRunServer'
+import { googleMapsRouteUrl, orderRoute, type LatLng } from '@/lib/sweepers/route'
 import { createServiceClient } from '@/lib/supabase/server'
 import type { Job } from '@/types/database'
 
@@ -54,4 +56,33 @@ export async function getSweeperWeek(sweeperId: string, now: Date = new Date()):
   }
   for (const d of days) d.jobs.sort((a, b) => windowOrder(a) - windowOrder(b) || (a.scheduled_at ?? '').localeCompare(b.scheduled_at ?? ''))
   return days
+}
+
+// ---- Day route ---------------------------------------------------------------
+
+// Addresses rarely change; remember lookups for the life of the server.
+const geoCache = new Map<string, LatLng | null>()
+
+async function locate(address: string): Promise<LatLng | null> {
+  if (!geoCache.has(address)) geoCache.set(address, await geocodeAddress(address))
+  return geoCache.get(address) ?? null
+}
+
+export type DayRoute = { stops: ScheduleJob[]; mapsUrl: string | null }
+
+/** Remaining visits for a day in driving order (see orderRoute) + one Google Maps link. */
+export async function getDayRoute(jobs: ScheduleJob[]): Promise<DayRoute> {
+  const remaining = jobs.filter((j) => j.status === 'confirmed' || j.status === 'in_progress')
+  const coords = await Promise.all(remaining.map((j) => locate(j.address)))
+  const ordered = orderRoute(
+    remaining.map((j, i) => ({
+      id: j.id,
+      address: j.address,
+      window: j.time_window === 'flexible' ? null : windowOrder(j),
+      coords: coords[i],
+    }))
+  )
+  const byId = new Map(remaining.map((j) => [j.id, j]))
+  const stops = ordered.map((s) => byId.get(s.id)!)
+  return { stops, mapsUrl: googleMapsRouteUrl(stops.map((s) => s.address)) }
 }

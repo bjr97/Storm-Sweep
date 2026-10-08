@@ -1,9 +1,10 @@
-import { ChevronRight, MapPin, ShieldCheck } from 'lucide-react'
+import { ChevronRight, MapPin, Navigation, Route, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
 import { formatBusinessDate } from '@/lib/admin/time'
 import { TIME_WINDOWS, jobTimeLabel } from '@/lib/booking/timeWindows'
-import { getSweeperWeek } from '@/lib/sweepers/schedule'
+import { googleMapsStopUrl } from '@/lib/sweepers/route'
+import { getDayRoute, getSweeperWeek } from '@/lib/sweepers/schedule'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 
@@ -19,6 +20,7 @@ export default async function SweeperSchedulePage({ searchParams }: { searchPara
   const days = user ? await getSweeperWeek(user.id) : []
   const selected = days.find((d) => d.key === searchParams.day) ?? days[0]
   const weekCount = days.reduce((n, d) => n + d.jobs.length, 0)
+  const route = selected ? await getDayRoute(selected.jobs) : { stops: [], mapsUrl: null }
 
   // Timeline: one row per arrival window (plus "Other" for jobs without one).
   const rows = [
@@ -67,6 +69,49 @@ export default async function SweeperSchedulePage({ searchParams }: { searchPara
           <h2 className="text-sm font-bold text-[#F0F0F0]">
             {formatBusinessDate(selected.date, { weekday: 'long', month: 'long', day: 'numeric' })}
           </h2>
+          {route.stops.length > 0 ? (
+            <div className="space-y-3 rounded-xl border border-sky/30 bg-sky/[0.07] p-3">
+              <div className="flex items-center gap-2">
+                <Route className="size-4 text-sky-light" aria-hidden="true" />
+                <p className="text-sm font-bold text-white">
+                  {route.stops.length === 1 ? 'One stop' : `Driving route · ${route.stops.length} stops`}
+                </p>
+              </div>
+              <ol className="space-y-1.5">
+                {route.stops.map((s, i) => (
+                  <li key={s.id} className="flex items-center gap-2.5 text-xs">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-sky text-[11px] font-bold text-white">{i + 1}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="font-semibold text-white">{s.customerFirstName}</span>
+                      <span className="text-[#9A9A9F]"> · {jobTimeLabel(s.scheduled_at, s.time_window)}</span>
+                      <span className="block truncate text-[#C9C9CE]">{s.address}</span>
+                    </span>
+                    <a
+                      href={googleMapsStopUrl(s.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 rounded-md border border-white/10 px-2 py-1 text-[11px] font-semibold text-sky-light hover:bg-white/[0.06]"
+                    >
+                      Navigate
+                    </a>
+                  </li>
+                ))}
+              </ol>
+              {route.mapsUrl && route.stops.length > 1 ? (
+                <a
+                  href={route.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-11 items-center justify-center gap-2 rounded-lg bg-sky text-sm font-bold text-white hover:bg-sky-light"
+                >
+                  <Navigation className="size-4" aria-hidden="true" /> Open whole route in Google Maps
+                </a>
+              ) : null}
+              <p className="text-[11px] leading-relaxed text-[#8A8A8F]">
+                Ordered by arrival window, then shortest drive between stops. Starts from where you are now.
+              </p>
+            </div>
+          ) : null}
           {selected.jobs.length === 0 ? (
             <p className="rounded-xl border border-dashed border-white/[0.1] px-4 py-8 text-center text-sm text-[#8A8A8F]">
               Nothing scheduled. <Link href="/sweeper" className="font-semibold text-sky-light hover:underline">Find open jobs</Link>
