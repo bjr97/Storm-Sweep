@@ -79,6 +79,8 @@ export type CreateJobOptions = {
   stripePaymentIntentId?: string | null
   paypalOrderId?: string | null
   sendSms?: boolean
+  /** Send the booking confirmation even though nothing was paid online (office phone bookings). */
+  confirmUnpaid?: boolean
 }
 
 export async function createJobFromBooking(
@@ -149,7 +151,7 @@ export async function createJobFromBooking(
       .eq('id', customerId)
   }
 
-  if (paymentStatus !== 'unpaid') {
+  if (paymentStatus !== 'unpaid' || options.confirmUnpaid) {
     if (options.sendSms !== false) {
       try {
         await sendBookingConfirmedSms({

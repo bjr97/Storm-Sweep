@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react'
+import { Plus, Star } from 'lucide-react'
 import Link from 'next/link'
 
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
@@ -38,7 +38,11 @@ export default async function AdminJobsPage({
 
   return (
     <>
-      <AdminTopbar title="All Jobs" subtitle={`${jobs.length}${truncated ? '+' : ''} shown`} />
+      <AdminTopbar title="All Jobs" subtitle={`${jobs.length}${truncated ? '+' : ''} shown`}>
+        <Link href="/admin/jobs/new" className="inline-flex h-8 items-center gap-1 rounded-md bg-sky px-3 text-xs font-semibold text-white hover:bg-sky-light">
+          <Plus className="size-3.5" aria-hidden="true" /> New booking
+        </Link>
+      </AdminTopbar>
       <main className="flex-1 space-y-4 overflow-y-auto px-4 py-6 sm:px-7">
         <JobsFilters status={status} when={when} q={q} />
 
