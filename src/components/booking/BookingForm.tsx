@@ -623,7 +623,7 @@ export function BookingForm({
               </div>
 
               <label className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-[#F7F7F4] px-3 py-3 text-sm text-shelter sm:col-span-2">
-                <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-sky" {...register('photo_consent')} />
+                <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-sky" defaultChecked={initialCustomer?.marketing_photo_consent ?? true} {...register('photo_consent')} />
                 <span>
                   Storm Sweep may share before &amp; after photos of my shelter on social media.
                   <span className="block text-xs text-muted-foreground">

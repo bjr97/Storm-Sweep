@@ -172,7 +172,7 @@ export function RegisterForm(): React.ReactElement {
             </div>
 
             <label className="flex items-start gap-2.5 text-sm text-shelter">
-              <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-sky" {...register('photoConsent')} />
+              <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-sky" defaultChecked {...register('photoConsent')} />
               <span>
                 Storm Sweep may share before &amp; after photos of my shelter on social media.
                 <span className="block text-xs text-muted-foreground">
