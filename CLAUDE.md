@@ -261,6 +261,9 @@ Customer Details (Step 3) specifics:
 
 6. **IC Tax:** Sweepers are 1099 contractors. Never withhold taxes. 
    Generate 1099-NEC for earners over $600/yr by Jan 31.
+   Payouts (`src/lib/sweepers/payouts.ts`, /admin/payouts) record money sent
+   and snapshot each job's pay (`jobs.payout_amount`); 1099 totals = payouts by
+   `paid_at` in the calendar year (CSV export). The app never stores tax IDs.
 
 7. **Partner referrals:** When `?ref=CODE` param present at booking,
    look up partner by referral_code, set partner_id on job record.

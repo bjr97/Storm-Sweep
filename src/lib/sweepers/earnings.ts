@@ -23,6 +23,8 @@ export type JobEarning = {
   videoBonus: boolean
   viaClaim: boolean
   pay: PayBreakdown
+  /** Included in a recorded payout. */
+  paid: boolean
 }
 
 export type CompletedJobRow = {
@@ -40,12 +42,14 @@ export type CompletedJobRow = {
   claim_visible_at: string | null
   referral_source: string | null
   partner_id: string | null
+  payout_id: string | null
+  payout_amount: number | null
 }
 
 async function completedJobs(range: Range, sweeperId?: string): Promise<CompletedJobRow[]> {
   let query = createServiceClient()
     .from('jobs')
-    .select('id, sweeper_id, customer_id, address, service_type, service_value, total_amount, scheduled_at, completed_at, assigned_via, claimed_at, claim_visible_at, referral_source, partner_id')
+    .select('id, sweeper_id, customer_id, address, service_type, service_value, total_amount, scheduled_at, completed_at, assigned_via, claimed_at, claim_visible_at, referral_source, partner_id, payout_id, payout_amount')
     .eq('status', 'complete')
     .not('sweeper_id', 'is', null)
     .gte('completed_at', range.start.toISOString())
@@ -113,6 +117,7 @@ export async function getSweeperEarnings(sweeperId: string, range: Range): Promi
       videoBonus: p.video,
       viaClaim: r.assigned_via === 'claim',
       pay: p.pay,
+      paid: Boolean(r.payout_id),
     }
   })
 }

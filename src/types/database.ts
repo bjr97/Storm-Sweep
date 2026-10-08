@@ -58,6 +58,8 @@ export type SweeperTier = 'gold' | 'silver' | 'standard'
 
 export type AssignedVia = 'claim' | 'admin'
 
+export type PayoutMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'bank' | 'other'
+
 export type ClaimEventType = 'claim' | 'drop' | 'late_drop' | 'admin_assign' | 'admin_unassign'
 
 export interface Database {
@@ -222,6 +224,8 @@ export interface Database {
           referral_discount: number
           credit_applied: number
           referral_rewarded_at: string | null
+          payout_id: string | null
+          payout_amount: number | null
           referral_source: string | null
           partner_id: string | null
           completed_at: string | null
@@ -276,6 +280,8 @@ export interface Database {
           referral_discount?: number
           credit_applied?: number
           referral_rewarded_at?: string | null
+          payout_id?: string | null
+          payout_amount?: number | null
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -330,6 +336,8 @@ export interface Database {
           referral_discount?: number
           credit_applied?: number
           referral_rewarded_at?: string | null
+          payout_id?: string | null
+          payout_amount?: number | null
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -522,6 +530,45 @@ export interface Database {
           profile_id?: string | null
           keyword?: string | null
           twilio_sid?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      sweeper_payouts: {
+        Row: {
+          id: string
+          sweeper_id: string
+          amount: number
+          job_count: number
+          method: PayoutMethod
+          reference: string | null
+          note: string | null
+          paid_at: string
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          sweeper_id: string
+          amount: number
+          job_count: number
+          method: PayoutMethod
+          reference?: string | null
+          note?: string | null
+          paid_at?: string
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          sweeper_id?: string
+          amount?: number
+          job_count?: number
+          method?: PayoutMethod
+          reference?: string | null
+          note?: string | null
+          paid_at?: string
+          created_by?: string | null
           created_at?: string
         }
         Relationships: []

@@ -26,6 +26,7 @@ export default async function SweeperEarningsPage({ searchParams }: { searchPara
     : [[], []]
   const sum = summarize(jobs)
   const ytd = summarize(yearJobs).total
+  const unpaid = yearJobs.filter((j) => !j.paid).reduce((n, j) => n + j.pay.total, 0)
   const year = formatBusinessDate(now, { year: 'numeric' })
 
   return (
@@ -78,7 +79,10 @@ export default async function SweeperEarningsPage({ searchParams }: { searchPara
                   </p>
                   <p className="truncate text-xs text-[#9A9A9F]">{j.area} · {j.services.join(' + ')}</p>
                 </div>
-                <p className="font-[family-name:var(--font-bebas)] text-2xl tracking-wide text-[#2ECC71]">{formatCurrency(j.pay.total)}</p>
+                <div className="shrink-0 text-right">
+                  <p className="font-[family-name:var(--font-bebas)] text-2xl leading-none tracking-wide text-[#2ECC71]">{formatCurrency(j.pay.total)}</p>
+                  <p className={cn('text-[10px] font-bold uppercase tracking-wider', j.paid ? 'text-[#8A8A8F]' : 'text-wheat-light')}>{j.paid ? 'Paid' : 'Unpaid'}</p>
+                </div>
               </summary>
               <dl className="space-y-1 border-t border-white/[0.07] px-3 py-2.5 text-xs text-[#C9C9CE]">
                 <div className="flex justify-between">
@@ -102,7 +106,7 @@ export default async function SweeperEarningsPage({ searchParams }: { searchPara
         <Info className="size-4 shrink-0 text-sky-light" aria-hidden="true" />
         <div className="space-y-1">
           <p>
-            <span className="font-semibold text-white">{year} so far: {formatCurrency(ytd)}</span>
+            <span className="font-semibold text-white">{year} so far: {formatCurrency(ytd)} earned{unpaid ? ` · ${formatCurrency(unpaid)} not paid out yet` : ''}</span>
             {ytd >= IRS_1099_THRESHOLD_CENTS
               ? ` — you'll receive a 1099-NEC by January 31.`
               : ` — a 1099-NEC is issued once you earn ${formatCurrency(IRS_1099_THRESHOLD_CENTS)} in a year.`}

@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Banknote,
   CalendarDays,
   DollarSign,
   Handshake,
@@ -45,6 +46,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: 'Business',
     items: [
       { label: 'Revenue', icon: DollarSign, href: '/admin/revenue', built: true },
+      { label: 'Payouts', icon: Banknote, href: '/admin/payouts', built: true },
       { label: 'Marketing', icon: Megaphone, href: '/admin/marketing', built: true },
       { label: 'Partners', icon: Handshake, href: '/admin/partners', built: true },
     ],
