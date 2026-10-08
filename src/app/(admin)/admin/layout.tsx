@@ -1,3 +1,4 @@
+import { Home } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -45,6 +46,14 @@ export default async function AdminLayout({
             <span className="ml-2 font-[family-name:var(--font-barlow)] text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8A8A8F]">
               Admin
             </span>
+          </Link>
+          <Link
+            href="/"
+            aria-label="Go to the public website"
+            title="Go to the public website"
+            className="ml-2 rounded-md p-1 text-[#9A9A9F] transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky"
+          >
+            <Home className="size-4" aria-hidden="true" />
           </Link>
         </div>
         {children}

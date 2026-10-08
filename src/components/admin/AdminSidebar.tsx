@@ -6,6 +6,7 @@ import {
   DollarSign,
   Handshake,
   HardHat,
+  Home,
   LayoutDashboard,
   LogOut,
   Megaphone,
@@ -81,12 +82,22 @@ export function AdminSidebar({ adminName }: AdminSidebarProps): React.ReactEleme
   return (
     <aside className="hidden h-screen w-56 shrink-0 flex-col overflow-y-auto border-r border-white/[0.07] bg-[#141416] lg:flex">
       <div className="border-b border-white/[0.07] px-5 pb-5 pt-6">
-        <Link
-          href="/admin"
-          className="font-[family-name:var(--font-bebas)] text-2xl leading-none tracking-[0.08em] text-white"
-        >
-          STORM<span className="text-sky-light">SWEEP</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin"
+            className="font-[family-name:var(--font-bebas)] text-2xl leading-none tracking-[0.08em] text-white"
+          >
+            STORM<span className="text-sky-light">SWEEP</span>
+          </Link>
+          <Link
+            href="/"
+            aria-label="Go to the public website"
+            title="Go to the public website"
+            className="rounded-md p-1 text-[#9A9A9F] transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky"
+          >
+            <Home className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
         <p className="mt-1 font-[family-name:var(--font-barlow)] text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8A8A8F]">
           Admin · Norman OK
         </p>
