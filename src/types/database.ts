@@ -60,6 +60,7 @@ export type AssignedVia = 'claim' | 'admin'
 
 export type PayoutMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'bank' | 'other'
 
+export type PromoKind = 'amount' | 'percent'
 export type BalanceMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'card' | 'other'
 
 export type ClaimEventType = 'claim' | 'drop' | 'late_drop' | 'admin_assign' | 'admin_unassign'
@@ -244,6 +245,8 @@ export interface Database {
           balance_method: BalanceMethod | null
           balance_reference: string | null
           is_demo: boolean
+          promo_code_id: string | null
+          promo_discount: number
           referral_source: string | null
           partner_id: string | null
           completed_at: string | null
@@ -304,6 +307,8 @@ export interface Database {
           balance_method?: BalanceMethod | null
           balance_reference?: string | null
           is_demo?: boolean
+          promo_code_id?: string | null
+          promo_discount?: number
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -364,6 +369,8 @@ export interface Database {
           balance_method?: BalanceMethod | null
           balance_reference?: string | null
           is_demo?: boolean
+          promo_code_id?: string | null
+          promo_discount?: number
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -527,6 +534,45 @@ export interface Database {
           sold_by?: string | null
           customer_initials?: string
           approved_at?: string
+        }
+        Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          id: string
+          code: string
+          kind: PromoKind
+          value: number
+          max_uses: number | null
+          first_time_only: boolean
+          expires_on: string | null
+          active: boolean
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          kind: PromoKind
+          value: number
+          max_uses?: number | null
+          first_time_only?: boolean
+          expires_on?: string | null
+          active?: boolean
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          kind?: PromoKind
+          value?: number
+          max_uses?: number | null
+          first_time_only?: boolean
+          expires_on?: string | null
+          active?: boolean
+          note?: string | null
+          created_at?: string
         }
         Relationships: []
       }
@@ -893,3 +939,4 @@ export type SocialPostInsert =
   Database['public']['Tables']['social_posts']['Insert']
 export type SocialPostUpdate =
   Database['public']['Tables']['social_posts']['Update']
+export type PromoCode = Database['public']['Tables']['promo_codes']['Row']

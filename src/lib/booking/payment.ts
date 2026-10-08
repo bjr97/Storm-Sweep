@@ -3,7 +3,7 @@ import type { KitSelection } from '@/components/booking/KitSelector'
 import type { BookingPayload, BookingPaymentData, BookingSelection } from '@/lib/bookings/types'
 import { formatServiceAddress } from '@/lib/booking/address'
 import { getPrepKitBundle } from '@/lib/booking/prepKits'
-import { priceBooking } from '@/lib/booking/quote'
+import { priceBooking, type PromoRule } from '@/lib/booking/quote'
 import { windowStartIso } from '@/lib/booking/timeWindows'
 import {
   formatCustomerFullName,
@@ -56,12 +56,13 @@ export function buildPaymentData(
   photoResult: PhotoScreenResult | null,
   kitSelection: KitSelection | null = null,
   member: { visitsUsed: number } | null = null,
-  referral: { inviteCode: string | null; credit: number } = { inviteCode: null, credit: 0 }
+  referral: { inviteCode: string | null; credit: number; promo?: PromoRule | null } = { inviteCode: null, credit: 0 }
 ): BookingPaymentData | null {
   // The server re-verifies the invite and credit; these only mirror its math.
   const quote = priceBooking(serviceSelection, kitSelection, member, {
     friendDiscount: Boolean(referral.inviteCode),
     credit: referral.credit,
+    promo: referral.promo ?? null,
   })
   if (quote.breakdown.total === null) return null
 
@@ -80,6 +81,7 @@ export function buildPaymentData(
       ...selectionOf(serviceSelection, kitSelection),
       ...(referral.inviteCode ? { inviteCode: referral.inviteCode } : {}),
       ...(referral.credit > 0 ? { useCredit: true } : {}),
+      ...(referral.promo ? { promoCode: referral.promo.code } : {}),
     },
   }
 }

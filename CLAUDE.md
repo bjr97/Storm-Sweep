@@ -278,6 +278,13 @@ Customer Details (Step 3) specifics:
    `referral_rewarded_at`); credit auto-applies to their next booking, is
    spent when paid, refunded on cancel. All verified in `repriceBooking()`.
 
+7c. **Promo codes** (`promo_codes`, `src/lib/promos.ts`, admin on /admin/marketing):
+   $ or % off the visit total, applied in `priceBooking()` BEFORE referral credit,
+   never below `PROMO_MIN_TOTAL` ($1 — online checkout can't charge $0). One
+   discount per booking: never combined with a friend invite. Expiry, use limit
+   (non-cancelled jobs count) and first-time-only are re-checked in
+   `repriceBooking()`; jobs store `promo_code_id` + `promo_discount`.
+
 8. **Membership visits:** Storm Ready = 2 cleanings/yr INCLUDED in the fee.
    The visit booked at signup is #1 (clean = $0; covers up to standard size,
    large pays the $30 difference). Track `visits_used` on profiles.

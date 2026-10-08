@@ -3,6 +3,7 @@ import { getPrepKitBundle, priceKitSelection, type KitMembershipPlan, type KitSe
 import { calculateBookingPrice, type BookingPriceBreakdown } from '@/lib/booking/pricing'
 import type { ServiceSelectionValues } from '@/lib/booking/schemas'
 import { calculateDeposit, PRICING } from '@/lib/utils'
+import type { PromoKind } from '@/types/database'
 
 /**
  * THE booking price. Pure — the browser uses it to show totals and the server
@@ -27,6 +28,20 @@ export type BookingQuote = {
   referralDiscount: number
   /** Booker's own referral credit spent (cents, >= 0). */
   creditApplied: number
+  /** Promo code discount applied (cents, >= 0). */
+  promoDiscount: number
+}
+
+/** A promo code's rule (verified server-side before it reaches priceBooking). */
+export type PromoRule = { code: string; kind: PromoKind; value: number }
+
+/** A promo always leaves at least this much to pay (online checkout can't charge $0). */
+export const PROMO_MIN_TOTAL = 100
+
+/** Cents off a total: amount = flat cents, percent = rounded to a whole cent; never below PROMO_MIN_TOTAL. */
+export function promoDiscountFor(rule: PromoRule, total: number): number {
+  const raw = rule.kind === 'percent' ? Math.round((total * Math.min(rule.value, 100)) / 100) : rule.value
+  return Math.max(0, Math.min(raw, total - PROMO_MIN_TOTAL))
 }
 
 /** Referral extras — verified server-side before they reach priceBooking. */
@@ -35,6 +50,8 @@ export type QuoteExtras = {
   friendDiscount?: boolean
   /** Referral credit available to spend (cents). */
   credit?: number
+  /** Promo code (never combined with a friend invite). */
+  promo?: PromoRule | null
 }
 
 /** Kit discount plan: existing members get the member kit discount without buying a plan. */
@@ -77,10 +94,16 @@ export function priceBooking(
   // Referral savings come off the visit total last and never take it below $0.
   let referralDiscount = 0
   let creditApplied = 0
+  let promoDiscount = 0
   let breakdown = withKit
   if (withKit.total !== null && withKit.total > 0) {
     let total = withKit.total
     const lines = [...withKit.lineItems]
+    if (extras.promo) {
+      promoDiscount = promoDiscountFor(extras.promo, total)
+      total -= promoDiscount
+      if (promoDiscount > 0) lines.push({ label: `Promo code ${extras.promo.code}`, amount: -promoDiscount })
+    }
     if (extras.friendDiscount) {
       referralDiscount = Math.min(PRICING.referral.customer_credit, total)
       total -= referralDiscount
@@ -91,7 +114,7 @@ export function priceBooking(
       total -= creditApplied
       lines.push({ label: 'Your referral credit', amount: -creditApplied })
     }
-    if (referralDiscount || creditApplied) {
+    if (referralDiscount || creditApplied || promoDiscount) {
       breakdown = { ...withKit, total, deposit: calculateDeposit(total), serviceSubtotal: total, lineItems: lines }
     }
   }
@@ -126,5 +149,6 @@ export function priceBooking(
     membershipPlan: service.membership === 'annual' || service.membership === 'monthly' ? service.membership : 'none',
     referralDiscount,
     creditApplied,
+    promoDiscount,
   }
 }

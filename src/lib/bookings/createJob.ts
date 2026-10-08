@@ -126,6 +126,8 @@ export async function createJobFromBooking(
       referred_by: payload.referredBy ?? null,
       referral_discount: payload.referralDiscount ?? 0,
       credit_applied: payload.creditApplied ?? 0,
+      promo_code_id: payload.promoCodeId ?? null,
+      promo_discount: payload.promoDiscount ?? 0,
       service_value: payload.serviceValue ?? payload.totalAmount,
     })
     .select()

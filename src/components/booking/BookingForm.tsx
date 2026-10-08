@@ -12,6 +12,7 @@ import { BookingProgressNav } from '@/components/booking/BookingProgressNav'
 import { persistKitConfirmationMessage } from '@/components/booking/ConfirmationKitMessage'
 import { canProceedWithKit, KitSelector, type KitSelection } from '@/components/booking/KitSelector'
 import { PaymentStep } from '@/components/booking/PaymentStep'
+import { PromoCodeField } from '@/components/booking/PromoCodeField'
 import { PhotoUpload, type PhotoScreenResult } from '@/components/booking/PhotoUpload'
 import { ServiceSelector } from '@/components/booking/ServiceSelector'
 import { Input } from '@/components/ui/input'
@@ -19,7 +20,7 @@ import { Label } from '@/components/ui/label'
 import { parseServiceAddress } from '@/lib/booking/address'
 import { buildPaymentData, buildQuoteBookingPayload } from '@/lib/booking/payment'
 import { calculateBookingPrice } from '@/lib/booking/pricing'
-import { priceBooking } from '@/lib/booking/quote'
+import { priceBooking, type PromoRule } from '@/lib/booking/quote'
 import { TIME_WINDOWS } from '@/lib/booking/timeWindows'
 import {
   BOOKING_STEPS,
@@ -211,14 +212,24 @@ export function BookingForm({
       window.clearTimeout(timer)
     }
   }, [inviteCode, bookingEmail])
+  // Promo code (Payment step). Never stacked with a friend invite; checkout re-checks it.
+  const [promo, setPromo] = useState<PromoRule | null>(null)
   const referral = useMemo(
-    () => ({ inviteCode: invite.status === 'valid' ? inviteCode : null, credit }),
-    [invite.status, inviteCode, credit]
+    () => ({
+      inviteCode: invite.status === 'valid' ? inviteCode : null,
+      credit,
+      promo: invite.status === 'valid' ? null : promo,
+    }),
+    [invite.status, inviteCode, credit, promo]
   )
 
   // Same function the server re-runs at checkout (src/lib/booking/quote.ts).
   const pricing = useMemo(
-    () => priceBooking(serviceSelection, kitSelection, member, { friendDiscount: Boolean(referral.inviteCode), credit: referral.credit }).breakdown,
+    () => priceBooking(serviceSelection, kitSelection, member, {
+        friendDiscount: Boolean(referral.inviteCode),
+        credit: referral.credit,
+        promo: referral.promo,
+      }).breakdown,
     [serviceSelection, kitSelection, member, referral]
   )
 
@@ -586,7 +597,18 @@ export function BookingForm({
 
       case 5:
         return paymentData ? (
-          <PaymentStep booking={paymentData} />
+          <div className="space-y-5">
+            {paymentData.totalAmount > 0 || referral.promo ? (
+              <PromoCodeField
+                email={bookingEmail}
+                withInvite={Boolean(referral.inviteCode)}
+                applied={referral.promo}
+                saved={-(pricing.lineItems.find((l) => l.label.startsWith('Promo code'))?.amount ?? 0)}
+                onChange={setPromo}
+              />
+            ) : null}
+            <PaymentStep booking={paymentData} />
+          </div>
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">

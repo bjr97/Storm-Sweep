@@ -3,8 +3,10 @@ import { ShieldAlert } from 'lucide-react'
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { DraftPostButtons, PostEditor } from '@/components/admin/MarketingControls'
 import { EmptyState, Panel } from '@/components/admin/Panel'
+import { PromoCodes, type PromoListItem } from '@/components/admin/PromoCodes'
 import { getMarketingQueue, type ShareablePhoto } from '@/lib/admin/marketing'
-import { formatBusinessDate } from '@/lib/admin/time'
+import { formatBusinessDate, localDate } from '@/lib/admin/time'
+import { describePromo, listPromos } from '@/lib/promos'
 import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -31,7 +33,22 @@ function Thumbs({ label, photos }: { label: string; photos: ShareablePhoto[] }):
 }
 
 export default async function AdminMarketingPage(): Promise<React.ReactElement> {
-  const { visits, posts } = await getMarketingQueue()
+  const [{ visits, posts }, promoRows] = await Promise.all([getMarketingQueue(), listPromos()])
+  const t = localDate(new Date())
+  const today = `${t.year}-${String(t.month).padStart(2, '0')}-${String(t.day).padStart(2, '0')}`
+  const promos: PromoListItem[] = promoRows.map((p) => ({
+    id: p.id,
+    code: p.code,
+    label: describePromo(p),
+    uses: p.uses,
+    maxUses: p.max_uses,
+    discountGiven: p.discountGiven,
+    firstTimeOnly: p.first_time_only,
+    expiresOn: p.expires_on,
+    expired: Boolean(p.expires_on && p.expires_on < today),
+    active: p.active,
+    note: p.note,
+  }))
   const drafts = posts.filter((p) => !p.publishedAt)
   const posted = posts.filter((p) => p.publishedAt)
 
@@ -94,6 +111,10 @@ export default async function AdminMarketingPage(): Promise<React.ReactElement> 
               ))}
             </ul>
           )}
+        </Panel>
+
+        <Panel title="Promo codes" subtitle="Discounts for launch posts, flyers and partners">
+          <PromoCodes promos={promos} />
         </Panel>
       </main>
     </>

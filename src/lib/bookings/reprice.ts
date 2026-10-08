@@ -1,6 +1,7 @@
 import { calculateDeposit } from '@/lib/utils'
 import { priceBooking } from '@/lib/booking/quote'
 import { checkInvite, getCreditBalance } from '@/lib/customer/referrals'
+import { checkPromo } from '@/lib/promos'
 import type { BookingItem, BookingPayload } from '@/lib/bookings/types'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
@@ -51,6 +52,14 @@ export async function repriceBooking(input: BookingPayload): Promise<RepricedBoo
     referredBy = invite.referrerId
   }
 
+  // Promo code: never stacked with a friend invite; limits re-checked here.
+  let promo: Awaited<ReturnType<typeof checkPromo>> | null = null
+  if (selection.promoCode) {
+    promo = await checkPromo(selection.promoCode, input.customerEmail, { withInvite: Boolean(referredBy) })
+    if (!promo.valid) return { error: promo.reason, code: 'PROMO_INVALID', status: 409 }
+  }
+  const promoRule = promo?.valid ? promo.promo : null
+
   // Referral credit: only the signed-in customer's own balance, on their own booking.
   let credit = 0
   if (selection.useCredit) {
@@ -62,7 +71,7 @@ export async function repriceBooking(input: BookingPayload): Promise<RepricedBoo
     }
   }
 
-  const quote = priceBooking(service, selection.kit, member, { friendDiscount: Boolean(referredBy), credit })
+  const quote = priceBooking(service, selection.kit, member, { friendDiscount: Boolean(referredBy), credit, promo: promoRule })
   const total = quote.breakdown.total ?? 0 // X-Large: quoted later by the office
 
   const payload: BookingPayload = {
@@ -77,6 +86,8 @@ export async function repriceBooking(input: BookingPayload): Promise<RepricedBoo
     referredBy: quote.referralDiscount > 0 ? referredBy : undefined,
     referralDiscount: quote.referralDiscount,
     creditApplied: quote.creditApplied,
+    promoCodeId: quote.promoDiscount > 0 ? promoRule?.id : undefined,
+    promoDiscount: quote.promoDiscount,
   }
   return { payload, items: quote.items, depositAmount: calculateDeposit(total) }
 }

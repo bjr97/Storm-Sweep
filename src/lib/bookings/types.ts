@@ -29,6 +29,8 @@ export const bookingSelectionSchema = z.object({
   inviteCode: z.string().trim().max(24).optional(),
   /** Spend the signed-in customer's referral credit. */
   useCredit: z.boolean().optional(),
+  /** Promo code — verified and priced server-side. */
+  promoCode: z.string().trim().max(24).optional(),
 })
 export type BookingSelection = z.infer<typeof bookingSelectionSchema>
 
@@ -61,6 +63,8 @@ export const bookingPayloadSchema = z.object({
   referredBy: z.string().uuid().optional(),
   referralDiscount: z.number().int().nonnegative().optional(),
   creditApplied: z.number().int().nonnegative().optional(),
+  promoCodeId: z.string().uuid().optional(),
+  promoDiscount: z.number().int().nonnegative().optional(),
 })
 
 export type BookingPayload = z.infer<typeof bookingPayloadSchema>

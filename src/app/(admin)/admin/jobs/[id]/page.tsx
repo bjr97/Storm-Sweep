@@ -340,6 +340,9 @@ export default async function AdminJobDetailPage({
             <Panel title="Payment">
               <dl>
                 <Row label="Visit total">{formatCurrency(job.total_amount)}</Row>
+                {job.promo_discount > 0 ? <Row label="Promo discount">−{formatCurrency(job.promo_discount)}</Row> : null}
+                {job.referral_discount > 0 ? <Row label="Friend invite discount">−{formatCurrency(job.referral_discount)}</Row> : null}
+                {job.credit_applied > 0 ? <Row label="Referral credit used">−{formatCurrency(job.credit_applied)}</Row> : null}
                 <Row label="Deposit">{formatCurrency(job.deposit_amount ?? 0)}</Row>
                 <Row label="Balance after service">{formatCurrency(Math.max(0, balance))}</Row>
                 <Row label="Status">{PAYMENT_LABEL[job.payment_status] ?? job.payment_status}</Row>
