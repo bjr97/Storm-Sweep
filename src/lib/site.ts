@@ -1,7 +1,18 @@
+/** Absolute site origin; tolerates a host saved without https:// (a bad value must never break the build). */
+function siteUrl(): string {
+  const raw = (process.env.NEXT_PUBLIC_APP_URL ?? '').trim() || process.env.VERCEL_PROJECT_PRODUCTION_URL || 'stormsweep.com'
+  const withProtocol = /^https?:\/\//.test(raw) ? raw : `https://${raw}`
+  try {
+    return new URL(withProtocol).origin
+  } catch {
+    return 'https://stormsweep.com'
+  }
+}
+
 /** Public site identity for SEO (titles, sitemap, structured data). */
 export const SITE = {
   name: 'Storm Sweep',
-  url: (process.env.NEXT_PUBLIC_APP_URL ?? 'https://stormsweep.com').replace(/\/$/, ''),
+  url: siteUrl(),
   city: 'Norman',
   region: 'OK',
   description:
