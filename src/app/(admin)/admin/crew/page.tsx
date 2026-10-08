@@ -4,10 +4,12 @@ import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { EmptyState, Panel } from '@/components/admin/Panel'
 import { SweeperPaperwork } from '@/components/admin/SweeperPaperwork'
 import { TierOverrideSelect } from '@/components/admin/TierOverrideSelect'
+import { TrainingStatus } from '@/components/admin/TrainingStatus'
 import { formatBusinessDate } from '@/lib/admin/time'
 import { getCrewTiers } from '@/lib/sweepers/board'
 import { getCrewYearTotals, IRS_1099_THRESHOLD_CENTS } from '@/lib/sweepers/earnings'
 import { getCrewPaperwork } from '@/lib/sweepers/paperwork'
+import { TRAINING_MODULES } from '@/lib/sweepers/training'
 import { JOB_BOARD, TIER_LABEL, TIER_ORDER, TIER_RULES } from '@/lib/sweepers/jobBoard'
 import { cn, formatCurrency } from '@/lib/utils'
 import type { SweeperTier } from '@/types/database'
@@ -62,7 +64,7 @@ export default async function AdminCrewPage(): Promise<React.ReactElement> {
                     <th className="px-3 py-2.5 font-bold">Rating</th>
                     <th className="px-3 py-2.5 font-bold">Late drops (90d)</th>
                     <th className="px-3 py-2.5 font-bold">Earned {year}</th>
-                    <th className="w-56 px-3 py-2.5 font-bold">Paperwork</th>
+                    <th className="w-56 px-3 py-2.5 font-bold">Paperwork &amp; training</th>
                     <th className="w-44 px-4 py-2.5 font-bold">Override</th>
                   </tr>
                 </thead>
@@ -117,6 +119,14 @@ export default async function AdminCrewPage(): Promise<React.ReactElement> {
                             insuranceExpiresOn={paperwork.get(m.id)!.insuranceExpiresOn}
                             insurance={paperwork.get(m.id)!.insurance}
                             notes={paperwork.get(m.id)!.notes}
+                          />
+                        ) : null}
+                        {paperwork.get(m.id) ? (
+                          <TrainingStatus
+                            sweeperId={m.id}
+                            status={paperwork.get(m.id)!.training}
+                            read={paperwork.get(m.id)!.trainingRead}
+                            total={TRAINING_MODULES.length}
                           />
                         ) : null}
                       </td>

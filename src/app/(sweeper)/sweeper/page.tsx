@@ -1,4 +1,4 @@
-import { CalendarDays, Clock, Lock, MapPin, Medal, Navigation, Ruler } from 'lucide-react'
+import { CalendarDays, Clock, GraduationCap, Lock, MapPin, Medal, Navigation, Ruler } from 'lucide-react'
 import Link from 'next/link'
 
 import { AvailabilityToggle } from '@/components/sweeper/AvailabilityToggle'
@@ -10,6 +10,7 @@ import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
 import { timeWindowLabel } from '@/lib/booking/timeWindows'
 import { getSweeperBoard } from '@/lib/sweepers/board'
 import { calculateSweeperPay, JOB_BOARD, potentialPay, TIER_LABEL, TIER_RULES } from '@/lib/sweepers/jobBoard'
+import { TRAINING_MODULES } from '@/lib/sweepers/training'
 import { createClient } from '@/lib/supabase/server'
 import { cn, formatCurrency, PRICING } from '@/lib/utils'
 import type { SweeperTier, TimeWindow } from '@/types/database'
@@ -58,6 +59,21 @@ export default async function SweeperBoardPage(): Promise<React.ReactElement> {
   return (
     <main className="space-y-6 px-4 pb-16 pt-5">
       <BoardAutoRefresh />
+      {!me.trained ? (
+        <Link
+          href="/sweeper/training"
+          className="flex items-center gap-3 rounded-xl border border-wheat/40 bg-wheat/10 p-4 hover:border-wheat/70"
+        >
+          <GraduationCap className="size-6 shrink-0 text-wheat-light" aria-hidden="true" />
+          <span className="flex-1">
+            <span className="block text-sm font-bold text-white">Finish your training to start claiming jobs</span>
+            <span className="text-xs text-[#C9C9CE]">
+              About {TRAINING_MODULES.reduce((n, m) => n + m.minutes, 0)} minutes: {TRAINING_MODULES.length} short sections and a quick quiz.
+            </span>
+          </span>
+          <span className="text-sm font-bold text-wheat-light">Start</span>
+        </Link>
+      ) : null}
 
       {/* Who + tier */}
       <section className="rounded-xl border border-white/[0.07] bg-[#1C1C1F] p-4">
@@ -221,7 +237,11 @@ export default async function SweeperBoardPage(): Promise<React.ReactElement> {
               <p className="text-xs font-semibold text-wheat-light">
                 <PayCountdown visibleAt={job.visibleAt} />
               </p>
-              <ClaimButton jobId={job.id} disabled={job.dayFull} disabledLabel={`You have ${JOB_BOARD.MAX_JOBS_PER_DAY} jobs that day`} />
+              <ClaimButton
+                jobId={job.id}
+                disabled={job.dayFull || !me.trained}
+                disabledLabel={!me.trained ? 'Finish training to claim' : `You have ${JOB_BOARD.MAX_JOBS_PER_DAY} jobs that day`}
+              />
             </article>
           ))
         )}

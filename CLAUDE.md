@@ -251,6 +251,10 @@ Customer Details (Step 3) specifics:
    - Tier score: rating 40% + on-time 40% + reliability 20% (late drops in 90d).
      Gold 5+ jobs & 85+, Silver 2+ jobs & 70+. Admin can pin a tier.
    - Max 5 jobs per Sweeper per day. Dropping < 24h before = late drop.
+   - Training (`src/lib/sweepers/training.ts`, /sweeper/training): read every
+     module + pass the quiz (graded server-side) before claiming; claimJob returns
+     403 TRAINING_REQUIRED. Admin can waive/reset on Crew. Admin assignments
+     are not blocked. Keep module text in sync with the app's real button labels.
    - Open jobs show city + ZIP only until claimed.
 
 9. **Add-ons** (`src/lib/booking/addons.ts`, prices in `PRICING.addons`):

@@ -93,6 +93,9 @@ export interface Database {
           w9_received_at: string | null
           insurance_expires_on: string | null
           paperwork_notes: string | null
+          training_progress: Json
+          training_completed_at: string | null
+          training_waived: boolean
           is_demo: boolean
           created_at: string
         }
@@ -119,6 +122,9 @@ export interface Database {
           w9_received_at?: string | null
           insurance_expires_on?: string | null
           paperwork_notes?: string | null
+          training_progress?: Json
+          training_completed_at?: string | null
+          training_waived?: boolean
           is_demo?: boolean
           created_at?: string
         }
@@ -145,6 +151,9 @@ export interface Database {
           w9_received_at?: string | null
           insurance_expires_on?: string | null
           paperwork_notes?: string | null
+          training_progress?: Json
+          training_completed_at?: string | null
+          training_waived?: boolean
           is_demo?: boolean
           created_at?: string
         }

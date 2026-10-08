@@ -33,6 +33,8 @@ export type CrewMemberTier = {
   stats: SweeperStats
   /** Demo Sweeper (admin preview): sees only demo jobs, never counts toward tiers. */
   isDemo: boolean
+  /** Finished onboarding (or the office waived it) — required to claim jobs. */
+  trained: boolean
 }
 
 export async function getCrewTiers(now: Date = new Date()): Promise<{
@@ -42,7 +44,7 @@ export async function getCrewTiers(now: Date = new Date()): Promise<{
   const supabase = createServiceClient()
   const { data: sweepers, error } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, sweeper_tier_override, sweeper_available, is_demo')
+    .select('id, full_name, phone, sweeper_tier_override, sweeper_available, is_demo, training_completed_at, training_waived')
     .eq('role', 'sweeper')
   if (error) throw error
 
@@ -107,6 +109,7 @@ export async function getCrewTiers(now: Date = new Date()): Promise<{
       score: sweeperScore(st),
       stats: st,
       isDemo: s.is_demo,
+      trained: Boolean(s.training_completed_at) || s.training_waived,
     })
   }
   return { crew, populated }
@@ -314,6 +317,7 @@ export async function claimJob(
   const me = crew.get(sweeperId)
   if (!me) return { error: 'Only active Sweepers can claim jobs', code: 'NOT_SWEEPER', status: 403 }
   if (me.isDemo !== job.is_demo) return { error: 'Job not found', code: 'NOT_FOUND', status: 404 }
+  if (!me.trained) return { error: 'Finish your training (Training tab) before claiming jobs', code: 'TRAINING_REQUIRED', status: 403 }
   const visibleAt = me.isDemo ? new Date(job.board_opened_at) : tierVisibleAt(new Date(job.board_opened_at), me.tier, populated)
   if (visibleAt > now) {
     return { error: 'This job is not open to your tier yet', code: 'NOT_YET', status: 403 }

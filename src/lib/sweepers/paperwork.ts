@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/server'
+import { parseProgress } from '@/lib/sweepers/training'
 
 /** Per-Sweeper paperwork status for the Crew and Payouts pages (server-only). */
 
@@ -9,6 +10,8 @@ export type Paperwork = {
   agreementSigned: boolean
   /** expired | soon (<30 days) | ok | missing */
   insurance: 'expired' | 'soon' | 'ok' | 'missing'
+  training: 'done' | 'waived' | 'in_progress' | 'not_started'
+  trainingRead: number
 }
 
 export function insuranceStatus(expiresOn: string | null, now: Date = new Date()): Paperwork['insurance'] {
@@ -21,7 +24,7 @@ export function insuranceStatus(expiresOn: string | null, now: Date = new Date()
 export async function getCrewPaperwork(now: Date = new Date()): Promise<Map<string, Paperwork>> {
   const supabase = createServiceClient()
   const [{ data: sweepers }, { data: applicants }] = await Promise.all([
-    supabase.from('profiles').select('id, w9_received_at, insurance_expires_on, paperwork_notes').eq('role', 'sweeper').eq('is_demo', false),
+    supabase.from('profiles').select('id, w9_received_at, insurance_expires_on, paperwork_notes, training_progress, training_completed_at, training_waived').eq('role', 'sweeper').eq('is_demo', false),
     supabase.from('sweeper_applicants').select('email, agreement_signed').eq('status', 'approved'),
   ])
   const signed = new Set((applicants ?? []).filter((a) => a.agreement_signed).map((a) => a.email.toLowerCase()))
@@ -34,6 +37,8 @@ export async function getCrewPaperwork(now: Date = new Date()): Promise<Map<stri
       notes: s.paperwork_notes,
       agreementSigned: signed.has(email),
       insurance: insuranceStatus(s.insurance_expires_on, now),
+      training: s.training_waived ? 'waived' : s.training_completed_at ? 'done' : parseProgress(s.training_progress).read.length ? 'in_progress' : 'not_started',
+      trainingRead: parseProgress(s.training_progress).read.length,
     })
   }
   return map
