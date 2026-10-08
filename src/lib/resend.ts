@@ -4,6 +4,7 @@ import { BookingConfirmationEmail } from '@/emails/BookingConfirmationEmail'
 import { JobCompleteEmail } from '@/emails/JobCompleteEmail'
 import { MembershipReceiptEmail } from '@/emails/MembershipReceiptEmail'
 import { MembershipWelcomeEmail } from '@/emails/MembershipWelcomeEmail'
+import { VisitUpdateEmail, type VisitUpdateEmailProps } from '@/emails/VisitUpdateEmail'
 import { getAppUrl } from '@/lib/twilio'
 import { formatCurrency, PRICING } from '@/lib/utils'
 
@@ -193,5 +194,19 @@ export async function sendMembershipReceiptEmail(
     throw new Error(error.message)
   }
 
+  return { id: data?.id ?? '' }
+}
+
+export const emailConfigured = (): boolean => Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL)
+
+export async function sendVisitUpdateEmail(params: { to: string; subject: string } & VisitUpdateEmailProps): Promise<SendEmailResult> {
+  const { to, subject, ...props } = params
+  const { data, error } = await getResendClient().emails.send({
+    from: getFromEmail(),
+    to,
+    subject,
+    react: VisitUpdateEmail(props),
+  })
+  if (error) throw new Error(error.message)
   return { id: data?.id ?? '' }
 }

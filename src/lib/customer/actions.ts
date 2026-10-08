@@ -2,6 +2,7 @@ import { addDays, startOfDay } from 'date-fns'
 
 import { windowStartIso } from '@/lib/booking/timeWindows'
 import { refundCredit } from '@/lib/customer/referrals'
+import { notifyCancelled, notifyRescheduled } from '@/lib/notify'
 import { canCustomerChange, CHANGE_CUTOFF_HOURS } from '@/lib/customer/rules'
 import { createServiceClient } from '@/lib/supabase/server'
 import type { TimeWindow } from '@/types/database'
@@ -42,6 +43,7 @@ export async function rescheduleVisit(
     .eq('id', jobId)
     .in('status', ['pending', 'confirmed'])
   if (error) throw error
+  await notifyRescheduled(jobId)
   return { scheduledAt }
 }
 
@@ -73,6 +75,7 @@ export async function cancelVisit(customerId: string, jobId: string, now: Date =
       await supabase.from('profiles').update({ visits_used: profile.visits_used - 1 }).eq('id', customerId)
     }
   }
+  await notifyCancelled(jobId, 'customer')
   return { refundDue }
 }
 

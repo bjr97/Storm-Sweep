@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { ADMIN_SETTABLE_STATUSES } from '@/lib/admin/jobConstants'
 import { requireRole } from '@/lib/auth/requireRole'
 import { createClient } from '@/lib/supabase/server'
+import { notifyCancelled } from '@/lib/notify'
 import { formatJobDate, renderSmsTemplate, sendSms } from '@/lib/twilio'
 import type { JobClaimEventInsert, JobUpdate } from '@/types/database'
 
@@ -46,7 +47,7 @@ export async function PATCH(
     const supabase = createClient()
     const { data: job, error: loadError } = await supabase
       .from('jobs')
-      .select('id, status, sweeper_id, customer_id, address, scheduled_at, photo_approved, refund_due')
+      .select('id, status, sweeper_id, customer_id, address, scheduled_at, photo_approved, refund_due, payment_status')
       .eq('id', jobId)
       .maybeSingle()
 
@@ -85,6 +86,11 @@ export async function PATCH(
         )
       }
       update.status = input.status
+      if (input.status === 'cancelled' && job.status !== 'cancelled') {
+        update.cancelled_at = new Date().toISOString()
+        update.cancelled_by = 'admin'
+        update.refund_due = job.payment_status === 'deposit_paid' || job.payment_status === 'paid'
+      }
     }
 
     let sweeperProfile: { full_name: string | null; phone: string | null } | null = null
@@ -151,6 +157,10 @@ export async function PATCH(
       } catch (smsError) {
         console.error('[jobs/patch] sweeper_job_assigned SMS failed', smsError)
       }
+    }
+
+    if (input.status === 'cancelled' && job.status !== 'cancelled') {
+      await notifyCancelled(jobId, 'admin')
     }
 
     return Response.json({ data: updated })
