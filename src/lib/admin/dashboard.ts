@@ -1,3 +1,4 @@
+import { balanceDue } from '@/lib/admin/balance'
 import { dayRange, formatBusinessDate, monthRange, weekRange, type Range } from '@/lib/admin/time'
 import { createClient } from '@/lib/supabase/server'
 import type { Job, JobStatus } from '@/types/database'
@@ -359,4 +360,25 @@ export async function getQuotesToPrice(): Promise<QuoteToPrice[]> {
   const { data: people } = await supabase.from('profiles').select('id, full_name').in('id', jobs.map((j) => j.customer_id))
   const name = new Map((people ?? []).map((p) => [p.id, p.full_name ?? 'Customer']))
   return jobs.map((j) => ({ jobId: j.id, customerName: name.get(j.customer_id) ?? 'Customer', requestedFor: j.scheduled_at, createdAt: j.created_at }))
+}
+
+export type BalanceToCollect = { jobId: string; customerName: string; due: number; completedAt: string | null }
+
+/** Completed visits with money still owed (total minus any paid deposit). */
+export async function getBalancesToCollect(): Promise<BalanceToCollect[]> {
+  const supabase = createClient()
+  const { data: jobs, error } = await supabase
+    .from('jobs')
+    .select('id, customer_id, total_amount, deposit_amount, payment_status, status, completed_at')
+    .eq('status', 'complete')
+    .in('payment_status', ['unpaid', 'deposit_paid'])
+    .gt('total_amount', 0)
+    .order('completed_at')
+  if (error) fail('balances to collect', error)
+  if (jobs.length === 0) return []
+  const { data: people } = await supabase.from('profiles').select('id, full_name').in('id', jobs.map((j) => j.customer_id))
+  const name = new Map((people ?? []).map((p) => [p.id, p.full_name ?? 'Customer']))
+  return jobs
+    .map((j) => ({ jobId: j.id, customerName: name.get(j.customer_id) ?? 'Customer', due: balanceDue(j), completedAt: j.completed_at }))
+    .filter((b) => b.due > 0)
 }

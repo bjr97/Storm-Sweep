@@ -6,11 +6,13 @@ import { notFound } from 'next/navigation'
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { AssignSweeperSelect } from '@/components/admin/AssignSweeperSelect'
 import { IssueDecision } from '@/components/admin/IssueDecision'
+import { BalanceButton } from '@/components/admin/BalanceButton'
 import { JobActions } from '@/components/admin/JobActions'
 import { JobEditor } from '@/components/admin/JobEditor'
 import { MarkRefundedButton } from '@/components/admin/MarkRefundedButton'
 import { EmptyState, Panel } from '@/components/admin/Panel'
 import { StatusPill } from '@/components/admin/StatusPill'
+import { BALANCE_METHODS, balanceDue } from '@/lib/admin/balance'
 import { getJobDetail, listSweepers } from '@/lib/admin/jobs'
 import { formatBusinessDate, formatBusinessTime, localDate } from '@/lib/admin/time'
 import { jobTimeLabel } from '@/lib/booking/timeWindows'
@@ -344,7 +346,14 @@ export default async function AdminJobDetailPage({
                 <Row label="List value (sweeper pay basis)">{formatCurrency(job.service_value ?? job.total_amount)}</Row>
                 {job.membership_visit ? <Row label="Membership">Clean covered by Storm Ready</Row> : null}
                 <Row label="Paid via">{job.paypal_order_id ? 'PayPal' : job.stripe_payment_intent_id ? 'Stripe' : '—'}</Row>
+                {job.balance_paid_at ? (
+                  <Row label="Balance collected">
+                    {formatBusinessDate(new Date(job.balance_paid_at), { month: 'short', day: 'numeric' })} · {BALANCE_METHODS.find((m) => m.value === job.balance_method)?.label ?? '—'}
+                    {job.balance_reference ? ` · ${job.balance_reference}` : ''}
+                  </Row>
+                ) : null}
               </dl>
+              {balanceDue(job) > 0 ? <BalanceButton jobId={job.id} due={balanceDue(job)} /> : null}
             </Panel>
 
             <Panel title="Photo screening">

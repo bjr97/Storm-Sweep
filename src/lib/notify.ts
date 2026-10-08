@@ -196,3 +196,26 @@ export async function notifyVisitUpdated(jobId: string, change: { timeChanged: b
     await text(sweeper.phone, `Storm Sweep: the office moved ${first(customer?.name ?? 'a customer')}'s visit to ${date}, ${window}. Can't make it? Drop it in the app — no penalty.`, 'sweeper_job_changed', sweeper.id, job.id)
   }
 }
+
+/** Balance collected — send the customer a receipt. */
+export async function notifyBalancePaid(jobId: string, amount: number): Promise<void> {
+  const job = await loadJob(jobId)
+  if (!job) return
+  const customer = await person(job.customer_id)
+  if (!customer) return
+  const portal = `${getAppUrl()}/history/${job.id}`
+  await text(customer.phone, `Storm Sweep: we received your ${formatCurrency(amount)} payment — your visit is paid in full. Thank you! Receipt: ${portal}`, 'balance_paid', customer.id, job.id)
+  await email(customer.email, `Payment received — ${formatCurrency(amount)}`, {
+    preview: 'Your Storm Sweep visit is paid in full',
+    title: 'Payment received',
+    greeting: `Hi ${first(customer.name)},`,
+    message: 'Thank you — your Storm Sweep visit is paid in full.',
+    rows: [
+      { label: 'Amount received', value: formatCurrency(amount) },
+      { label: 'Visit total', value: formatCurrency(job.total_amount) },
+      { label: 'Services', value: job.service_type.join(', ') },
+    ],
+    ctaLabel: 'View your report',
+    ctaUrl: portal,
+  })
+}

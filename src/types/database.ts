@@ -60,6 +60,8 @@ export type AssignedVia = 'claim' | 'admin'
 
 export type PayoutMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'bank' | 'other'
 
+export type BalanceMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'card' | 'other'
+
 export type ClaimEventType = 'claim' | 'drop' | 'late_drop' | 'admin_assign' | 'admin_unassign'
 
 export interface Database {
@@ -86,6 +88,9 @@ export interface Database {
           referral_credit: number
           sms_opt_out: boolean
           sms_opt_out_at: string | null
+          w9_received_at: string | null
+          insurance_expires_on: string | null
+          paperwork_notes: string | null
           created_at: string
         }
         Insert: {
@@ -108,6 +113,9 @@ export interface Database {
           referral_credit?: number
           sms_opt_out?: boolean
           sms_opt_out_at?: string | null
+          w9_received_at?: string | null
+          insurance_expires_on?: string | null
+          paperwork_notes?: string | null
           created_at?: string
         }
         Update: {
@@ -130,6 +138,9 @@ export interface Database {
           referral_credit?: number
           sms_opt_out?: boolean
           sms_opt_out_at?: string | null
+          w9_received_at?: string | null
+          insurance_expires_on?: string | null
+          paperwork_notes?: string | null
           created_at?: string
         }
         Relationships: []
@@ -226,6 +237,9 @@ export interface Database {
           referral_rewarded_at: string | null
           payout_id: string | null
           payout_amount: number | null
+          balance_paid_at: string | null
+          balance_method: BalanceMethod | null
+          balance_reference: string | null
           referral_source: string | null
           partner_id: string | null
           completed_at: string | null
@@ -282,6 +296,9 @@ export interface Database {
           referral_rewarded_at?: string | null
           payout_id?: string | null
           payout_amount?: number | null
+          balance_paid_at?: string | null
+          balance_method?: BalanceMethod | null
+          balance_reference?: string | null
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -338,6 +355,9 @@ export interface Database {
           referral_rewarded_at?: string | null
           payout_id?: string | null
           payout_amount?: number | null
+          balance_paid_at?: string | null
+          balance_method?: BalanceMethod | null
+          balance_reference?: string | null
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null

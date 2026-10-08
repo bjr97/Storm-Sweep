@@ -8,7 +8,7 @@ import { JobsTable } from '@/components/admin/JobsTable'
 import { KpiRow } from '@/components/admin/KpiRow'
 import { Panel } from '@/components/admin/Panel'
 import { RevenueChart } from '@/components/admin/RevenueChart'
-import { getDashboardData, getPausedJobs, getQuotesToPrice, getRecentInboundTexts, getRefundsDue } from '@/lib/admin/dashboard'
+import { getBalancesToCollect, getDashboardData, getPausedJobs, getQuotesToPrice, getRecentInboundTexts, getRefundsDue } from '@/lib/admin/dashboard'
 import { formatBusinessDate, formatRelative } from '@/lib/admin/time'
 import { ISSUE_KINDS } from '@/lib/sweepers/jobRun'
 import { formatCurrency } from '@/lib/utils'
@@ -19,7 +19,14 @@ export const metadata = { title: 'Dashboard · Storm Sweep Admin' }
 
 export default async function AdminDashboardPage(): Promise<React.ReactElement> {
   const now = new Date()
-  const [data, paused, refunds, texts, quotes] = await Promise.all([getDashboardData(now), getPausedJobs(), getRefundsDue(), getRecentInboundTexts(), getQuotesToPrice()])
+  const [data, paused, refunds, texts, quotes, balances] = await Promise.all([
+    getDashboardData(now),
+    getPausedJobs(),
+    getRefundsDue(),
+    getRecentInboundTexts(),
+    getQuotesToPrice(),
+    getBalancesToCollect(),
+  ])
 
   return (
     <>
@@ -42,6 +49,23 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
                     {ISSUE_KINDS.find((k) => k.value === p.kind)?.label ?? p.kind} · {p.address}
                   </Link>
                   <span className="text-[#9A9A9F]"> · {formatRelative(p.reportedAt, now)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+        {balances.length > 0 ? (
+          <section aria-label="Balances to collect" className="space-y-2 rounded-xl border border-wheat/50 bg-wheat/10 p-4">
+            <p className="text-sm font-bold text-[#F0F0F0]">
+              {formatCurrency(balances.reduce((n, b) => n + b.due, 0))} to collect from {balances.length} completed visit{balances.length === 1 ? '' : 's'}
+            </p>
+            <ul className="space-y-1 text-[13px]">
+              {balances.map((b) => (
+                <li key={b.jobId}>
+                  <Link href={`/admin/jobs/${b.jobId}`} className="text-sky-light hover:underline">
+                    {b.customerName} · {formatCurrency(b.due)}
+                  </Link>
+                  {b.completedAt ? <span className="text-[#9A9A9F]"> · done {formatRelative(b.completedAt, now)}</span> : null}
                 </li>
               ))}
             </ul>
