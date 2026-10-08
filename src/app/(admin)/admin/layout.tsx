@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { LiveRefresh } from '@/components/live/LiveRefresh'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -55,6 +56,7 @@ export default async function AdminLayout({
           >
             <Home className="size-4" aria-hidden="true" />
           </Link>
+          <LiveRefresh className="ml-auto" />
         </div>
         {children}
       </div>

@@ -325,6 +325,16 @@ Customer Details (Step 3) specifics:
   only demo jobs; no tier delay). Never texted/emailed. New admin queries over
   jobs/people must add `.eq('is_demo', false)`.
 
+## LIVE UPDATES + SERVICE AREA
+
+- Live: a DB trigger (migration 021) pings the private Realtime topic
+  `jobs-changes` (empty payload) on every jobs change; `<LiveRefresh>` (admin,
+  Sweeper, customer layouts) calls router.refresh(), debounced, with a 60s poll
+  fallback. Pages re-fetch their own data — never put job data in the ping.
+- Service area: `service_zips` (empty = everywhere). `repriceBooking()` rejects
+  out-of-area ZIPs (409 OUT_OF_AREA); Step 3 offers the `waitlist` instead.
+  Admin phone bookings are not limited. Admin: /admin/service-area.
+
 ## TESTS
 
 - `npm test` (node:test + tsx, `tests/*.test.ts`) locks in pricing, Sweeper pay,

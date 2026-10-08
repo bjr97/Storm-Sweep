@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { CustomerNav, MobileSignOut } from '@/components/customer/CustomerNav'
+import { LiveRefresh } from '@/components/live/LiveRefresh'
 import { PreviewBanner } from '@/components/preview/PreviewBanner'
 import { createClient } from '@/lib/supabase/server'
 
@@ -28,6 +29,7 @@ export default async function CustomerLayout({
             STORM<span className="text-sky">SWEEP</span>
           </Link>
           <CustomerNav />
+          <LiveRefresh className="hidden" />
           <MobileSignOut />
         </div>
       </header>

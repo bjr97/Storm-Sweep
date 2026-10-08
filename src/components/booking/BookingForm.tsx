@@ -15,6 +15,7 @@ import { PaymentStep } from '@/components/booking/PaymentStep'
 import { PromoCodeField } from '@/components/booking/PromoCodeField'
 import { PhotoUpload, type PhotoScreenResult } from '@/components/booking/PhotoUpload'
 import { ServiceSelector } from '@/components/booking/ServiceSelector'
+import { WaitlistOffer } from '@/components/booking/WaitlistOffer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { parseServiceAddress } from '@/lib/booking/address'
@@ -178,6 +179,25 @@ export function BookingForm({
 
   const customerValues = watch()
 
+  // Service area: out-of-area ZIPs get a waitlist offer instead of continuing (checkout re-checks).
+  const [outOfArea, setOutOfArea] = useState<string | null>(null)
+  async function inServiceArea(): Promise<boolean> {
+    const zip = customerValues.zip?.trim() ?? ''
+    try {
+      const res = await fetch(`/api/service-area?zip=${encodeURIComponent(zip)}`)
+      const json = (await res.json()) as { data?: { served: boolean } }
+      if (json.data && !json.data.served) {
+        setOutOfArea(zip)
+        document.getElementById('zip')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        return false
+      }
+    } catch {
+      // Can't check right now: let them continue; checkout enforces the area.
+    }
+    setOutOfArea(null)
+    return true
+  }
+
   const bookingState = useMemo<BookingState>(() => {
     const basePricing = calculateBookingPrice({ ...serviceSelection }, member)
 
@@ -267,6 +287,7 @@ export function BookingForm({
         firstInvalid?.focus()
         return
       }
+      if (!(await inServiceArea())) return
       setCurrentStep(4)
       return
     }
@@ -487,6 +508,15 @@ export function BookingForm({
                   {customerErrors.zip ? <p className="text-sm text-tornado">{customerErrors.zip.message}</p> : null}
                 </div>
               </div>
+              {outOfArea && outOfArea === customerValues.zip?.trim() ? (
+                <WaitlistOffer
+                  zip={outOfArea}
+                  name={`${customerValues.first_name ?? ''} ${customerValues.last_name ?? ''}`.trim()}
+                  email={customerValues.email ?? ''}
+                  phone={customerValues.phone ?? ''}
+                  address={customerValues.address ?? ''}
+                />
+              ) : null}
 
               <div className="space-y-2">
                 <Label htmlFor="preferred_date">Preferred date</Label>
@@ -636,7 +666,8 @@ export function BookingForm({
 
   function handleFooterContinue(): void {
     if (currentStep === 3) {
-      void customerForm.handleSubmit(() => {
+      void customerForm.handleSubmit(async () => {
+        if (!(await inServiceArea())) return
         setCurrentStep(4)
       })()
       return

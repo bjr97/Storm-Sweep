@@ -2,6 +2,7 @@ import { calculateDeposit } from '@/lib/utils'
 import { priceBooking } from '@/lib/booking/quote'
 import { checkInvite, getCreditBalance } from '@/lib/customer/referrals'
 import { checkPromo } from '@/lib/promos'
+import { isServedZip, zipFromAddress } from '@/lib/serviceArea'
 import type { BookingItem, BookingPayload } from '@/lib/bookings/types'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
@@ -23,6 +24,12 @@ export async function repriceBooking(input: BookingPayload): Promise<RepricedBoo
     return { error: 'Booking is missing its service selection — please refresh and try again', code: 'SELECTION_REQUIRED', status: 400 }
   }
   const service = selection.service
+
+  // Online booking only inside the service area (the office can still book anywhere).
+  const zip = zipFromAddress(input.address)
+  if (zip && !(await isServedZip(zip))) {
+    return { error: `We don't serve ${zip} yet — join the waitlist and we'll let you know`, code: 'OUT_OF_AREA', status: 409 }
+  }
 
   let member: { visitsUsed: number } | null = null
   if (service.membership === 'member') {

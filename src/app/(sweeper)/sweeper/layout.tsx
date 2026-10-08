@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { SignOutButton } from '@/components/sweeper/SignOutButton'
 import { SweeperNav } from '@/components/sweeper/SweeperNav'
 import { SweeperPwa } from '@/components/sweeper/SweeperPwa'
+import { LiveRefresh } from '@/components/live/LiveRefresh'
 import { PreviewBanner } from '@/components/preview/PreviewBanner'
 import { createClient } from '@/lib/supabase/server'
 
@@ -41,7 +42,10 @@ export default async function SweeperLayout({
             Sweeper
           </span>
         </Link>
-        <SignOutButton />
+        <div className="flex items-center gap-3">
+          <LiveRefresh />
+          <SignOutButton />
+        </div>
       </header>
       <SweeperPwa />
       <div className="mx-auto w-full max-w-2xl pb-20">{children}</div>

@@ -10,6 +10,7 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Megaphone,
   Star,
   UserPlus,
@@ -21,6 +22,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { LiveRefresh } from '@/components/live/LiveRefresh'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
@@ -52,6 +54,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { label: 'Payouts', icon: Banknote, href: '/admin/payouts', built: true },
       { label: 'Marketing', icon: Megaphone, href: '/admin/marketing', built: true },
       { label: 'Partners', icon: Handshake, href: '/admin/partners', built: true },
+      { label: 'Service area', icon: MapPin, href: '/admin/service-area', built: true },
     ],
   },
 ]
@@ -100,9 +103,12 @@ export function AdminSidebar({ adminName }: AdminSidebarProps): React.ReactEleme
             <Home className="size-4" aria-hidden="true" />
           </Link>
         </div>
-        <p className="mt-1 font-[family-name:var(--font-barlow)] text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8A8A8F]">
-          Admin · Norman OK
-        </p>
+        <div className="mt-1 flex items-center justify-between gap-2">
+          <p className="font-[family-name:var(--font-barlow)] text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8A8A8F]">
+            Admin · Norman OK
+          </p>
+          <LiveRefresh />
+        </div>
       </div>
 
       <nav className="flex-1 font-[family-name:var(--font-barlow)]">

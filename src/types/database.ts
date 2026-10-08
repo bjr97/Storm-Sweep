@@ -576,6 +576,45 @@ export interface Database {
         }
         Relationships: []
       }
+      service_zips: {
+        Row: { zip: string; label: string | null; created_at: string }
+        Insert: { zip: string; label?: string | null; created_at?: string }
+        Update: { zip?: string; label?: string | null; created_at?: string }
+        Relationships: []
+      }
+      waitlist: {
+        Row: {
+          id: string
+          zip: string
+          name: string | null
+          email: string
+          phone: string | null
+          address: string | null
+          notified_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          zip: string
+          name?: string | null
+          email: string
+          phone?: string | null
+          address?: string | null
+          notified_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          zip?: string
+          name?: string | null
+          email?: string
+          phone?: string | null
+          address?: string | null
+          notified_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       sms_inbound: {
         Row: {
           id: string
