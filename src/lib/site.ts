@@ -15,6 +15,9 @@ export const SITE = {
   url: siteUrl(),
   city: 'Norman',
   region: 'OK',
+  /** Optional public contact details (env); pages fall back to the Help form + text replies. */
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || null,
+  supportPhone: process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || null,
   description:
     'Underground storm shelter cleaning in Norman, Oklahoma — deep cleans, LED lighting, door hardware and emergency prep kits, with before & after photos of every visit.',
 } as const
@@ -27,4 +30,7 @@ export const PUBLIC_PAGES = [
   { path: '/book', priority: 0.8 },
   { path: '/about', priority: 0.6 },
   { path: '/sweepers/apply', priority: 0.4 },
+  { path: '/faq', priority: 0.6 },
+  { path: '/terms', priority: 0.2 },
+  { path: '/privacy', priority: 0.2 },
 ] as const

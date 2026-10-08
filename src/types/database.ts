@@ -61,6 +61,7 @@ export type AssignedVia = 'claim' | 'admin'
 export type PayoutMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'bank' | 'other'
 
 export type PromoKind = 'amount' | 'percent'
+export type HelpTopic = 'visit' | 'reschedule' | 'billing' | 'membership' | 'other'
 export type BalanceMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'card' | 'other'
 
 export type ClaimEventType = 'claim' | 'drop' | 'late_drop' | 'admin_assign' | 'admin_unassign'
@@ -534,6 +535,36 @@ export interface Database {
           sold_by?: string | null
           customer_initials?: string
           approved_at?: string
+        }
+        Relationships: []
+      }
+      help_requests: {
+        Row: {
+          id: string
+          customer_id: string
+          job_id: string | null
+          topic: HelpTopic
+          message: string
+          handled_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          customer_id: string
+          job_id?: string | null
+          topic: HelpTopic
+          message: string
+          handled_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          customer_id?: string
+          job_id?: string | null
+          topic?: HelpTopic
+          message?: string
+          handled_at?: string | null
+          created_at?: string
         }
         Relationships: []
       }

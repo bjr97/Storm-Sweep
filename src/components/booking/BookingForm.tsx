@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addDays, format } from 'date-fns'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -651,6 +652,11 @@ export function BookingForm({
               />
             ) : null}
             <PaymentStep booking={paymentData} />
+            <p className="text-xs text-muted-foreground">
+              By booking you agree to our{' '}
+              <Link href="/terms" target="_blank" className="underline underline-offset-2">Terms</Link> and{' '}
+              <Link href="/privacy" target="_blank" className="underline underline-offset-2">Privacy Policy</Link>.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">

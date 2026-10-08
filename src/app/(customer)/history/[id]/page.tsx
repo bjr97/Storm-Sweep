@@ -211,6 +211,12 @@ export default async function VisitReportPage({ params }: { params: { id: string
           </div>
         </section>
       ) : null}
+      <p className="text-center text-sm text-[#6B6B70]">
+        Questions about this visit?{' '}
+        <Link href={`/dashboard/help?job=${visit.id}`} className="font-semibold text-sky-dark underline">
+          Message us
+        </Link>
+      </p>
     </div>
   )
 }

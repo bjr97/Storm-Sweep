@@ -193,6 +193,12 @@ export function RegisterForm(): React.ReactElement {
               </p>
             ) : null}
 
+            <p className="text-xs text-muted-foreground">
+              By creating an account you agree to our{' '}
+              <Link href="/terms" className="underline underline-offset-2">Terms</Link> and{' '}
+              <Link href="/privacy" className="underline underline-offset-2">Privacy Policy</Link>.
+            </p>
+
             <Button
               type="submit"
               disabled={isSubmitting}

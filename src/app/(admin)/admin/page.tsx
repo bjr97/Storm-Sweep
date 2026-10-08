@@ -4,12 +4,14 @@ import Link from 'next/link'
 import { ActivityFeed } from '@/components/admin/ActivityFeed'
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { CrewStatus } from '@/components/admin/CrewStatus'
+import { HelpHandledButton } from '@/components/admin/HelpHandledButton'
 import { JobsTable } from '@/components/admin/JobsTable'
 import { KpiRow } from '@/components/admin/KpiRow'
 import { Panel } from '@/components/admin/Panel'
 import { RevenueChart } from '@/components/admin/RevenueChart'
-import { getBalancesToCollect, getDashboardData, getPausedJobs, getQuotesToPrice, getRecentInboundTexts, getRefundsDue } from '@/lib/admin/dashboard'
+import { getBalancesToCollect, getDashboardData, getOpenHelpRequests, getPausedJobs, getQuotesToPrice, getRecentInboundTexts, getRefundsDue } from '@/lib/admin/dashboard'
 import { formatBusinessDate, formatRelative } from '@/lib/admin/time'
+import { helpTopicLabel } from '@/lib/help'
 import { ISSUE_KINDS } from '@/lib/sweepers/jobRun'
 import { formatCurrency } from '@/lib/utils'
 
@@ -19,13 +21,14 @@ export const metadata = { title: 'Dashboard · Storm Sweep Admin' }
 
 export default async function AdminDashboardPage(): Promise<React.ReactElement> {
   const now = new Date()
-  const [data, paused, refunds, texts, quotes, balances] = await Promise.all([
+  const [data, paused, refunds, texts, quotes, balances, help] = await Promise.all([
     getDashboardData(now),
     getPausedJobs(),
     getRefundsDue(),
     getRecentInboundTexts(),
     getQuotesToPrice(),
     getBalancesToCollect(),
+    getOpenHelpRequests(),
   ])
 
   return (
@@ -49,6 +52,39 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
                     {ISSUE_KINDS.find((k) => k.value === p.kind)?.label ?? p.kind} · {p.address}
                   </Link>
                   <span className="text-[#9A9A9F]"> · {formatRelative(p.reportedAt, now)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+        {help.length > 0 ? (
+          <section aria-label="Help requests" className="space-y-2 rounded-xl border border-sky/40 bg-sky/10 p-4">
+            <p className="text-sm font-bold text-[#F0F0F0]">
+              {help.length} customer{help.length === 1 ? '' : 's'} asked for help
+            </p>
+            <ul className="space-y-3 text-[13px]">
+              {help.map((h) => (
+                <li key={h.id} className="space-y-1">
+                  <p className="flex flex-wrap items-center gap-x-2">
+                    <Link href={`/admin/customers/${h.customerId}`} className="font-semibold text-sky-light hover:underline">
+                      {h.customerName}
+                    </Link>
+                    <span className="text-[#9A9A9F]">· {helpTopicLabel(h.topic)} · {formatRelative(h.createdAt, now)}</span>
+                    {h.phone ? (
+                      <a href={`tel:${h.phone.replace(/[^\d+]/g, '')}`} className="text-sky-light hover:underline">
+                        {h.phone}
+                      </a>
+                    ) : null}
+                    {h.jobId ? (
+                      <Link href={`/admin/jobs/${h.jobId}`} className="text-sky-light hover:underline">
+                        Open visit
+                      </Link>
+                    ) : null}
+                    <span className="ml-auto">
+                      <HelpHandledButton id={h.id} />
+                    </span>
+                  </p>
+                  <p className="whitespace-pre-line text-[#C9C9CE]">{h.message}</p>
                 </li>
               ))}
             </ul>

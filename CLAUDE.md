@@ -338,6 +338,17 @@ Customer Details (Step 3) specifics:
   out-of-area ZIPs (409 OUT_OF_AREA); Step 3 offers the `waitlist` instead.
   Admin phone bookings are not limited. Admin: /admin/service-area.
 
+## LEGAL, FAQ + HELP
+
+- /terms, /privacy, /faq (`src/components/legal/LegalPage.tsx`) pull every number
+  from PRICING / CHANGE_CUTOFF_HOURS / PROMO_MIN_TOTAL; keep them in sync when
+  policies change (and update the "Last updated" date). The Privacy page lists
+  every data processor; add new vendors there.
+- Public contact details are optional env vars NEXT_PUBLIC_SUPPORT_EMAIL /
+  NEXT_PUBLIC_SUPPORT_PHONE; without them pages point to Help + text replies.
+- Customer Help (`/dashboard/help`) saves `help_requests` (migration 024) and
+  alerts the office (`notifyHelpRequest`); open ones show on the admin dashboard.
+
 ## TESTS
 
 - `npm test` (node:test + tsx, `tests/*.test.ts`) locks in pricing, Sweeper pay,

@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarCheck, Home, Image as ImageIcon, LogOut, ShieldCheck, User } from 'lucide-react'
+import { CalendarCheck, Home, Image as ImageIcon, LifeBuoy, LogOut, ShieldCheck, User } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -15,6 +15,7 @@ const NAV = [
   { href: '/photos', label: 'Photos', icon: ImageIcon },
   { href: '/membership', label: 'Membership', icon: ShieldCheck },
   { href: '/account', label: 'Account', icon: User },
+  { href: '/dashboard/help', label: 'Help', icon: LifeBuoy },
 ] as const
 
 export function CustomerNav(): React.ReactElement {
@@ -30,7 +31,8 @@ export function CustomerNav(): React.ReactElement {
     router.refresh()
   }
 
-  const isActive = (href: string): boolean => pathname === href || pathname.startsWith(`${href}/`)
+  // Home is exact so it isn't also lit on /dashboard/help.
+  const isActive = (href: string): boolean => (href === '/dashboard' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`))
 
   return (
     <>
@@ -60,7 +62,7 @@ export function CustomerNav(): React.ReactElement {
       </nav>
 
       {/* Phones: bottom tab bar */}
-      <nav aria-label="Account" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-black/10 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <nav aria-label="Account" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t border-black/10 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
         {NAV.map((item) => (
           <Link
             key={item.href}

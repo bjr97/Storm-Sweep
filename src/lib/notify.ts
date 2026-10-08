@@ -1,6 +1,7 @@
 import type { VisitUpdateEmailProps } from '@/emails/VisitUpdateEmail'
 import { formatBusinessDate } from '@/lib/admin/time'
 import { jobTimeLabel } from '@/lib/booking/timeWindows'
+import { helpTopicLabel } from '@/lib/help'
 import { emailConfigured, sendJobCompleteEmail, sendVisitUpdateEmail } from '@/lib/resend'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getAppUrl, sendSms } from '@/lib/twilio'
@@ -219,4 +220,33 @@ export async function notifyBalancePaid(jobId: string, amount: number): Promise<
     ctaLabel: 'View your report',
     ctaUrl: portal,
   })
+}
+
+/** A customer asked for help: text + email the office (the request is already saved). */
+export async function notifyHelpRequest(requestId: string): Promise<void> {
+  const supabase = createServiceClient()
+  const { data: req } = await supabase.from('help_requests').select('customer_id, job_id, topic, message').eq('id', requestId).maybeSingle()
+  if (!req) return
+  const who = await person(req.customer_id)
+  if (!who) return // demo accounts (person() returns null) never alert the office
+  const link = `${getAppUrl()}/admin`
+  const summary = `Help request from ${who.name} (${helpTopicLabel(req.topic)}): ${req.message.slice(0, 200)}`
+  await attempt('help text', () => text(process.env.ADMIN_PHONE_NUMBER, `${summary} ${link}`, 'admin_alert', null, req.job_id))
+  for (const to of await adminEmails()) {
+    await attempt('help email', () =>
+      email(to, `Help request: ${helpTopicLabel(req.topic)}`, {
+        preview: summary,
+        title: 'A customer needs help',
+        greeting: 'Heads up,',
+        message: `${who.name} wrote: “${req.message}”`,
+        rows: [
+          { label: 'Topic', value: helpTopicLabel(req.topic) },
+          { label: 'Phone', value: who.phone ?? '—' },
+          { label: 'Email', value: who.email ?? '—' },
+        ],
+        ctaLabel: 'Open the dashboard',
+        ctaUrl: link,
+      })
+    )
+  }
 }

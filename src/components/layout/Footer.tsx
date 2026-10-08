@@ -8,6 +8,7 @@ const FOOTER_LINKS = [
   { href: '/services', label: 'Services' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/about', label: 'About' },
+  { href: '/faq', label: 'FAQ' },
   { href: '/book', label: 'Book a Sweep' },
   { href: '/login', label: 'Customer Login' },
   { href: '/sweepers/apply', label: 'Become a Sweeper' },
@@ -65,6 +66,11 @@ function DarkFooter(): React.ReactElement {
             © {new Date().getFullYear()} Storm Sweep · Norman, OK · All rights
             reserved.
           </p>
+          <p className="mt-2 text-center font-body text-xs text-[var(--color-text-muted)]/70">
+            <Link href="/terms" className="hover:text-[var(--color-primary-light)]">Terms</Link>
+            {' · '}
+            <Link href="/privacy" className="hover:text-[var(--color-primary-light)]">Privacy</Link>
+          </p>
         </div>
       </div>
     </footer>
@@ -119,6 +125,11 @@ function RetroFooter(): React.ReactElement {
         <div className="mt-10 border-t-[3px] border-[var(--color-ink)] pt-6">
           <p className="text-center font-body text-lg text-[var(--color-ink)]">
             © {new Date().getFullYear()} STORM SWEEP · NORMAN OK
+          </p>
+          <p className="mt-1 text-center font-body text-lg text-[var(--color-ink)]">
+            <Link href="/terms" className="hover:text-[var(--color-primary)]">TERMS</Link>
+            {' · '}
+            <Link href="/privacy" className="hover:text-[var(--color-primary)]">PRIVACY</Link>
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { balanceDue } from '@/lib/admin/balance'
 import { dayRange, formatBusinessDate, monthRange, weekRange, type Range } from '@/lib/admin/time'
 import { createClient } from '@/lib/supabase/server'
-import type { Job, JobStatus } from '@/types/database'
+import type { HelpTopic, Job, JobStatus } from '@/types/database'
 
 /**
  * Admin dashboard data. Runs as the signed-in admin — RLS (is_admin())
@@ -381,4 +381,42 @@ export async function getBalancesToCollect(): Promise<BalanceToCollect[]> {
   return jobs
     .map((j) => ({ jobId: j.id, customerName: name.get(j.customer_id) ?? 'Customer', due: balanceDue(j), completedAt: j.completed_at }))
     .filter((b) => b.due > 0)
+}
+
+export type OpenHelpRequest = {
+  id: string
+  jobId: string | null
+  customerId: string
+  customerName: string
+  phone: string | null
+  topic: HelpTopic
+  message: string
+  createdAt: string
+}
+
+/** Customer help requests not yet handled (demo accounts excluded), oldest first. */
+export async function getOpenHelpRequests(): Promise<OpenHelpRequest[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('help_requests')
+    .select('id, job_id, customer_id, topic, message, created_at')
+    .is('handled_at', null)
+    .order('created_at')
+    .limit(50)
+  if (error) fail('help requests', error)
+  if (data.length === 0) return []
+  const { data: people } = await supabase.from('profiles').select('id, full_name, phone, is_demo').in('id', Array.from(new Set(data.map((r) => r.customer_id))))
+  const byId = new Map((people ?? []).map((p) => [p.id, p]))
+  return data
+    .filter((r) => !byId.get(r.customer_id)?.is_demo)
+    .map((r) => ({
+      id: r.id,
+      jobId: r.job_id,
+      customerId: r.customer_id,
+      customerName: byId.get(r.customer_id)?.full_name ?? 'Customer',
+      phone: byId.get(r.customer_id)?.phone ?? null,
+      topic: r.topic,
+      message: r.message,
+      createdAt: r.created_at,
+    }))
 }
