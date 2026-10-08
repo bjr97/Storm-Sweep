@@ -1,4 +1,4 @@
-import { PasswordForm, PhotoConsentToggle, ProfileForm } from '@/components/customer/AccountForms'
+import { PasswordForm, PhotoConsentToggle, ProfileForm, TextUpdatesToggle } from '@/components/customer/AccountForms'
 import { currentCustomerId, getCustomerProfile } from '@/lib/customer/portal'
 
 export const dynamic = 'force-dynamic'
@@ -18,6 +18,10 @@ export default async function CustomerAccountPage(): Promise<React.ReactElement>
       <section className={card} aria-labelledby="details">
         <h2 id="details" className={h2}>Your details</h2>
         <ProfileForm initial={{ full_name: profile?.full_name ?? '', phone: profile?.phone ?? '', address: profile?.address ?? '' }} />
+      </section>
+      <section className={card} aria-labelledby="texts">
+        <h2 id="texts" className={h2}>Text messages</h2>
+        <TextUpdatesToggle initialOptOut={profile?.sms_opt_out ?? false} />
       </section>
       <section id="photo-consent" className={card} aria-labelledby="consent">
         <h2 id="consent" className={h2}>Photo sharing</h2>

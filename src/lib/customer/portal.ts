@@ -18,7 +18,7 @@ export async function currentCustomerId(): Promise<string | null> {
 
 export type CustomerProfile = Pick<
   Profile,
-  'id' | 'full_name' | 'phone' | 'address' | 'membership_status' | 'membership_plan' | 'membership_renews_at' | 'visits_used' | 'membership_commitment_ends_at' | 'marketing_photo_consent'
+  'id' | 'full_name' | 'phone' | 'address' | 'membership_status' | 'membership_plan' | 'membership_renews_at' | 'visits_used' | 'membership_commitment_ends_at' | 'marketing_photo_consent' | 'sms_opt_out'
 > & { email: string | null }
 
 export async function getCustomerProfile(userId: string): Promise<CustomerProfile | null> {
@@ -26,7 +26,7 @@ export async function getCustomerProfile(userId: string): Promise<CustomerProfil
   const [{ data: profile }, { data: auth }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, full_name, phone, address, membership_status, membership_plan, membership_renews_at, visits_used, membership_commitment_ends_at, marketing_photo_consent')
+      .select('id, full_name, phone, address, membership_status, membership_plan, membership_renews_at, visits_used, membership_commitment_ends_at, marketing_photo_consent, sms_opt_out')
       .eq('id', userId)
       .maybeSingle(),
     supabase.auth.admin.getUserById(userId),

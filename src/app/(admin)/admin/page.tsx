@@ -8,7 +8,7 @@ import { JobsTable } from '@/components/admin/JobsTable'
 import { KpiRow } from '@/components/admin/KpiRow'
 import { Panel } from '@/components/admin/Panel'
 import { RevenueChart } from '@/components/admin/RevenueChart'
-import { getDashboardData, getPausedJobs, getRefundsDue } from '@/lib/admin/dashboard'
+import { getDashboardData, getPausedJobs, getRecentInboundTexts, getRefundsDue } from '@/lib/admin/dashboard'
 import { formatBusinessDate, formatRelative } from '@/lib/admin/time'
 import { ISSUE_KINDS } from '@/lib/sweepers/jobRun'
 import { formatCurrency } from '@/lib/utils'
@@ -19,7 +19,7 @@ export const metadata = { title: 'Dashboard · Storm Sweep Admin' }
 
 export default async function AdminDashboardPage(): Promise<React.ReactElement> {
   const now = new Date()
-  const [data, paused, refunds] = await Promise.all([getDashboardData(now), getPausedJobs(), getRefundsDue()])
+  const [data, paused, refunds, texts] = await Promise.all([getDashboardData(now), getPausedJobs(), getRefundsDue(), getRecentInboundTexts()])
 
   return (
     <>
@@ -90,6 +90,21 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
           <Panel title="Crew status" bodyClassName="py-1">
             <CrewStatus crew={data.crew} />
           </Panel>
+          {texts.length > 0 ? (
+            <Panel title="Customer texts" subtitle="Replies to your Storm Sweep number" className="xl:col-span-3">
+              <ul className="divide-y divide-white/[0.07]">
+                {texts.map((t) => (
+                  <li key={t.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2 text-[13px]">
+                    <span className="font-semibold text-[#F0F0F0]">{t.name ?? t.from}</span>
+                    {t.keyword === 'stop' ? <span className="text-[11px] font-bold uppercase text-[#F0B27A]">Opted out</span> : null}
+                    {t.keyword === 'start' ? <span className="text-[11px] font-bold uppercase text-[#2ECC71]">Opted in</span> : null}
+                    <span className="min-w-0 flex-1 text-[#C9C9CE]">“{t.body}”</span>
+                    <span className="text-[11px] text-[#8A8A8F]">{formatRelative(t.at, now)}</span>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          ) : null}
         </div>
       </main>
     </>

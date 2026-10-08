@@ -288,6 +288,25 @@ Customer Details (Step 3) specifics:
 
 ---
 
+## TEXTING (SMS) COMPLIANCE
+
+- All texts go through `sendSms()` (`src/lib/twilio.ts`): it converts numbers to
+  E.164 and SKIPS anyone with `profiles.sms_opt_out` (returns `skipped`). Never
+  call Twilio directly.
+- Replies arrive at `POST /api/sms/inbound` (Twilio "A message comes in"
+  webhook, signature-checked): STOP/START set the opt-out, RESCHEDULE gets the
+  portal link, everything is logged in `sms_inbound` and forwarded to
+  `ADMIN_PHONE_NUMBER`. Marketing texts must say "Reply STOP to opt out".
+- Tornado-season campaign: daily automation, Feb 15–Mar 31, once/year/customer.
+
+## TESTS
+
+- `npm test` (node:test + tsx, `tests/*.test.ts`) locks in pricing, Sweeper pay,
+  completion rules, time windows (incl. DST) and SMS helpers. CI runs it with
+  tsc + lint on every push (`.github/workflows/ci.yml`). Add a test when you
+  change money math.
+- Business-local times: use `localDateTime()` — never "midnight + N hours".
+
 ## WHAT NOT TO DO
 
 - **Never** use Pages Router (`/pages` directory)
@@ -423,10 +442,10 @@ Track progress here as phases complete:
 - [ ] Phase 4.3 — Supabase Realtime
 - [ ] Phase 4.4 — Google Maps routes
 - [x] Phase 4.5 — Referral program (customer "Give $25, get $25")
-- [ ] Phase 4.6 — Review system
+- [x] Phase 4.6 — Review system (/admin/reviews)
 - [ ] Phase 4.7 — TikTok integration
 - [x] Phase 4.8 — PWA sweeper app (manifest, icons, offline page)
-- [ ] Phase 4.9 — Tornado season automation
+- [x] Phase 4.9 — Tornado season automation (daily, Feb 15–Mar 31)
 
 ---
 

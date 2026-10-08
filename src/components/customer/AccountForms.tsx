@@ -134,3 +134,36 @@ export function PasswordForm(): React.ReactElement {
     </form>
   )
 }
+
+/** Text updates on/off (stored as sms_opt_out). Replying STOP/START by text does the same. */
+export function TextUpdatesToggle({ initialOptOut }: { initialOptOut: boolean }): React.ReactElement {
+  const [on, setOn] = useState(!initialOptOut)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function toggle(next: boolean): Promise<void> {
+    setOn(next)
+    setBusy(true)
+    const err = await patchProfile({ sms_opt_out: !next })
+    setBusy(false)
+    if (err) {
+      setOn(!next)
+      setError(err)
+    } else setError(null)
+  }
+
+  return (
+    <div className="space-y-2">
+      <label className="flex cursor-pointer items-start gap-3">
+        <input type="checkbox" checked={on} disabled={busy} onChange={(e) => void toggle(e.target.checked)} className="mt-1 size-5 shrink-0 accent-sky" />
+        <span className="text-sm">
+          <span className="font-semibold">Text me visit updates and reminders</span>
+          <span className="block text-[#6B6B70]">
+            Confirmations, “on the way” alerts and day-before reminders. Msg &amp; data rates may apply. If you replied STOP, text START to our number to turn texts back on.
+          </span>
+        </span>
+      </label>
+      {error ? <p role="alert" className="text-sm font-semibold text-tornado">{error}</p> : null}
+    </div>
+  )
+}

@@ -97,10 +97,11 @@ export async function submitReview(
 
 export async function updateCustomerProfile(
   customerId: string,
-  input: { full_name?: string; phone?: string; address?: string; marketing_photo_consent?: boolean }
+  input: { full_name?: string; phone?: string; address?: string; marketing_photo_consent?: boolean; sms_opt_out?: boolean }
 ): Promise<{ ok: true }> {
   const supabase = createServiceClient()
-  const { error } = await supabase.from('profiles').update(input).eq('id', customerId).eq('role', 'customer')
+  const update = input.sms_opt_out === undefined ? input : { ...input, sms_opt_out_at: input.sms_opt_out ? new Date().toISOString() : null }
+  const { error } = await supabase.from('profiles').update(update).eq('id', customerId).eq('role', 'customer')
   if (error) throw error
 
   // Mirror the account-wide consent onto every before/after photo of theirs —

@@ -82,6 +82,8 @@ export interface Database {
           sweeper_available: boolean
           referral_code: string | null
           referral_credit: number
+          sms_opt_out: boolean
+          sms_opt_out_at: string | null
           created_at: string
         }
         Insert: {
@@ -102,6 +104,8 @@ export interface Database {
           sweeper_available?: boolean
           referral_code?: string | null
           referral_credit?: number
+          sms_opt_out?: boolean
+          sms_opt_out_at?: string | null
           created_at?: string
         }
         Update: {
@@ -122,6 +126,8 @@ export interface Database {
           sweeper_available?: boolean
           referral_code?: string | null
           referral_credit?: number
+          sms_opt_out?: boolean
+          sms_opt_out_at?: string | null
           created_at?: string
         }
         Relationships: []
@@ -490,6 +496,36 @@ export interface Database {
         }
         Relationships: []
       }
+      sms_inbound: {
+        Row: {
+          id: string
+          from_phone: string
+          body: string
+          profile_id: string | null
+          keyword: string | null
+          twilio_sid: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          from_phone: string
+          body: string
+          profile_id?: string | null
+          keyword?: string | null
+          twilio_sid?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          from_phone?: string
+          body?: string
+          profile_id?: string | null
+          keyword?: string | null
+          twilio_sid?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       job_claim_events: {
         Row: {
           id: string
@@ -636,6 +672,8 @@ export interface Database {
           body: string | null
           photo_consent: boolean
           created_at: string
+          admin_note: string | null
+          followed_up_at: string | null
         }
         Insert: {
           id?: string
@@ -645,6 +683,8 @@ export interface Database {
           body?: string | null
           photo_consent?: boolean
           created_at?: string
+          admin_note?: string | null
+          followed_up_at?: string | null
         }
         Update: {
           id?: string
@@ -654,6 +694,8 @@ export interface Database {
           body?: string | null
           photo_consent?: boolean
           created_at?: string
+          admin_note?: string | null
+          followed_up_at?: string | null
         }
         Relationships: [
           {

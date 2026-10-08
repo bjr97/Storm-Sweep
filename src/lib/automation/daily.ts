@@ -17,10 +17,21 @@ import {
  *   - day_before_reminder: confirmed visits scheduled tomorrow
  *   - review_request: visits completed in the last 72h with no review yet
  *   - membership_renewal: active members renewing in ~30 days
+ *   - tornado_season: Feb 15–Mar 31, past customers with no visit in 120 days
+ *     and nothing upcoming; once a year each, max 50/day
  */
 
 export type TaskResult = { eligible: number; sent: number; skipped: number; failed: number; note?: string }
 export type DailyResult = { ranAt: string; twilioConfigured: boolean; tasks: Record<string, TaskResult> }
+
+/** Yearly "is your shelter ready?" campaign window (business dates) and pacing. */
+export const TORNADO_CAMPAIGN = { start: { month: 2, day: 15 }, end: { month: 3, day: 31 }, dailyLimit: 50, quietDays: 120 } as const
+
+export function inTornadoSeason(month: number, day: number): boolean {
+  const md = month * 100 + day
+  const { start, end } = TORNADO_CAMPAIGN
+  return md >= start.month * 100 + start.day && md <= end.month * 100 + end.day
+}
 
 const twilioConfigured = (): boolean =>
   Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER)
@@ -36,7 +47,7 @@ async function alreadySent(trigger: string, where: { jobId?: string; profileId?:
 }
 
 async function sendOne(
-  trigger: Extract<SmsTrigger, 'day_before_reminder' | 'review_request' | 'membership_renewal'>,
+  trigger: Extract<SmsTrigger, 'day_before_reminder' | 'review_request' | 'membership_renewal' | 'tornado_season'>,
   ids: { jobId?: string; profileId?: string },
   custom: Record<string, unknown>,
   result: TaskResult
@@ -53,14 +64,15 @@ async function sendOne(
   }
   try {
     const data = buildTemplateDataFromContext(trigger, job, profile, sweeper, custom)
-    await sendSms({
+    const sent = await sendSms({
       to: profile.phone,
       body: renderSmsTemplate(trigger, data as SmsTemplateData[typeof trigger]),
       trigger,
       profileId: profile.id,
       jobId: ids.jobId ?? null,
     })
-    result.sent += 1
+    if (sent.skipped) result.skipped += 1
+    else result.sent += 1
   } catch (error) {
     console.error(`[automation/${trigger}]`, error)
     result.failed += 1
@@ -139,6 +151,29 @@ export async function runDailyAutomations(now: Date = new Date()): Promise<Daily
       )
     }
     tasks.renewalNotices = r
+  }
+
+  // 4) Tornado-season campaign (Feb 15 – Mar 31): past customers who are due.
+  if (inTornadoSeason(t.month, t.day)) {
+    const r: TaskResult = { eligible: 0, sent: 0, skipped: 0, failed: 0 }
+    const since = new Date(now.getTime() - TORNADO_CAMPAIGN.quietDays * 86_400_000).toISOString()
+    const { data: recent, error: rErr } = await supabase
+      .from('jobs')
+      .select('customer_id')
+      .neq('status', 'cancelled')
+      .or(`scheduled_at.gte.${since},status.in.(pending,confirmed,in_progress)`)
+    if (rErr) throw rErr
+    const busy = new Set(recent.map((j) => j.customer_id))
+    const { data: past, error: pErr } = await supabase.from('jobs').select('customer_id').eq('status', 'complete')
+    if (pErr) throw pErr
+    const candidates = Array.from(new Set(past.map((j) => j.customer_id))).filter((id) => !busy.has(id))
+    for (const id of candidates) {
+      if (r.sent + r.skipped + r.failed >= TORNADO_CAMPAIGN.dailyLimit) break
+      if (await alreadySent('tornado_season', { profileId: id, sinceDays: 200 })) continue
+      r.eligible += 1
+      await sendOne('tornado_season', { profileId: id }, { bookUrl: `${appUrl}/book` }, r)
+    }
+    tasks.tornadoSeason = r
   }
 
   return { ranAt: now.toISOString(), twilioConfigured: twilioConfigured(), tasks }

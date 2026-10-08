@@ -125,6 +125,13 @@ export default async function AdminCustomerPage({ params }: { params: { id: stri
 
             <Panel title="Preferences">
               <dl>
+                <Row label="Text messages">
+                  {p.sms_opt_out ? (
+                    <span className="text-[#F0B27A]">Opted out{p.sms_opt_out_at ? ` ${date(p.sms_opt_out_at)}` : ''}</span>
+                  ) : (
+                    'On'
+                  )}
+                </Row>
                 <Row label="Marketing photos">
                   {p.marketing_photo_consent ? <span className="text-[#2ECC71]">Opted in</span> : 'Not allowed'}
                 </Row>

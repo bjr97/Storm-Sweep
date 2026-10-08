@@ -14,6 +14,8 @@ const bodySchema = z
       .max(250)
       .regex(SERVICE_ADDRESS_PATTERN, 'Use the format: 123 Main St, Norman, OK 73069'),
     marketing_photo_consent: z.boolean(),
+    /** true = stop texting me. */
+    sms_opt_out: z.boolean(),
   })
   .partial()
 

@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   Megaphone,
+  Star,
   UserPlus,
   Users,
   Wrench,
@@ -37,13 +38,14 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { label: 'Customers', icon: Users, href: '/admin/customers', built: true },
       { label: 'Crew', icon: HardHat, href: '/admin/crew', built: true },
       { label: 'Applicants', icon: UserPlus, href: '/admin/sweepers', built: true },
+      { label: 'Reviews', icon: Star, href: '/admin/reviews', built: true },
     ],
   },
   {
     label: 'Business',
     items: [
       { label: 'Revenue', icon: DollarSign, href: '/admin/revenue', built: true },
-      { label: 'Marketing', icon: Megaphone, href: '/admin/marketing', built: false },
+      { label: 'Marketing', icon: Megaphone, href: '/admin/marketing', built: true },
       { label: 'Partners', icon: Handshake, href: '/admin/partners', built: true },
     ],
   },

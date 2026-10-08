@@ -81,7 +81,7 @@ function RetroFooter(): React.ReactElement {
               STORM SWEEP
             </p>
             <p className="mt-3 max-w-sm font-body text-xl leading-snug text-[var(--color-text-muted)]">
-              Norman&apos;s #1 underground shelter cleaning service. Clean
+              Norman&apos;s local underground shelter cleaning service. Clean
               shelters. Ready families.
             </p>
           </div>

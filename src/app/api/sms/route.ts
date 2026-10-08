@@ -47,7 +47,8 @@ async function isAuthorized(req: Request): Promise<boolean> {
     .eq('id', user.id)
     .single()
 
-  return profile?.role === 'admin' || profile?.role === 'sweeper'
+  // Admin only: this can send any template (incl. marketing) to anyone.
+  return profile?.role === 'admin'
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -108,10 +109,11 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({
       data: {
         sid: result.sid,
+        skipped: result.skipped ?? null,
         body: result.body,
         trigger,
       },
-      message: 'SMS sent successfully',
+      message: result.skipped ? `Not sent (${result.skipped === 'opted_out' ? 'recipient opted out' : 'invalid phone number'})` : 'SMS sent successfully',
     })
   } catch (error) {
     console.error('[sms]', error)

@@ -407,6 +407,9 @@ export function BookingForm({
                 {customerErrors.phone ? (
                   <p className="text-sm text-tornado">{customerErrors.phone.message}</p>
                 ) : null}
+                <p className="text-xs text-muted-foreground">
+                  We&apos;ll text visit confirmations, reminders and &ldquo;on the way&rdquo; alerts. Msg &amp; data rates may apply. Reply STOP to opt out.
+                </p>
               </div>
 
               <div className="space-y-2 sm:col-span-2">

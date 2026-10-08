@@ -324,3 +324,20 @@ export async function getRefundsDue(): Promise<RefundDue[]> {
   const name = new Map((people ?? []).map((p) => [p.id, p.full_name ?? 'Customer']))
   return jobs.map((j) => ({ jobId: j.id, customerName: name.get(j.customer_id) ?? 'Customer', amount: j.deposit_amount ?? 0, cancelledAt: j.cancelled_at }))
 }
+
+export type InboundText = { id: string; from: string; name: string | null; body: string; keyword: string | null; at: string }
+
+/** Latest texts customers sent in (replies, STOP/START, questions). */
+export async function getRecentInboundTexts(limit = 5): Promise<InboundText[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('sms_inbound')
+    .select('id, from_phone, body, keyword, created_at, profile_id')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) fail('inbound texts', error)
+  const ids = Array.from(new Set(data.map((d) => d.profile_id).filter((x): x is string => Boolean(x))))
+  const { data: people } = ids.length ? await supabase.from('profiles').select('id, full_name').in('id', ids) : { data: [] }
+  const name = new Map((people ?? []).map((p) => [p.id, p.full_name]))
+  return data.map((d) => ({ id: d.id, from: d.from_phone, name: d.profile_id ? name.get(d.profile_id) ?? null : null, body: d.body, keyword: d.keyword, at: d.created_at }))
+}

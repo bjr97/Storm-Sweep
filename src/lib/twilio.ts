@@ -1,6 +1,7 @@
 import twilio from 'twilio'
 
 import { timeWindowLabel } from '@/lib/booking/timeWindows'
+import { phoneKey, toE164 } from '@/lib/sms/phone'
 import { createServiceClient } from '@/lib/supabase/server'
 import type { Job, Profile, TimeWindow } from '@/types/database'
 
@@ -83,7 +84,7 @@ export const SMS_TEMPLATES = {
     window: string,
     sweeperName: string
   ): string =>
-    `Hi ${name}! Your Storm Sweep is confirmed for ${date} between ${window}. Your Sweeper will be ${sweeperName}. We'll text when they're on the way. Questions? Reply here. – Storm Sweep 🌪️`,
+    `Hi ${name}! Your Storm Sweep is confirmed for ${date} between ${window}. Your Sweeper will be ${sweeperName}. We'll text when they're on the way. Questions? Reply here. Reply STOP to opt out. – Storm Sweep 🌪️`,
 
   day_before_reminder: (name: string, window: string): string =>
     `Reminder: Storm Sweep is tomorrow between ${window}. Please make sure the garage is accessible. Reply RESCHEDULE if needed. – Storm Sweep`,
@@ -108,7 +109,7 @@ export const SMS_TEMPLATES = {
     `Hey ${name} — your Storm Ready membership renews in 30 days on ${date}. Auto-renews via Stripe. Time to schedule your next visit? ${bookUrl} 🌪️`,
 
   tornado_season: (bookUrl: string): string =>
-    `🌪️ Tornado season is here, Norman. Is your shelter ready? Storm Sweep is booking fast — secure your spot before May. Book now: ${bookUrl} — Storm Sweep, your local shelter pros.`,
+    `🌪️ Storm season is coming, Norman. Is your shelter clean, lit and stocked? Book a visit before spring storms: ${bookUrl} — Storm Sweep. Reply STOP to opt out.`,
 
   sweeper_welcome: (name: string, loginUrl: string, tempPassword: string): string =>
     `Welcome to Storm Sweep, ${name}! 🌪️ Your Sweeper account is live. Login: ${loginUrl} — temp password: ${tempPassword}. Change it on first login.`,
@@ -137,6 +138,8 @@ export interface SendSmsParams {
 export interface SendSmsResult {
   sid: string
   body: string
+  /** Set when nothing was sent (opted out, or not a valid US number). */
+  skipped?: 'opted_out' | 'invalid_number'
 }
 
 function getTwilioClient(): twilio.Twilio {
@@ -223,12 +226,34 @@ export function renderSmsTemplate<T extends SmsTrigger>(
   }
 }
 
+/** True when this person replied STOP / turned texts off (matched by profile, else by number). */
+async function isOptedOut(profileId: string | null | undefined, to: string): Promise<boolean> {
+  const supabase = createServiceClient()
+  if (profileId) {
+    const { data } = await supabase.from('profiles').select('sms_opt_out').eq('id', profileId).maybeSingle()
+    if (data) return data.sms_opt_out
+  }
+  const key = phoneKey(to)
+  if (!key) return false
+  const { data: candidates } = await supabase
+    .from('profiles')
+    .select('phone, sms_opt_out')
+    .like('phone', `%${key.slice(-4)}`)
+    .eq('sms_opt_out', true)
+  return (candidates ?? []).some((p) => phoneKey(p.phone) === key)
+}
+
 export async function sendSms(params: SendSmsParams): Promise<SendSmsResult> {
+  // Compliance: never text someone who opted out; carriers need E.164 numbers.
+  const to = toE164(params.to)
+  if (!to) return { sid: '', body: params.body, skipped: 'invalid_number' }
+  if (await isOptedOut(params.profileId, to)) return { sid: '', body: params.body, skipped: 'opted_out' }
+
   const client = getTwilioClient()
   const message = await client.messages.create({
     body: params.body,
     from: getFromNumber(),
-    to: params.to,
+    to,
   })
 
   const supabase = createServiceClient()

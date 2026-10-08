@@ -21,12 +21,12 @@ const LOCAL_STATS = [
   {
     value: '120K+',
     label: 'Norman residents',
-    description: 'Home to thousands of in-ground garage storm shelters',
+    description: 'Many homes here rely on an in-ground garage shelter',
   },
   {
-    value: '#1',
+    value: 'OK',
     label: 'Tornado Alley',
-    description: 'Oklahoma leads the nation in tornado frequency and severity',
+    description: 'Oklahoma sits in the heart of Tornado Alley — spring storms are a fact of life',
   },
   {
     value: 'Your date',

@@ -1,4 +1,4 @@
-import { formatBusinessTime, localMidnight } from '@/lib/admin/time'
+import { formatBusinessTime, localDateTime } from '@/lib/admin/time'
 import type { TimeWindow } from '@/types/database'
 
 /** Customer arrival windows (booking Step 3). Hours are America/Chicago. */
@@ -25,7 +25,7 @@ export function timeWindowLabel(value: TimeWindow | null | undefined): string | 
 export function windowStartIso(date: string, window: TimeWindow): string {
   const [y, m, d] = date.split('-').map(Number)
   const startHour = TIME_WINDOWS.find((t) => t.value === window)?.startHour ?? 8
-  return new Date(localMidnight(y, m, d).getTime() + startHour * 3_600_000).toISOString()
+  return localDateTime(y, m, d, startHour).toISOString()
 }
 
 /** What to show for a job's time: its arrival window, else the start time (older jobs). */

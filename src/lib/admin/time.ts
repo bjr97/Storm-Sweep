@@ -45,7 +45,15 @@ function offsetMs(date: Date): number {
 
 /** UTC instant of local midnight for a business-calendar date (month is 1-based; overflow OK). */
 export function localMidnight(year: number, month: number, day: number): Date {
-  const guess = new Date(Date.UTC(year, month - 1, day))
+  return localDateTime(year, month, day)
+}
+
+/**
+ * UTC instant of a business-local wall-clock time. Use this instead of
+ * "midnight + N hours", which is an hour off on DST-change days.
+ */
+export function localDateTime(year: number, month: number, day: number, hour = 0, minute = 0): Date {
+  const guess = new Date(Date.UTC(year, month - 1, day, hour, minute))
   const first = new Date(guess.getTime() - offsetMs(guess))
   // Re-check once in case the guess and the real midnight straddle a DST change.
   return new Date(guess.getTime() - offsetMs(first))

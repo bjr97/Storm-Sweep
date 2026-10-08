@@ -121,7 +121,7 @@ export async function listCustomers(
 export type CustomerDetail = {
   profile: Pick<
     Profile,
-    'id' | 'full_name' | 'phone' | 'address' | 'membership_status' | 'membership_plan' | 'membership_renews_at' | 'visits_used' | 'membership_commitment_ends_at' | 'marketing_photo_consent' | 'created_at' | 'referral_code' | 'referral_credit'
+    'id' | 'full_name' | 'phone' | 'address' | 'membership_status' | 'membership_plan' | 'membership_renews_at' | 'visits_used' | 'membership_commitment_ends_at' | 'marketing_photo_consent' | 'created_at' | 'referral_code' | 'referral_credit' | 'sms_opt_out' | 'sms_opt_out_at'
   >
   email: string | null
   jobs: Pick<Job, 'id' | 'status' | 'scheduled_at' | 'time_window' | 'service_type' | 'total_amount' | 'payment_status' | 'referral_source' | 'membership_visit'>[]
@@ -134,7 +134,7 @@ export async function getCustomerDetail(id: string): Promise<CustomerDetail | nu
   const supabase = createServiceClient()
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, address, membership_status, membership_plan, membership_renews_at, visits_used, membership_commitment_ends_at, marketing_photo_consent, created_at, role, referral_code, referral_credit')
+    .select('id, full_name, phone, address, membership_status, membership_plan, membership_renews_at, visits_used, membership_commitment_ends_at, marketing_photo_consent, created_at, role, referral_code, referral_credit, sms_opt_out, sms_opt_out_at')
     .eq('id', id)
     .maybeSingle()
   if (error) throw error
