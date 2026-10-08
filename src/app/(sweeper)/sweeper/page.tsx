@@ -140,7 +140,7 @@ export default async function SweeperBoardPage(): Promise<React.ReactElement> {
               <article key={job.id} className="space-y-2.5 rounded-xl border border-sky/25 bg-[#1C1C1F] p-4">
                 {job.rescheduledByCustomer ? (
                   <p className="rounded-md border border-wheat/40 bg-wheat/10 px-2.5 py-1.5 text-xs font-semibold text-wheat-light">
-                    The customer moved this visit. Still works? If not, drop it — no penalty.
+                    This visit was moved. Still works? If not, drop it — no penalty.
                   </p>
                 ) : null}
                 <When iso={job.scheduledAt} window={job.timeWindow} />

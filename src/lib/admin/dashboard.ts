@@ -341,3 +341,22 @@ export async function getRecentInboundTexts(limit = 5): Promise<InboundText[]> {
   const name = new Map((people ?? []).map((p) => [p.id, p.full_name]))
   return data.map((d) => ({ id: d.id, from: d.from_phone, name: d.profile_id ? name.get(d.profile_id) ?? null : null, body: d.body, keyword: d.keyword, at: d.created_at }))
 }
+
+export type QuoteToPrice = { jobId: string; customerName: string; requestedFor: string | null; createdAt: string }
+
+/** X-Large quote requests still waiting for a price. */
+export async function getQuotesToPrice(): Promise<QuoteToPrice[]> {
+  const supabase = createClient()
+  const { data: jobs, error } = await supabase
+    .from('jobs')
+    .select('id, customer_id, scheduled_at, created_at')
+    .eq('status', 'pending')
+    .eq('shelter_size', 'xlarge')
+    .eq('total_amount', 0)
+    .order('created_at')
+  if (error) fail('quotes to price', error)
+  if (jobs.length === 0) return []
+  const { data: people } = await supabase.from('profiles').select('id, full_name').in('id', jobs.map((j) => j.customer_id))
+  const name = new Map((people ?? []).map((p) => [p.id, p.full_name ?? 'Customer']))
+  return jobs.map((j) => ({ jobId: j.id, customerName: name.get(j.customer_id) ?? 'Customer', requestedFor: j.scheduled_at, createdAt: j.created_at }))
+}

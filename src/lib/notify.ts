@@ -161,3 +161,38 @@ export async function emailCompletionReport(jobId: string): Promise<void> {
     })
   )
 }
+
+/** Office changed an upcoming visit's time and/or price. */
+export async function notifyVisitUpdated(jobId: string, change: { timeChanged: boolean; priceChanged: boolean }): Promise<void> {
+  const job = await loadJob(jobId)
+  if (!job) return
+  const [customer, sweeper] = await Promise.all([person(job.customer_id), person(job.sweeper_id)])
+  const { date, window } = when(job)
+  const portal = `${getAppUrl()}/history/${job.id}`
+  const parts = [
+    change.timeChanged ? `new time: ${date}, ${window}` : null,
+    change.priceChanged ? `visit total: ${formatCurrency(job.total_amount)}` : null,
+  ].filter(Boolean)
+
+  if (customer) {
+    await text(customer.phone, `Storm Sweep: your visit was updated — ${parts.join('; ')}. Details: ${portal}`, 'visit_updated', customer.id, job.id)
+    await email(customer.email, 'Your Storm Sweep visit was updated', {
+      preview: `Updated: ${parts.join('; ')}`,
+      title: 'Your visit was updated',
+      greeting: `Hi ${first(customer.name)},`,
+      message: 'We’ve updated your upcoming Storm Sweep visit. Here are the current details:',
+      rows: [
+        { label: 'Date', value: date },
+        { label: 'Arrival window', value: window },
+        { label: 'Visit total', value: formatCurrency(job.total_amount) },
+        { label: 'Services', value: job.service_type.join(', ') },
+      ],
+      ctaLabel: 'View your visit',
+      ctaUrl: portal,
+      footnote: 'Questions? Just reply to our texts or call us.',
+    })
+  }
+  if (sweeper && change.timeChanged) {
+    await text(sweeper.phone, `Storm Sweep: the office moved ${first(customer?.name ?? 'a customer')}'s visit to ${date}, ${window}. Can't make it? Drop it in the app — no penalty.`, 'sweeper_job_changed', sweeper.id, job.id)
+  }
+}

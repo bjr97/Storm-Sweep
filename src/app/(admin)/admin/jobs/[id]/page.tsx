@@ -7,11 +7,12 @@ import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { AssignSweeperSelect } from '@/components/admin/AssignSweeperSelect'
 import { IssueDecision } from '@/components/admin/IssueDecision'
 import { JobActions } from '@/components/admin/JobActions'
+import { JobEditor } from '@/components/admin/JobEditor'
 import { MarkRefundedButton } from '@/components/admin/MarkRefundedButton'
 import { EmptyState, Panel } from '@/components/admin/Panel'
 import { StatusPill } from '@/components/admin/StatusPill'
 import { getJobDetail, listSweepers } from '@/lib/admin/jobs'
-import { formatBusinessDate, formatBusinessTime } from '@/lib/admin/time'
+import { formatBusinessDate, formatBusinessTime, localDate } from '@/lib/admin/time'
 import { jobTimeLabel } from '@/lib/booking/timeWindows'
 import { ISSUE_KINDS, parseRecommendations, RECOMMENDATIONS } from '@/lib/sweepers/jobRun'
 import { cn, formatCurrency, PRICING } from '@/lib/utils'
@@ -285,6 +286,28 @@ export default async function AdminJobDetailPage({
                   ) : null}
                 </div>
                 <JobActions jobId={job.id} status={job.status} photoGrade={job.photo_grade} photoApproved={job.photo_approved} />
+                {job.status === 'pending' || job.status === 'confirmed' ? (
+                  <JobEditor
+                    jobId={job.id}
+                    initial={{
+                      date: job.scheduled_at
+                        ? (() => {
+                            const d = localDate(new Date(job.scheduled_at))
+                            return `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`
+                          })()
+                        : '',
+                      window: job.time_window ?? 'morning',
+                      shelterSize: job.shelter_size,
+                      services: job.service_type,
+                      total: job.total_amount,
+                      serviceValue: job.service_value ?? job.total_amount,
+                      address: job.address,
+                      notes: job.notes ?? '',
+                      isQuote: job.shelter_size === 'xlarge' && job.total_amount === 0,
+                      depositPaid: job.payment_status === 'deposit_paid' || job.payment_status === 'paid' ? job.deposit_amount ?? 0 : 0,
+                    }}
+                  />
+                ) : null}
               </div>
             </Panel>
 
