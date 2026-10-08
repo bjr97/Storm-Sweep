@@ -443,7 +443,7 @@ export function KitSelector({
           </button>
         ) : (
           <p className="text-sm italic text-gray-500">
-            No worries — you can always add a kit after your visit from your customer portal.
+            No worries — you can add a kit when you book your next visit.
           </p>
         )}
       </div>

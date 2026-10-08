@@ -52,7 +52,7 @@ const WHY_STORM_SWEEP = [
     icon: ShieldCheck,
     title: 'Photo-Verified Every Visit',
     description:
-      'Before-and-after photos on every job. You see exactly what was done, even if you are not home when we arrive.',
+      'Before-and-after photos on every job. You see exactly what was done, even the parts you did not watch.',
   },
   {
     icon: Tornado,
@@ -106,7 +106,7 @@ export default function AboutPage(): React.ReactElement {
               </h2>
               <div className="mt-6 space-y-4 font-body text-base leading-relaxed text-[var(--color-text)]/70">
                 <p>
-                  Norman sits at the heart of Tornado Alley. Most homes here have
+                  Norman sits at the heart of Tornado Alley. Many homes here have
                   an in-ground garage storm shelter — a concrete lifeline buried
                   under the driveway. But after installation, those shelters
                   often go years without a deep clean, a working light, or
@@ -119,9 +119,10 @@ export default function AboutPage(): React.ReactElement {
                   what is at stake when Oklahoma weather turns dangerous.
                 </p>
                 <p>
-                  We are launching in Norman first — because this is our
-                  community — with plans to expand across the OKC metro in year
-                  two.
+                  We are launching in Norman — because this is our community —
+                  and serve everywhere within about 15 miles, from Moore and
+                  Noble to Newcastle, Midwest City, Del City and south Oklahoma
+                  City.
                 </p>
               </div>
             </div>

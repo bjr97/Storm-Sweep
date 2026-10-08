@@ -22,6 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { fullPackageStartingPrice } from '@/lib/booking/quote'
 import { cn, formatCurrency, PRICING } from '@/lib/utils'
 
 const TRUST_ITEMS = [
@@ -37,7 +38,7 @@ const SERVICES = [
     description:
       'Full scrub, vacuum, mold treatment, and deodorizer for your underground shelter.',
     icon: Sparkles,
-    price: PRICING.shelter.standard,
+    price: PRICING.shelter.small,
   },
   {
     title: 'LED Lighting',
@@ -51,14 +52,14 @@ const SERVICES = [
     description:
       'Storm Starter, Family Ready, Pet Ready, or Full House — stocked in your shelter same visit.',
     icon: Package,
-    price: Math.min(...Object.values(PRICING.kits)),
+    price: PRICING.kits.storm_starter,
   },
   {
     title: 'Full Package',
     description:
       'Deep clean + LED lighting + Storm Starter prep kit — the complete storm-ready upgrade.',
     icon: ShieldCheck,
-    price: PRICING.bundles.full_package,
+    price: fullPackageStartingPrice(),
   },
 ] as const
 

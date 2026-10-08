@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: '/services', label: 'Services' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/about', label: 'About' },
+  { href: '/faq', label: 'FAQ' },
 ] as const
 
 const TICKER_TEXT =

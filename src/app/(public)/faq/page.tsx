@@ -73,8 +73,9 @@ function faqs(): { group: string; items: Faq[] }[] {
           q: 'Do you serve my area?',
           a: (
             <>
-              We book online in Norman ZIP codes. If yours isn&apos;t covered yet, the booking form lets you join the waitlist for
-              your ZIP, and we&apos;ll let you know when we expand. <Link href="/book">Start a booking</Link> to check.
+              We serve Norman and about 15 miles around it: Moore, Noble, Newcastle, Midwest City, Del City and south Oklahoma
+              City. If your ZIP isn&apos;t covered yet, the booking form lets you join the waitlist, and we&apos;ll let you know when
+              we expand. <Link href="/book">Start a booking</Link> to check.
             </>
           ),
         },

@@ -77,8 +77,8 @@ export function ApplicationForm(): React.ReactElement {
             Become a Sweeper
           </CardTitle>
           <CardDescription>
-            Join Storm Sweep as an independent contractor. Norman, OK area only
-            for launch.
+            Join Storm Sweep as an independent contractor. Jobs are in Norman
+            and about 15 miles around it (Moore, Noble, south OKC and nearby).
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -131,7 +131,7 @@ export function ApplicationForm(): React.ReactElement {
               <div>
                 <Label htmlFor="has_vehicle">I have a reliable vehicle</Label>
                 <p className="text-sm text-muted-foreground">
-                  Required to transport equipment to job sites across Norman.
+                  Required to transport equipment to job sites around the Norman area.
                 </p>
               </div>
             </div>

@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { HARDWARE_ADDONS, hardwareAddonPrice } from '@/lib/booking/addons'
+import { fullPackageStartingPrice } from '@/lib/booking/quote'
 import { cn, formatCurrency, PREP_KIT_BUNDLES, PRICING } from '@/lib/utils'
 
 const SERVICE_TYPES = [
@@ -69,11 +70,11 @@ const SERVICE_TYPES = [
   {
     title: 'Full Package',
     icon: ShieldCheck,
-    priceLabel: formatCurrency(PRICING.bundles.full_package),
+    priceLabel: `from ${formatCurrency(fullPackageStartingPrice())}`,
     description:
-      'The complete storm-ready upgrade: standard-size deep clean, LED lighting package, and Storm Starter prep kit — bundled for maximum value.',
+      'The complete storm-ready upgrade: deep clean, LED lighting package, and Storm Starter prep kit — bundled for maximum value.',
     includes: [
-      'Standard shelter deep clean (up to typical 6-person size)',
+      'Deep clean sized to your shelter (price adjusts for small and large shelters)',
       'LED Lighting Package included',
       'Storm Starter prep kit included (upgrade anytime)',
       'Full inspection and photo report',

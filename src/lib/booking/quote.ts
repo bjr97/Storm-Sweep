@@ -152,3 +152,12 @@ export function priceBooking(
     promoDiscount,
   }
 }
+
+/** Full Package price for the smallest shelter ("from $X" on marketing pages). */
+export function fullPackageStartingPrice(): number {
+  const q = priceBooking(
+    { shelter_size: 'small', deep_clean: false, led_package: false, full_package: true, hardware_addons: [], membership: 'one_time' },
+    null
+  )
+  return q.breakdown.total ?? PRICING.bundles.full_package
+}

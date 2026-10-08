@@ -88,7 +88,7 @@ const FAQ_ITEMS = [
   {
     question: 'When is my balance due?',
     getAnswer: (): string =>
-      `A ${Math.round(PRICING.deposit_pct * 100)}% deposit is collected at booking. The remaining balance is charged automatically after your Sweeper completes the job and you sign off on the digital report.`,
+      `A ${Math.round(PRICING.deposit_pct * 100)}% deposit is collected at booking. The remaining balance is due after your Sweeper finishes and you sign off on the visit. We will let you know how to pay it and send a receipt once it is paid.`,
   },
 ] as const
 
