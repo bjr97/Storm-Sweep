@@ -83,7 +83,7 @@ const FAQ_ITEMS = [
   {
     question: 'Do you service areas outside Norman?',
     answer:
-      'We launch in Norman, OK and surrounding communities in the OKC metro. During booking, enter your address and we will confirm service availability. Moore, Noble, and nearby areas are on our expansion roadmap.',
+      'We serve Norman and everywhere within about 15 miles: Moore, Noble, Newcastle, Midwest City, Del City and south Oklahoma City. Enter your address when booking and we will confirm your ZIP is covered, or you can join the waitlist for your area.',
   },
   {
     question: 'When is my balance due?',

@@ -53,7 +53,8 @@ function DarkFooter(): React.ReactElement {
             </p>
             <p className="mt-4 font-body text-sm leading-relaxed text-[var(--color-text-muted)]">
               Locally owned and operated in Cleveland County. Serving Norman,
-              Moore, Noble, and surrounding communities across tornado alley.
+              Moore, Noble, Newcastle, Midwest City, Del City and south Oklahoma
+              City: everywhere within about 15 miles of Norman.
             </p>
             <p className="mt-4 font-body text-sm text-[var(--color-text-muted)]/70">
               Locally owned · Norman, OK
@@ -114,7 +115,7 @@ function RetroFooter(): React.ReactElement {
             </p>
             <p className="mt-4 font-body text-xl leading-snug text-[var(--color-text-muted)]">
               Locally owned in Cleveland County. Serving Norman, Moore, Noble,
-              and tornado alley.
+              Newcastle, Midwest City, Del City and south OKC.
             </p>
             <p className="mt-4 font-body text-lg text-[var(--color-text-muted)]">
               Locally owned · Norman, OK
