@@ -19,7 +19,7 @@ export async function listPartners(): Promise<PartnerView[]> {
   const supabase = createClient()
   const [partnersRes, jobsRes] = await Promise.all([
     supabase.from('partners').select('*').order('active', { ascending: false }).order('name'),
-    supabase.from('jobs').select('partner_id, status').not('partner_id', 'is', null),
+    supabase.from('jobs').select('partner_id, status').eq('is_demo', false).not('partner_id', 'is', null),
   ])
   if (partnersRes.error) throw partnersRes.error
   if (jobsRes.error) throw jobsRes.error

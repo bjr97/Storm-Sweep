@@ -91,7 +91,7 @@ export async function runDailyAutomations(now: Date = new Date()): Promise<Daily
     const r: TaskResult = { eligible: 0, sent: 0, skipped: 0, failed: 0 }
     const { data: jobs, error } = await supabase
       .from('jobs')
-      .select('id')
+      .select('id').eq('is_demo', false)
       .eq('status', 'confirmed')
       .gte('scheduled_at', tomorrow.start.toISOString())
       .lt('scheduled_at', tomorrow.end.toISOString())
@@ -109,7 +109,7 @@ export async function runDailyAutomations(now: Date = new Date()): Promise<Daily
     const r: TaskResult = { eligible: 0, sent: 0, skipped: 0, failed: 0 }
     const { data: jobs, error } = await supabase
       .from('jobs')
-      .select('id')
+      .select('id').eq('is_demo', false)
       .eq('status', 'complete')
       .gte('completed_at', new Date(now.getTime() - 72 * 3_600_000).toISOString())
       .lt('completed_at', dayRange(now).end.toISOString())
@@ -132,6 +132,7 @@ export async function runDailyAutomations(now: Date = new Date()): Promise<Daily
       .from('profiles')
       .select('id, membership_renews_at')
       .eq('membership_status', 'active')
+      .eq('is_demo', false)
       .gte('membership_renews_at', localMidnight(t.year, t.month, t.day + 29).toISOString())
       .lt('membership_renews_at', localMidnight(t.year, t.month, t.day + 32).toISOString())
     if (error) throw error
@@ -159,12 +160,12 @@ export async function runDailyAutomations(now: Date = new Date()): Promise<Daily
     const since = new Date(now.getTime() - TORNADO_CAMPAIGN.quietDays * 86_400_000).toISOString()
     const { data: recent, error: rErr } = await supabase
       .from('jobs')
-      .select('customer_id')
+      .select('customer_id').eq('is_demo', false)
       .neq('status', 'cancelled')
       .or(`scheduled_at.gte.${since},status.in.(pending,confirmed,in_progress)`)
     if (rErr) throw rErr
     const busy = new Set(recent.map((j) => j.customer_id))
-    const { data: past, error: pErr } = await supabase.from('jobs').select('customer_id').eq('status', 'complete')
+    const { data: past, error: pErr } = await supabase.from('jobs').select('customer_id').eq('is_demo', false).eq('status', 'complete')
     if (pErr) throw pErr
     const candidates = Array.from(new Set(past.map((j) => j.customer_id))).filter((id) => !busy.has(id))
     for (const id of candidates) {

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { currentPreview, exitPreview } from '@/lib/previewClient'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +24,7 @@ export function CustomerNav(): React.ReactElement {
 
   async function signOut(): Promise<void> {
     setSigningOut(true)
+    if (currentPreview()) return exitPreview()
     await createClient().auth.signOut()
     router.push('/login')
     router.refresh()
@@ -83,7 +85,7 @@ export function MobileSignOut(): React.ReactElement {
   return (
     <button
       type="button"
-      onClick={() => void createClient().auth.signOut().then(() => { router.push('/login'); router.refresh() })}
+      onClick={() => (currentPreview() ? void exitPreview() : void createClient().auth.signOut().then(() => { router.push('/login'); router.refresh() }))}
       className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-semibold text-[#6B6B70] hover:bg-black/5 md:hidden"
     >
       <LogOut className="size-4" aria-hidden="true" /> Sign out

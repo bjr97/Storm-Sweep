@@ -54,7 +54,7 @@ export async function getMarketingQueue(): Promise<{ visits: ShareableVisit[]; p
   const [postsRes, jobsRes, photosRes] = await Promise.all([
     supabase.from('social_posts').select('id, job_id, platform, caption, published_at, created_at').order('created_at', { ascending: false }).limit(200),
     okJobs.size
-      ? supabase.from('jobs').select('id, completed_at, address, shelter_size, service_type').in('id', Array.from(okJobs)).eq('status', 'complete').order('completed_at', { ascending: false }).limit(60)
+      ? supabase.from('jobs').select('id, completed_at, address, shelter_size, service_type').eq('is_demo', false).in('id', Array.from(okJobs)).eq('status', 'complete').order('completed_at', { ascending: false }).limit(60)
       : Promise.resolve({ data: [], error: null }),
     okJobs.size
       ? supabase.from('job_photos').select('id, job_id, photo_type, storage_path').in('job_id', Array.from(okJobs)).eq('customer_consent', true).in('photo_type', ['before', 'after'])

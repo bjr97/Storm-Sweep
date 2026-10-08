@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { currentPreview } from '@/lib/previewClient'
 import { createClient } from '@/lib/supabase/client'
 
 const input = 'mt-1 h-11 w-full rounded-lg border border-black/15 bg-white px-3 outline-none focus-visible:border-sky focus-visible:ring-2 focus-visible:ring-sky/30'
@@ -108,6 +109,7 @@ export function PasswordForm(): React.ReactElement {
     e.preventDefault()
     if (password.length < 8) return setMessage({ ok: false, text: 'Use at least 8 characters' })
     if (password !== confirm) return setMessage({ ok: false, text: 'Passwords don’t match' })
+    if (currentPreview()) return setMessage({ ok: false, text: 'Preview mode: passwords are locked while viewing as someone.' })
     setBusy(true)
     const { error } = await createClient().auth.updateUser({ password })
     setBusy(false)

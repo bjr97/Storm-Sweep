@@ -302,6 +302,22 @@ Customer Details (Step 3) specifics:
   `ADMIN_PHONE_NUMBER`. Marketing texts must say "Reply STOP to opt out".
 - Tornado-season campaign: daily automation, Feb 15–Mar 31, once/year/customer.
 
+## ADMIN "VIEW AS" + DEMO ACCOUNTS
+
+- `/admin/view-as`: the admin signs THIS browser in as a customer/Sweeper
+  (`/api/admin/view-as`, one-time server-side magic link; the admin session is
+  kept in httpOnly `ss_admin_return`; "Back to admin" = `/api/admin/view-as/exit`).
+  Banner via `<PreviewBanner>` in the customer + Sweeper layouts.
+- Real accounts are READ-ONLY: middleware 403s every non-GET (`PREVIEW_READ_ONLY`)
+  while `ss_view_as` says non-demo. Browser-direct auth calls (sign out, password)
+  must check `currentPreview()` (`src/lib/previewClient.ts`) — sign-out exits the
+  preview instead of signing the person out.
+- Demo accounts (`profiles.is_demo` / `jobs.is_demo`, seeded by `src/lib/demoSeed.ts`,
+  emails @example.com) are fully usable but EXCLUDED from every admin report/list,
+  revenue, payouts/1099, automation, and the real job board (demo Sweepers see
+  only demo jobs; no tier delay). Never texted/emailed. New admin queries over
+  jobs/people must add `.eq('is_demo', false)`.
+
 ## TESTS
 
 - `npm test` (node:test + tsx, `tests/*.test.ts`) locks in pricing, Sweeper pay,

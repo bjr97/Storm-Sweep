@@ -31,6 +31,8 @@ export type CrewMemberTier = {
   override: SweeperTier | null
   score: number
   stats: SweeperStats
+  /** Demo Sweeper (admin preview): sees only demo jobs, never counts toward tiers. */
+  isDemo: boolean
 }
 
 export async function getCrewTiers(now: Date = new Date()): Promise<{
@@ -40,7 +42,7 @@ export async function getCrewTiers(now: Date = new Date()): Promise<{
   const supabase = createServiceClient()
   const { data: sweepers, error } = await supabase
     .from('profiles')
-    .select('id, full_name, phone, sweeper_tier_override, sweeper_available')
+    .select('id, full_name, phone, sweeper_tier_override, sweeper_available, is_demo')
     .eq('role', 'sweeper')
   if (error) throw error
 
@@ -93,7 +95,7 @@ export async function getCrewTiers(now: Date = new Date()): Promise<{
     const st = stats.get(s.id)!
     const auto = autoTier(st)
     const tier = s.sweeper_tier_override ?? auto
-    populated.add(tier)
+    if (!s.is_demo) populated.add(tier)
     crew.set(s.id, {
       id: s.id,
       name: s.full_name ?? 'Sweeper',
@@ -104,13 +106,14 @@ export async function getCrewTiers(now: Date = new Date()): Promise<{
       override: s.sweeper_tier_override,
       score: sweeperScore(st),
       stats: st,
+      isDemo: s.is_demo,
     })
   }
   return { crew, populated }
 }
 
 const BOARD_COLUMNS =
-  'id, scheduled_at, time_window, address, shelter_size, service_type, service_value, total_amount, board_opened_at, status, sweeper_id, notes, customer_id, claimed_at, claim_visible_at, assigned_via, rescheduled_at'
+  'id, scheduled_at, time_window, address, shelter_size, service_type, service_value, total_amount, board_opened_at, status, sweeper_id, notes, customer_id, claimed_at, claim_visible_at, assigned_via, rescheduled_at, is_demo'
 
 type BoardRow = Pick<
   Job,
@@ -202,6 +205,7 @@ export async function getSweeperBoard(sweeperId: string, now: Date = new Date())
       .eq('status', 'confirmed')
       .is('sweeper_id', null)
       .not('board_opened_at', 'is', null)
+      .eq('is_demo', me.isDemo)
       .gte('scheduled_at', today)
       .order('scheduled_at', { ascending: true })
       .limit(200),
@@ -225,7 +229,7 @@ export async function getSweeperBoard(sweeperId: string, now: Date = new Date())
   let laterCount = 0
   let nextAt: Date | null = null
   for (const j of openRows) {
-    const visibleAt = tierVisibleAt(new Date(j.board_opened_at!), me.tier, populated)
+    const visibleAt = me.isDemo ? new Date(j.board_opened_at!) : tierVisibleAt(new Date(j.board_opened_at!), me.tier, populated)
     if (visibleAt > now) {
       laterCount += 1
       if (!nextAt || visibleAt < nextAt) nextAt = visibleAt
@@ -309,7 +313,8 @@ export async function claimJob(
   const { crew, populated } = await getCrewTiers(now)
   const me = crew.get(sweeperId)
   if (!me) return { error: 'Only active Sweepers can claim jobs', code: 'NOT_SWEEPER', status: 403 }
-  const visibleAt = tierVisibleAt(new Date(job.board_opened_at), me.tier, populated)
+  if (me.isDemo !== job.is_demo) return { error: 'Job not found', code: 'NOT_FOUND', status: 404 }
+  const visibleAt = me.isDemo ? new Date(job.board_opened_at) : tierVisibleAt(new Date(job.board_opened_at), me.tier, populated)
   if (visibleAt > now) {
     return { error: 'This job is not open to your tier yet', code: 'NOT_YET', status: 403 }
   }

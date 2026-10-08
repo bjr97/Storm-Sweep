@@ -69,10 +69,10 @@ export async function listCustomers(
     supabase
       .from('profiles')
       .select('id, full_name, phone, address, membership_status, membership_plan, visits_used, created_at')
-      .eq('role', 'customer')
+      .eq('role', 'customer').eq('is_demo', false)
       .order('created_at', { ascending: false })
       .limit(2000),
-    supabase.from('jobs').select('customer_id, status, total_amount, scheduled_at, completed_at').limit(10000),
+    supabase.from('jobs').select('customer_id, status, total_amount, scheduled_at, completed_at').eq('is_demo', false).limit(10000),
     supabase.from('reviews').select('customer_id, rating').limit(10000),
     emailsById(),
   ])
@@ -143,12 +143,12 @@ export async function getCustomerDetail(id: string): Promise<CustomerDetail | nu
   const [jobsRes, reviewsRes, authRes, referredRes] = await Promise.all([
     supabase
       .from('jobs')
-      .select('id, status, scheduled_at, time_window, service_type, total_amount, payment_status, referral_source, membership_visit')
+      .select('id, status, scheduled_at, time_window, service_type, total_amount, payment_status, referral_source, membership_visit').eq('is_demo', false)
       .eq('customer_id', id)
       .order('scheduled_at', { ascending: false, nullsFirst: true }),
     supabase.from('reviews').select('job_id, rating, body, created_at').eq('customer_id', id).order('created_at', { ascending: false }),
     supabase.auth.admin.getUserById(id),
-    supabase.from('jobs').select('customer_id').eq('referred_by', id).neq('status', 'cancelled'),
+    supabase.from('jobs').select('customer_id').eq('is_demo', false).eq('referred_by', id).neq('status', 'cancelled'),
   ])
   if (jobsRes.error) throw jobsRes.error
   const { role: _role, ...rest } = profile

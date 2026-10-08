@@ -19,10 +19,11 @@ async function person(id: string | null): Promise<Person | null> {
   if (!id) return null
   const supabase = createServiceClient()
   const [{ data: p }, { data: auth }] = await Promise.all([
-    supabase.from('profiles').select('id, full_name, phone').eq('id', id).maybeSingle(),
+    supabase.from('profiles').select('id, full_name, phone, is_demo').eq('id', id).maybeSingle(),
     supabase.auth.admin.getUserById(id),
   ])
-  if (!p) return null
+  // Demo accounts (admin preview) never get real texts or emails.
+  if (!p || p.is_demo) return null
   return { id: p.id, name: p.full_name ?? 'there', phone: p.phone, email: auth.user?.email ?? null }
 }
 

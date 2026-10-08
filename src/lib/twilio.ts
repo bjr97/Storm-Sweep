@@ -230,8 +230,9 @@ export function renderSmsTemplate<T extends SmsTrigger>(
 async function isOptedOut(profileId: string | null | undefined, to: string): Promise<boolean> {
   const supabase = createServiceClient()
   if (profileId) {
-    const { data } = await supabase.from('profiles').select('sms_opt_out').eq('id', profileId).maybeSingle()
-    if (data) return data.sms_opt_out
+    const { data } = await supabase.from('profiles').select('sms_opt_out, is_demo').eq('id', profileId).maybeSingle()
+    // Demo accounts (admin preview) are never texted.
+    if (data) return data.sms_opt_out || data.is_demo
   }
   const key = phoneKey(to)
   if (!key) return false

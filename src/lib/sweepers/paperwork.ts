@@ -21,7 +21,7 @@ export function insuranceStatus(expiresOn: string | null, now: Date = new Date()
 export async function getCrewPaperwork(now: Date = new Date()): Promise<Map<string, Paperwork>> {
   const supabase = createServiceClient()
   const [{ data: sweepers }, { data: applicants }] = await Promise.all([
-    supabase.from('profiles').select('id, w9_received_at, insurance_expires_on, paperwork_notes').eq('role', 'sweeper'),
+    supabase.from('profiles').select('id, w9_received_at, insurance_expires_on, paperwork_notes').eq('role', 'sweeper').eq('is_demo', false),
     supabase.from('sweeper_applicants').select('email, agreement_signed').eq('status', 'approved'),
   ])
   const signed = new Set((applicants ?? []).filter((a) => a.agreement_signed).map((a) => a.email.toLowerCase()))

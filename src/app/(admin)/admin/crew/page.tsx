@@ -24,7 +24,7 @@ const TIER_STYLE: Record<SweeperTier, string> = {
 export default async function AdminCrewPage(): Promise<React.ReactElement> {
   const [{ crew }, yearTotals, paperwork] = await Promise.all([getCrewTiers(), getCrewYearTotals(), getCrewPaperwork()])
   const year = formatBusinessDate(new Date(), { year: 'numeric' })
-  const members = Array.from(crew.values()).sort(
+  const members = Array.from(crew.values()).filter((m) => !m.isDemo).sort(
     (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier) || b.score - a.score || a.name.localeCompare(b.name)
   )
   const count = (t: SweeperTier): number => members.filter((m) => m.tier === t).length

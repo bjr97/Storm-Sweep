@@ -4,6 +4,7 @@ import {
   Banknote,
   CalendarDays,
   DollarSign,
+  Eye,
   Handshake,
   HardHat,
   Home,
@@ -32,6 +33,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { label: 'Dashboard', icon: LayoutDashboard, href: '/admin', built: true },
       { label: 'Schedule', icon: CalendarDays, href: '/admin/schedule', built: true },
       { label: 'All Jobs', icon: Wrench, href: '/admin/jobs', built: true },
+      { label: 'View as', icon: Eye, href: '/admin/view-as', built: true },
     ],
   },
   {

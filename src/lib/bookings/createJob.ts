@@ -93,6 +93,8 @@ export async function createJobFromBooking(
   const customerId = await resolveCustomerId(payload)
   const partnerId = await resolvePartnerId(payload.referralSource)
   const depositAmount = calculateDeposit(payload.totalAmount)
+  // A demo customer's bookings stay demo (hidden from reports, demo-only job board).
+  const { data: owner } = await supabase.from('profiles').select('is_demo').eq('id', customerId).maybeSingle()
 
   const photoApproved =
     !payload.photoGrade || ['A', 'B'].includes(payload.photoGrade.toUpperCase())
@@ -101,6 +103,7 @@ export async function createJobFromBooking(
     .from('jobs')
     .insert({
       customer_id: customerId,
+      is_demo: owner?.is_demo ?? false,
       status: 'pending',
       service_type: payload.serviceTypes,
       scheduled_at: payload.scheduledAt ?? null,

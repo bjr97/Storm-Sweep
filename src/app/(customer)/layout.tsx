@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { CustomerNav, MobileSignOut } from '@/components/customer/CustomerNav'
+import { PreviewBanner } from '@/components/preview/PreviewBanner'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -20,6 +21,7 @@ export default async function CustomerLayout({
 
   return (
     <div className="min-h-screen bg-[#F7F7F4] font-[family-name:var(--font-barlow)] text-shelter">
+      <PreviewBanner />
       <header className="sticky top-0 z-10 border-b border-black/10 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
           <Link href="/dashboard" className="font-[family-name:var(--font-bebas)] text-2xl tracking-[0.06em] text-shelter">

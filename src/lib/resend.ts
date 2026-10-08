@@ -5,6 +5,7 @@ import { JobCompleteEmail } from '@/emails/JobCompleteEmail'
 import { MembershipReceiptEmail } from '@/emails/MembershipReceiptEmail'
 import { MembershipWelcomeEmail } from '@/emails/MembershipWelcomeEmail'
 import { VisitUpdateEmail, type VisitUpdateEmailProps } from '@/emails/VisitUpdateEmail'
+import { isDemoEmail } from '@/lib/demo'
 import { getAppUrl } from '@/lib/twilio'
 import { formatCurrency, PRICING } from '@/lib/utils'
 
@@ -46,6 +47,7 @@ export async function sendBookingConfirmationEmail(
   const resend = getResendClient()
   const appUrl = getAppUrl()
 
+  if (isDemoEmail(params.to)) return { id: 'demo-skipped' }
   const { data, error } = await resend.emails.send({
     from: getFromEmail(),
     to: params.to,
@@ -90,6 +92,7 @@ export async function sendJobCompleteEmail(
   const portalUrl = params.portalUrl ?? `${appUrl}/dashboard`
   const reportUrl = `${appUrl}/history/${params.jobId}`
 
+  if (isDemoEmail(params.to)) return { id: 'demo-skipped' }
   const { data, error } = await resend.emails.send({
     from: getFromEmail(),
     to: params.to,
@@ -135,6 +138,7 @@ export async function sendMembershipWelcomeEmail(
       ? formatCurrency(PRICING.membership.annual)
       : `${formatCurrency(PRICING.membership.monthly)}/mo`
 
+  if (isDemoEmail(params.to)) return { id: 'demo-skipped' }
   const { data, error } = await resend.emails.send({
     from: getFromEmail(),
     to: params.to,
@@ -176,6 +180,7 @@ export async function sendMembershipReceiptEmail(
   const planLabel =
     params.plan === 'annual' ? 'Storm Ready — Annual' : 'Storm Ready — Monthly'
 
+  if (isDemoEmail(params.to)) return { id: 'demo-skipped' }
   const { data, error } = await resend.emails.send({
     from: getFromEmail(),
     to: params.to,
@@ -201,6 +206,7 @@ export const emailConfigured = (): boolean => Boolean(process.env.RESEND_API_KEY
 
 export async function sendVisitUpdateEmail(params: { to: string; subject: string } & VisitUpdateEmailProps): Promise<SendEmailResult> {
   const { to, subject, ...props } = params
+  if (isDemoEmail(params.to)) return { id: 'demo-skipped' }
   const { data, error } = await getResendClient().emails.send({
     from: getFromEmail(),
     to,

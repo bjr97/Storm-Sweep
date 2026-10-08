@@ -4,6 +4,7 @@ import { LogOut } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { currentPreview, exitPreview } from '@/lib/previewClient'
 import { createClient } from '@/lib/supabase/client'
 
 export function SignOutButton(): React.ReactElement {
@@ -12,6 +13,7 @@ export function SignOutButton(): React.ReactElement {
 
   async function signOut(): Promise<void> {
     setBusy(true)
+    if (currentPreview()) return exitPreview()
     await createClient().auth.signOut()
     router.push('/login')
     router.refresh()

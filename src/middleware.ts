@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
+import { parseViewAs, VIEW_AS_COOKIE } from '@/lib/demo'
 import { updateSession } from '@/lib/supabase/middleware'
 import type { UserRole } from '@/types/database'
+
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
 const PUBLIC_PATHS = new Set([
   '/',
@@ -53,6 +56,19 @@ function getRequiredRole(pathname: string): UserRole | null {
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { supabase, user, response } = await updateSession(request)
   const { pathname } = request.nextUrl
+
+  // Admin "View as" a REAL customer/Sweeper is read-only: block every write
+  // (API calls, form posts) except leaving the preview. Demo accounts are usable.
+  const preview = parseViewAs(request.cookies.get(VIEW_AS_COOKIE)?.value)
+  if (preview && !preview.demo && !SAFE_METHODS.has(request.method) && pathname !== '/api/admin/view-as/exit' && user) {
+    const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+    if (me?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Preview mode: actions are off for real accounts. Use a demo account to try things out.', code: 'PREVIEW_READ_ONLY' },
+        { status: 403 }
+      )
+    }
+  }
 
   if (pathname.startsWith('/api')) {
     return response

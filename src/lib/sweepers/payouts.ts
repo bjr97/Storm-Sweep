@@ -22,7 +22,7 @@ export async function getCrewBalances(now: Date = new Date()): Promise<CrewBalan
   const supabase = createServiceClient()
   const [completed, sweepersRes, payoutsRes] = await Promise.all([
     getCompletedJobPay(ALL_TIME),
-    supabase.from('profiles').select('id, full_name, w9_received_at').eq('role', 'sweeper').order('full_name'),
+    supabase.from('profiles').select('id, full_name, w9_received_at').eq('role', 'sweeper').eq('is_demo', false).order('full_name'),
     supabase.from('sweeper_payouts').select('sweeper_id, amount, paid_at').order('paid_at', { ascending: false }),
   ])
   if (sweepersRes.error) throw sweepersRes.error

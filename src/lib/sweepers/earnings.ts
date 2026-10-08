@@ -55,7 +55,8 @@ async function completedJobs(range: Range, sweeperId?: string): Promise<Complete
     .gte('completed_at', range.start.toISOString())
     .lt('completed_at', range.end.toISOString())
     .order('completed_at', { ascending: false })
-  if (sweeperId) query = query.eq('sweeper_id', sweeperId)
+  // Demo jobs only ever count for the demo Sweeper's own earnings page.
+  query = sweeperId ? query.eq('sweeper_id', sweeperId) : query.eq('is_demo', false)
   const { data, error } = await query
   if (error) throw error
   return data

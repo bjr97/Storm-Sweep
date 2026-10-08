@@ -35,13 +35,14 @@ export async function listReviews(filter: ReviewFilter): Promise<{
   if (error) throw error
 
   const jobIds = data.map((r) => r.job_id)
-  const { data: jobs } = jobIds.length ? await supabase.from('jobs').select('id, sweeper_id').in('id', jobIds) : { data: [] }
+  const { data: jobs } = jobIds.length ? await supabase.from('jobs').select('id, sweeper_id, is_demo').in('id', jobIds) : { data: [] }
+  const demoJobs = new Set((jobs ?? []).filter((j) => j.is_demo).map((j) => j.id))
   const sweeperOf = new Map((jobs ?? []).map((j) => [j.id, j.sweeper_id]))
   const peopleIds = Array.from(new Set([...data.map((r) => r.customer_id), ...(jobs ?? []).map((j) => j.sweeper_id).filter((x): x is string => Boolean(x))]))
   const { data: people } = peopleIds.length ? await supabase.from('profiles').select('id, full_name').in('id', peopleIds) : { data: [] }
   const name = new Map((people ?? []).map((p) => [p.id, p.full_name ?? 'Unknown']))
 
-  const all: ReviewRow[] = data.map((r) => {
+  const all: ReviewRow[] = data.filter((r) => !demoJobs.has(r.job_id)).map((r) => {
     const sweeperId = sweeperOf.get(r.job_id) ?? null
     return {
       id: r.id,

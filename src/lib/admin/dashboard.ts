@@ -119,25 +119,25 @@ export async function getDashboardData(now: Date = new Date()): Promise<Dashboar
       // Jobs booked in the reporting window (revenue, avg value, activity).
       supabase
         .from('jobs')
-        .select(JOB_COLUMNS)
+        .select(JOB_COLUMNS).eq('is_demo', false)
         .gte('created_at', earliest.toISOString())
         .order('created_at', { ascending: false }),
       // Jobs scheduled last week through this week (counts, today, crew).
       supabase
         .from('jobs')
-        .select(JOB_COLUMNS)
+        .select(JOB_COLUMNS).eq('is_demo', false)
         .gte('scheduled_at', lastWeek.start.toISOString())
         .lt('scheduled_at', thisWeek.end.toISOString())
         .neq('status', 'cancelled')
         .order('scheduled_at', { ascending: true }),
       supabase
         .from('jobs')
-        .select(JOB_COLUMNS)
+        .select(JOB_COLUMNS).eq('is_demo', false)
         .not('completed_at', 'is', null)
         .order('completed_at', { ascending: false })
         .limit(5),
-      supabase.from('profiles').select('id').eq('membership_status', 'active'),
-      supabase.from('profiles').select('id, full_name').eq('role', 'sweeper').order('full_name'),
+      supabase.from('profiles').select('id').eq('membership_status', 'active').eq('is_demo', false),
+      supabase.from('profiles').select('id, full_name').eq('role', 'sweeper').eq('is_demo', false).order('full_name'),
       supabase
         .from('reviews')
         .select('id, rating, created_at, customer_id')
@@ -192,7 +192,7 @@ export async function getDashboardData(now: Date = new Date()): Promise<Dashboar
   const memberIds = new Set(membersRes.data.map((p) => p.id))
   const { data: paidJobs, error: paidErr } = await supabase
     .from('jobs')
-    .select('customer_id')
+    .select('customer_id').eq('is_demo', false)
     .in('payment_status', [...PAID_STATUSES])
   if (paidErr) fail('paying customers', paidErr)
   const paidCustomerIds = Array.from(new Set(paidJobs.map((j) => j.customer_id)))
@@ -302,7 +302,7 @@ export async function getPausedJobs(): Promise<PausedJob[]> {
   if (issues.length === 0) return []
   const { data: jobs, error: jobsError } = await supabase
     .from('jobs')
-    .select('id, address')
+    .select('id, address').eq('is_demo', false)
     .in('id', Array.from(new Set(issues.map((i) => i.job_id))))
   if (jobsError) fail('paused job addresses', jobsError)
   const address = new Map(jobs.map((j) => [j.id, j.address]))
@@ -316,7 +316,7 @@ export async function getRefundsDue(): Promise<RefundDue[]> {
   const supabase = createClient()
   const { data: jobs, error } = await supabase
     .from('jobs')
-    .select('id, customer_id, deposit_amount, cancelled_at')
+    .select('id, customer_id, deposit_amount, cancelled_at').eq('is_demo', false)
     .eq('refund_due', true)
     .order('cancelled_at')
   if (error) fail('refunds due', error)
@@ -350,7 +350,7 @@ export async function getQuotesToPrice(): Promise<QuoteToPrice[]> {
   const supabase = createClient()
   const { data: jobs, error } = await supabase
     .from('jobs')
-    .select('id, customer_id, scheduled_at, created_at')
+    .select('id, customer_id, scheduled_at, created_at').eq('is_demo', false)
     .eq('status', 'pending')
     .eq('shelter_size', 'xlarge')
     .eq('total_amount', 0)
@@ -369,7 +369,7 @@ export async function getBalancesToCollect(): Promise<BalanceToCollect[]> {
   const supabase = createClient()
   const { data: jobs, error } = await supabase
     .from('jobs')
-    .select('id, customer_id, total_amount, deposit_amount, payment_status, status, completed_at')
+    .select('id, customer_id, total_amount, deposit_amount, payment_status, status, completed_at').eq('is_demo', false)
     .eq('status', 'complete')
     .in('payment_status', ['unpaid', 'deposit_paid'])
     .gt('total_amount', 0)

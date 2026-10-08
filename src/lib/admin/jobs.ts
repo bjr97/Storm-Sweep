@@ -72,7 +72,7 @@ export async function listJobs(filters: {
 }): Promise<{ jobs: JobListItem[]; truncated: boolean }> {
   const supabase = createClient()
   const todayStart = dayRange().start.toISOString()
-  let query = supabase.from('jobs').select(LIST_COLUMNS)
+  let query = supabase.from('jobs').select(LIST_COLUMNS).eq('is_demo', false)
 
   if (filters.status !== 'all') query = query.eq('status', filters.status)
   if (filters.when === 'upcoming') {
@@ -117,6 +117,7 @@ export async function listSweepers(): Promise<SweeperOption[]> {
     .from('profiles')
     .select('id, full_name, sweeper_available')
     .eq('role', 'sweeper')
+    .eq('is_demo', false)
     .order('full_name')
   if (error) throw new Error('Failed to load sweepers')
   // Off-duty Sweepers stay assignable but are labeled so the admin can tell.
@@ -162,6 +163,7 @@ export async function getScheduleMonth(monthOffset: number, now: Date = new Date
   const { data, error } = await supabase
     .from('jobs')
     .select(LIST_COLUMNS)
+    .eq('is_demo', false)
     .gte('scheduled_at', gridStart.toISOString())
     .lt('scheduled_at', gridEnd.toISOString())
     .order('scheduled_at', { ascending: true })

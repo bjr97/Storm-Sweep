@@ -91,6 +91,7 @@ export interface Database {
           w9_received_at: string | null
           insurance_expires_on: string | null
           paperwork_notes: string | null
+          is_demo: boolean
           created_at: string
         }
         Insert: {
@@ -116,6 +117,7 @@ export interface Database {
           w9_received_at?: string | null
           insurance_expires_on?: string | null
           paperwork_notes?: string | null
+          is_demo?: boolean
           created_at?: string
         }
         Update: {
@@ -141,6 +143,7 @@ export interface Database {
           w9_received_at?: string | null
           insurance_expires_on?: string | null
           paperwork_notes?: string | null
+          is_demo?: boolean
           created_at?: string
         }
         Relationships: []
@@ -240,6 +243,7 @@ export interface Database {
           balance_paid_at: string | null
           balance_method: BalanceMethod | null
           balance_reference: string | null
+          is_demo: boolean
           referral_source: string | null
           partner_id: string | null
           completed_at: string | null
@@ -299,6 +303,7 @@ export interface Database {
           balance_paid_at?: string | null
           balance_method?: BalanceMethod | null
           balance_reference?: string | null
+          is_demo?: boolean
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
@@ -358,6 +363,7 @@ export interface Database {
           balance_paid_at?: string | null
           balance_method?: BalanceMethod | null
           balance_reference?: string | null
+          is_demo?: boolean
           referral_source?: string | null
           partner_id?: string | null
           completed_at?: string | null
