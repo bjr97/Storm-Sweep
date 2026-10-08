@@ -116,13 +116,17 @@ Three roles: `customer`, `sweeper`, `admin`
 // middleware.ts pattern — protect by path prefix
 const roleRoutes = {
   '/admin': 'admin',
-  '/sweeper': 'sweeper', 
-  '/dashboard': 'customer',
+  '/sweeper': 'sweeper',
+  '/dashboard': 'customer',   // incl. /dashboard/help
   '/history': 'customer',
   '/photos': 'customer',
   '/membership': 'customer',
+  '/account': 'customer',
 }
 ```
+- Layouts re-check the role server-side too (a matcher mistake must never expose data).
+- API routes check with `requireRole('admin' | 'sweeper' | 'customer')` (`src/lib/auth/requireRole.ts`).
+- `/sweepers/apply` (Sweeper application) and `/book` are public.
 
 ---
 
@@ -139,9 +143,11 @@ const roleRoutes = {
 - Light backgrounds (public/customer): `bg-white` or `bg-[#F7F7F4]`
 
 ### Typography classes
+Fonts are loaded with next/font as CSS variables (root `layout.tsx`):
 ```
-Font display/headlines: font-['Bebas_Neue'] tracking-wide
-Font UI: font-['Barlow_Condensed'] or font-['Barlow']
+Portals (admin/sweeper/customer): font-[family-name:var(--font-bebas)] tracking-wide  (headings)
+                                  font-[family-name:var(--font-barlow)]               (body/UI)
+Public site (themed):             font-display / font-body + var(--color-*) tokens
 ```
 
 ### Design references (open in browser to see exact designs)
@@ -152,7 +158,11 @@ Font UI: font-['Barlow_Condensed'] or font-['Barlow']
 
 ### Theme rules
 - Admin + Sweeper portals: DARK theme (charcoal/slate backgrounds)
-- Public website + Customer portal: LIGHT theme (cream/white backgrounds)
+- Public website: themed via CSS variables. Default is DARK (`website-dark.html`);
+  `NEXT_PUBLIC_ACTIVE_THEME=retro` switches to the retro pixel theme
+  (`src/lib/theme.ts`, `useIsRetro()`). Public components must use the
+  `var(--color-*)` tokens and support both themes (see `Footer.tsx`).
+- Customer portal: LIGHT theme (cream/white backgrounds)
 - Mobile-first for sweeper app (field workers use phones)
 - Desktop-first for admin dashboard (managed from computer)
 
@@ -181,6 +191,24 @@ Customer Details (Step 3) specifics:
 
 ## BUSINESS LOGIC — CRITICAL RULES
 
+0. **Booking lifecycle** (`jobs.status`): every new booking (online or phone)
+   is created `pending` by `createJobFromBooking()` (`src/lib/bookings/createJob.ts`).
+   An ADMIN confirms it (`PATCH /api/jobs/[id]`) → `confirmed` → it goes on the
+   Sweeper board (or the admin assigns a Sweeper) → `in_progress` (arrived) →
+   `complete`; or `cancelled` at any point before completion.
+   - Confirming is blocked until the shelter photo is approved: grade A/B (or no
+     photo) is auto-approved; C/D/F need the admin's `approvePhoto` first.
+   - X-Large bookings arrive as $0 quotes; the admin prices them in the job
+     editor before confirming (dashboard "Quotes to price").
+   - Admin edits of upcoming visits (`PATCH /api/jobs/[id]/edit`, `JobEditor`):
+     only pending/confirmed (409 JOB_LOCKED); the total can't drop below a paid
+     deposit (409 BELOW_DEPOSIT); a time change sets `rescheduled_at` (the
+     Sweeper may drop free of a late-drop strike) and `notifyVisitUpdated` tells
+     the customer/Sweeper.
+   - Office phone bookings: `/admin/jobs/new` → `POST /api/admin/jobs`, priced by
+     `priceBooking()` on the server, `confirmUnpaid` sends the confirmation with
+     nothing paid online. Not limited by the service area.
+
 1. **Job completion requires:**
    - Minimum 2 before photos + 2 after photos uploaded
    - All `required: true` checklist items checked
@@ -197,16 +225,22 @@ Customer Details (Step 3) specifics:
    - Media uploads use one-time signed upload URLs; never public bucket reads.
 
 2. **Photo consent:**
-   - Account-wide opt-in: `profiles.marketing_photo_consent` (Account page),
-     mirrored onto `job_photos.customer_consent` for before/after photos.
-   - Customers can reschedule/cancel online until 48h before (`src/lib/customer`);
-     cancel with a paid deposit sets `jobs.refund_due` for the admin.
-   - Service documentation: auto-opted-in (disclosed in T&Cs)
+   - Account-wide choice: `profiles.marketing_photo_consent` (Account page),
+     mirrored onto `job_photos.customer_consent` for before/after photos
+     (changing it updates existing photos too). Reviews carry their own
+     `reviews.photo_consent`.
+   - Service documentation: auto-opted-in (disclosed in /terms)
    - Marketing use: ON by default for new accounts (owner decision 2026-10-08),
      shown as a PRE-CHECKED box at sign-up (RegisterForm) and booking Step 3;
      unticking always opts out, ticking never overrides an earlier opt-out.
      Posts never show name or street address.
-   - Never publish content without `photo_consent: true` on job_photos record
+   - Never publish content without consent: `job_photos.customer_consent` (and
+     the profile choice re-checked when a post is marked posted)
+
+2b. **Customer changes:** customers reschedule/cancel online until
+   `CHANGE_CUTOFF_HOURS` (48h) before (`src/lib/customer/rules.ts`); inside that
+   they use Help. Cancelling with a paid deposit sets `jobs.refund_due`; the
+   admin refunds manually and marks it refunded.
 
 3. **Junk policy:**
    - If AI photo grade is C: admin reviews before confirming
@@ -220,10 +254,17 @@ Customer Details (Step 3) specifics:
      PRICE_CHANGED). Existing-member pricing requires being signed in as them.
    - `/api/bookings` (no payment) accepts only X-Large quotes and $0 included
      member visits.
-   - Always use Stripe for memberships (subscriptions)
+   - Always use Stripe for memberships (subscriptions). STATUS: Stripe is ON
+     HOLD (owner decision) — code exists but isn't live; don't build on it
+     without asking.
    - PayPal available for one-time payments only
-   - Deposit = 50% at booking, balance charged after job complete
-   - Never store card numbers — Stripe handles everything
+   - Deposit = 50% at booking. The BALANCE is collected after the visit and
+     recorded by the admin: `POST /api/jobs/[id]/balance` (`BalanceButton`,
+     method cash/check/Zelle/…, optional reference) sets `paid` +
+     `balance_paid_at/method/reference` and sends a receipt
+     (`notifyBalancePaid`). Amount due = `balanceDue()` (`src/lib/admin/balance.ts`);
+     nothing due → 409 NOTHING_DUE. Dashboard lists "to collect".
+   - Never store card numbers — the payment provider handles them
 
 5. **Sweeper pay calculation:**
    ```
@@ -271,6 +312,15 @@ Customer Details (Step 3) specifics:
    Payouts (`src/lib/sweepers/payouts.ts`, /admin/payouts) record money sent
    and snapshot each job's pay (`jobs.payout_amount`); 1099 totals = payouts by
    `paid_at` in the calendar year (CSV export). The app never stores tax IDs.
+   - Sweeper hiring: public application `/sweepers/apply` → `sweeper_applicants`
+     (agreement signed + tools) → admin approves on /admin/sweepers, which
+     creates the Sweeper account. Paperwork on /admin/crew
+     (`src/lib/sweepers/paperwork.ts`): W-9 received (date only), agreement
+     signed (from the approved application), auto-insurance expiry (red when
+     expired or <30 days), notes. Payouts warn when no W-9 is on file.
+   - Day route (`src/lib/sweepers/route.ts`, Schedule page): remaining visits
+     ordered by arrival window, then nearest stop; flexible visits go where they
+     add the least driving; one Google Maps directions link (no API key).
 
 7. **Partner referrals:** When `?ref=CODE` param present at booking,
    look up partner by referral_code, set partner_id on job record.
@@ -316,6 +366,50 @@ Customer Details (Step 3) specifics:
   `ADMIN_PHONE_NUMBER`. Marketing texts must say "Reply STOP to opt out".
 - Tornado-season campaign: daily automation, Feb 15–Mar 31, once/year/customer.
 
+## NOTIFICATIONS + DAILY AUTOMATION
+
+- Customer/Sweeper/office notices live in `src/lib/notify.ts` (reschedule,
+  cancel, visit updated, completion report, balance receipt, help request).
+  They are BEST-EFFORT: no-ops when Twilio/Resend env vars are missing, never
+  throw into the caller, and skip demo accounts. Office alerts go to
+  `ADMIN_PHONE_NUMBER` + every admin's email.
+- Booking-flow texts use `sendJobSms()` templates in `src/lib/twilio.ts`;
+  emails use React Email templates in `src/emails/` via `src/lib/resend.ts`.
+- Daily cron: `vercel.json` → `GET /api/cron/daily` at 22:00 UTC (≈5pm
+  Chicago in summer). Protected only when `CRON_SECRET` is set in Vercel
+  (Vercel then sends it as a Bearer token) — keep it set in production. `runDailyAutomations()`
+  (`src/lib/automation/daily.ts`): day-before reminders, review requests,
+  membership renewal notices (~30 days out), tornado-season campaign.
+
+## SEO + PUBLIC PAGES
+
+- Site identity in `src/lib/site.ts`: `SITE.url` normalizes
+  `NEXT_PUBLIC_APP_URL` (a value without https:// once broke the Vercel build).
+  Add every new public page to `PUBLIC_PAGES` (feeds `/sitemap.xml`); private
+  portals are disallowed in `src/app/robots.ts`.
+- Each public page exports `metadata` (title template "%s | Storm Sweep",
+  canonical). Login/register are noindex. Home renders `<LocalBusinessJsonLd>`
+  (prices from PRICING). Social preview is the static `public/og.png` —
+  don't use `next/og` (it crashes on Windows paths with spaces).
+
+## DATABASE + DEPLOY WORKFLOW
+
+- Migrations live in `supabase/migrations/NNN_*.sql`, but the OWNER runs them
+  by hand in the Supabase SQL editor: give them as small copy-paste blocks in
+  chat. Write function bodies as single-quoted strings (`as '...'`, doubled
+  inner quotes), never `$$`, so they survive pasting.
+- Never push code that reads new columns/tables before the owner confirms the
+  SQL ran — verify via the REST API with the service key first.
+- Update `src/types/database.ts` by hand to match each migration.
+- `master` auto-deploys to Vercel. CI (tsc + lint + `npm test`) does NOT run
+  `next build`, so after every push check the commit status
+  (`gh api repos/bjr97/storm-sweep/commits/<sha>/status`) before calling it live.
+- Local build gotchas (Windows + OneDrive): `rm -rf .next` before building; a
+  build worker crash (0xC0000409) is transient, just retry.
+- End-to-end checks: build, `next start` on a spare port, seed throwaway users
+  with the service key, sign them in via the `sb-<ref>-auth-token` cookie, and
+  clean everything up afterwards.
+
 ## ADMIN "VIEW AS" + DEMO ACCOUNTS
 
 - `/admin/view-as`: the admin signs THIS browser in as a customer/Sweeper
@@ -355,8 +449,9 @@ Customer Details (Step 3) specifics:
 
 ## TESTS
 
-- `npm test` (node:test + tsx, `tests/*.test.ts`) locks in pricing, Sweeper pay,
-  completion rules, time windows (incl. DST) and SMS helpers. CI runs it with
+- `npm test` (node:test + tsx, `tests/*.test.ts`) locks in pricing, promo math,
+  Sweeper pay, completion rules, time windows (incl. DST), SMS helpers, day-route
+  ordering and training quiz grading. CI runs it with
   tsc + lint on every push (`.github/workflows/ci.yml`). Add a test when you
   change money math.
 - Business-local times: use `localDateTime()` — never "midnight + N hours".
@@ -456,14 +551,13 @@ Trigger SMS: [trigger_name] if applicable.
 Verify webhook signature using STRIPE_WEBHOOK_SECRET.
 ```
 
-### Prompt 7 — Realtime subscription
+### Prompt 7 — Live updates
 ```
-Add a Supabase Realtime subscription to the [component] component.
-Listen to changes on table [table] where [filter condition].
-On INSERT: [what to do].
-On UPDATE: [what to do].
-Update local state with the new data.
-Clean up subscription on component unmount.
+Pages already refresh via <LiveRefresh> (private broadcast topic
+'jobs-changes', migration 021). To make a new table live, add a trigger that
+calls realtime.send('{}'::jsonb, 'changed', '<topic>', true) plus a
+realtime.messages SELECT policy for authenticated users on that topic.
+Never put row data in the payload; pages re-fetch with their own auth.
 ```
 
 ---
@@ -472,14 +566,14 @@ Clean up subscription on component unmount.
 
 Track progress here as phases complete:
 
-- [ ] Phase 1.1 — Project initialization
-- [ ] Phase 1.2 — Auth & middleware
-- [ ] Phase 1.3 — Public website
-- [ ] Phase 1.4 — Booking flow
-- [ ] Phase 1.5 — Sweeper onboarding portal
-- [ ] Phase 1.6 — AI photo screening API
-- [ ] Phase 1.7 — SMS automation (Twilio)
-- [ ] Phase 1.8 — Email (Resend)
+- [x] Phase 1.1 — Project initialization
+- [x] Phase 1.2 — Auth & middleware
+- [x] Phase 1.3 — Public website (+ SEO, /faq, /terms, /privacy)
+- [x] Phase 1.4 — Booking flow (+ promo codes, service area + waitlist)
+- [x] Phase 1.5 — Sweeper onboarding portal (/sweepers/apply + approval + training)
+- [x] Phase 1.6 — AI photo screening API (needs ANTHROPIC_API_KEY in production)
+- [x] Phase 1.7 — SMS automation (Twilio) (live once TWILIO_* env vars are set)
+- [x] Phase 1.8 — Email (Resend) (live once RESEND_* env vars are set)
 - [x] Phase 2.1 — Sweeper dashboard (job board)
 - [x] Phase 2.2 — Job detail + checklist
 - [x] Phase 2.3 — Sweeper schedule
@@ -494,13 +588,16 @@ Track progress here as phases complete:
 - [x] Phase 3.5 — Account settings
 - [x] Phase 4.1 — Revenue charts (/admin/revenue)
 - [x] Phase 4.2 — Partners management (/admin/partners)
-- [ ] Phase 4.3 — Supabase Realtime
-- [ ] Phase 4.4 — Google Maps routes
+- [x] Phase 4.3 — Supabase Realtime (live page refresh, migration 021)
+- [x] Phase 4.4 — Google Maps routes (Sweeper day route + Maps link; no embedded map)
 - [x] Phase 4.5 — Referral program (customer "Give $25, get $25")
 - [x] Phase 4.6 — Review system (/admin/reviews)
 - [ ] Phase 4.7 — TikTok integration
 - [x] Phase 4.8 — PWA sweeper app (manifest, icons, offline page)
 - [x] Phase 4.9 — Tornado season automation (daily, Feb 15–Mar 31)
+- [x] Extra — Admin tools: job editing + quotes, balance collection, phone
+      bookings, payouts/1099, Sweeper paperwork, View as + demo accounts,
+      customer Help, live updates
 
 ---
 
