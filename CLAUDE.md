@@ -451,6 +451,14 @@ Customer Details (Step 3) specifics:
 - Customer Help (`/dashboard/help`) saves `help_requests` (migration 024) and
   alerts the office (`notifyHelpRequest`); open ones show on the admin dashboard.
 
+## LAUNCH CHECKLIST
+
+- `/admin/launch` (`src/lib/admin/launch.ts`): manual to-dos in `launch_tasks`
+  (migration 026; starter list inserted once, marked by a `_meta` row) plus
+  automatic checks from env vars + schema probes. Checks report set/not set
+  only, never values. When you add an env var or migration, add it to
+  `getAutoChecks()` / `SCHEMA_PROBES`. Launch date: `LAUNCH_DATE` (2026-11-15).
+
 ## DEFERRED (revisit later)
 
 - **Storm Ready member priority** (owner decision 2026-10-09: revisit once there

@@ -61,6 +61,7 @@ export type AssignedVia = 'claim' | 'admin'
 export type PayoutMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'bank' | 'other'
 
 export type PromoKind = 'amount' | 'percent'
+export type LaunchSection = 'business' | 'insurance' | 'brand' | 'operations' | 'website'
 export type HelpTopic = 'visit' | 'reschedule' | 'billing' | 'membership' | 'other'
 export type BalanceMethod = 'zelle' | 'venmo' | 'cash_app' | 'check' | 'cash' | 'card' | 'other'
 
@@ -577,6 +578,42 @@ export interface Database {
         }
         Relationships: []
       }
+      launch_tasks: {
+        Row: {
+          id: string
+          section: LaunchSection | '_meta'
+          title: string
+          notes: string | null
+          link: string | null
+          due_on: string | null
+          done_at: string | null
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          section: LaunchSection | '_meta'
+          title: string
+          notes?: string | null
+          link?: string | null
+          due_on?: string | null
+          done_at?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          section?: LaunchSection | '_meta'
+          title?: string
+          notes?: string | null
+          link?: string | null
+          due_on?: string | null
+          done_at?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       promo_codes: {
         Row: {
           id: string
@@ -1019,3 +1056,4 @@ export type SocialPostInsert =
 export type SocialPostUpdate =
   Database['public']['Tables']['social_posts']['Update']
 export type PromoCode = Database['public']['Tables']['promo_codes']['Row']
+export type LaunchTask = Database['public']['Tables']['launch_tasks']['Row']

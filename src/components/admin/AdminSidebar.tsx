@@ -12,6 +12,7 @@ import {
   LogOut,
   MapPin,
   Megaphone,
+  Rocket,
   Star,
   UserPlus,
   Users,
@@ -33,6 +34,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: 'Overview',
     items: [
       { label: 'Dashboard', icon: LayoutDashboard, href: '/admin', built: true },
+      { label: 'Launch checklist', icon: Rocket, href: '/admin/launch', built: true },
       { label: 'Schedule', icon: CalendarDays, href: '/admin/schedule', built: true },
       { label: 'All Jobs', icon: Wrench, href: '/admin/jobs', built: true },
       { label: 'View as', icon: Eye, href: '/admin/view-as', built: true },
