@@ -451,6 +451,18 @@ Customer Details (Step 3) specifics:
 - Customer Help (`/dashboard/help`) saves `help_requests` (migration 024) and
   alerts the office (`notifyHelpRequest`); open ones show on the admin dashboard.
 
+## DEFERRED (revisit later)
+
+- **Storm Ready member priority** (owner decision 2026-10-09: revisit once there
+  is a customer base and a booked-out calendar). The public site already
+  promises "priority booking before storm season"; today the office honors it
+  by hand. Ideas when it's time: (1) member visits skip the Gold→Silver→Standard
+  board drip and pin to the top with a member badge; (2) spring early access —
+  members book Feb 15–May 31 dates from Jan 15, everyone else from Feb 15, with a
+  Jan 15 invite; (3) alert the office when a member visit sits unclaimed
+  (12h on the board or 48h before the visit); (4) optional member pay boost for
+  Sweepers (costs margin).
+
 ## TESTS
 
 - `npm test` (node:test + tsx, `tests/*.test.ts`) locks in pricing, promo math,
