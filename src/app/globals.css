@@ -171,21 +171,8 @@
   }
 }
 
-@keyframes marquee-scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
 .animate-blink-cursor {
   animation: blink-cursor 1s step-end infinite;
-}
-
-.animate-marquee {
-  animation: marquee-scroll 20s linear infinite;
 }
 
 [data-theme="retro"] body::after {

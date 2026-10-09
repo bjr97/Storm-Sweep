@@ -119,8 +119,8 @@ export default function AboutPage(): React.ReactElement {
                   what is at stake when Oklahoma weather turns dangerous.
                 </p>
                 <p>
-                  We are launching in Norman — because this is our community —
-                  and serve everywhere within about 15 miles, from Moore and
+                  Norman is home — it is our community — and we serve
+                  everywhere within about 15 miles, from Moore and
                   Noble to Newcastle, Midwest City, Del City and south Oklahoma
                   City.
                 </p>

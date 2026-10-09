@@ -16,9 +16,6 @@ const NAV_LINKS = [
   { href: '/faq', label: 'FAQ' },
 ] as const
 
-const TICKER_TEXT =
-  '★ OPENING NOVEMBER 15 ★ NORMAN OK SHELTER CLEANING & UPGRADES ★ BOOK YOUR SWEEP ★ BEFORE & AFTER PHOTO REPORT EVERY VISIT ★'
-
 function DarkNavbar(): React.ReactElement {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -109,13 +106,6 @@ function RetroNavbar(): React.ReactElement {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="overflow-hidden border-b-[3px] border-[var(--color-ink)] bg-[var(--color-primary)] py-1">
-        <div className="animate-marquee flex whitespace-nowrap font-body text-lg text-[var(--color-paper)]">
-          <span className="mx-4">{TICKER_TEXT}</span>
-          <span className="mx-4">{TICKER_TEXT}</span>
-        </div>
-      </div>
-
       <div className="border-b-[3px] border-[var(--color-ink)] bg-[var(--color-accent)]">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link
